@@ -4,8 +4,8 @@
     <File Path="OFIPRO_MASTER.md" />
     <File Path="SESSION_LOG.md" />
   </Folder>
-  <Project Path="../OfiPro.Api/OfiPro.Api.csproj" />
-  <Project Path="../OfiPro.Application/OfiPro.Application.csproj" />
-  <Project Path="../OfiPro.Domain/OfiPro.Domain.csproj" />
-  <Project Path="../OfiPro.Infrastructure/OfiPro.Infrastructure.csproj" />
+  <Project Path="OfiPro.Api/OfiPro.Api.csproj" />
+  <Project Path="OfiPro.Application/OfiPro.Application.csproj" />
+  <Project Path="OfiPro.Domain/OfiPro.Domain.csproj" />
+  <Project Path="OfiPro.Infrastructure/OfiPro.Infrastructure.csproj" />
 </Solution>
