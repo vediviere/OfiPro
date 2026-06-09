@@ -23,26 +23,15 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
-
     public DbSet<UserRole> UserRoles => Set<UserRole>();
-
     public DbSet<ProfessionalProfile> ProfessionalProfiles => Set<ProfessionalProfile>();
-
     public DbSet<Category> Categories => Set<Category>();
-
     public DbSet<Subcategory> Subcategories => Set<Subcategory>();
-
     public DbSet<Project> Projects => Set<Project>();
-
     public DbSet<ProjectRequirement> ProjectRequirements => Set<ProjectRequirement>();
-
     public DbSet<ProjectPhoto> ProjectPhotos => Set<ProjectPhoto>();
-
     public DbSet<Proposal> Proposals => Set<Proposal>();
-
     public DbSet<Evidence> Evidences => Set<Evidence>();
-
     public DbSet<Rating> Ratings => Set<Rating>();
-
     public DbSet<Invitation> Invitations => Set<Invitation>();
 }
