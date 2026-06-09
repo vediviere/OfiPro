@@ -1,8 +1,10 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 1.0
+Versión: 1.1
 
 Fecha de creación: 2026-06-08
+
+Última actualización: 2026-06-09
 
 Estado: En desarrollo
 
@@ -98,6 +100,7 @@ Al finalizar una sesión de trabajo se debe generar:
 
 * Reporte de avance
 * Bloque para SESSION_LOG.md
+* Actualización para OFIPRO_MASTER.md
 * Próximo objetivo
 * Riesgos actuales
 * Evaluación de velocidad
@@ -181,15 +184,11 @@ Docs
 
 Marketplace de oficios.
 
----
-
 Usuarios objetivo:
 
 * Personas
 * Contratistas
 * Empresas pequeñas
-
----
 
 Oficios iniciales:
 
@@ -234,11 +233,11 @@ Objetivo:
 
 Permitir que un usuario:
 
-1. Publique un proyecto
-2. Reciba propuestas
-3. Seleccione una propuesta
-4. Finalice un trabajo
-5. Califique al contratista
+1. Publique un proyecto.
+2. Reciba propuestas.
+3. Seleccione una propuesta.
+4. Finalice un trabajo.
+5. Califique al contratista.
 
 ---
 
@@ -320,19 +319,11 @@ EvidenceType
 
 No usar microservicios.
 
-Razón:
-
-Complejidad innecesaria para V1.
-
 ---
 
 ## D002
 
 Todos los usuarios pueden crear proyectos.
-
-Razón:
-
-Un contratista puede necesitar otro contratista.
 
 ---
 
@@ -340,31 +331,17 @@ Un contratista puede necesitar otro contratista.
 
 No existirán tablas Cliente y Contratista.
 
-Razón:
-
-Todo gira alrededor de User.
-
 ---
 
 ## D004
 
 ProfessionalProfile tendrá una sola especialidad.
 
-Razón:
-
-Reducir complejidad.
-
-Múltiples especialidades pasan al backlog.
-
 ---
 
 ## D005
 
 Project soportará múltiples necesidades.
-
-Razón:
-
-Un proyecto puede requerir varios oficios.
 
 Resultado:
 
@@ -391,6 +368,49 @@ Documentación obligatoria.
 Resultado:
 
 OFIPRO_MASTER.md y SESSION_LOG.md.
+
+---
+
+## D008
+
+Antes de ejecutar comandos técnicos se debe validar primero.
+
+Orden correcto:
+
+1. Validar requisitos.
+2. Ejecutar.
+3. Verificar resultado.
+
+---
+
+## D009
+
+Cada bloque debe cerrarse formalmente.
+
+---
+
+## D010
+
+Los cierres de sesión entregarán:
+
+* SESSION_LOG completo de la sesión.
+* Actualizaciones para OFIPRO_MASTER.
+
+---
+
+## D011
+
+Todo bloque debe tener:
+
+* Objetivo definido.
+* Alcance definido.
+* Criterio de terminado.
+
+---
+
+## D012
+
+No iniciar Angular hasta tener Auth funcional.
 
 ---
 
@@ -423,6 +443,60 @@ Un contratista puede necesitar contratar otro contratista.
 Solución:
 
 Todos son Users.
+
+---
+
+## P004
+
+EF Core 10 incompatible con .NET 8.
+
+Solución:
+
+Migrar a EF Core 8.0.27.
+
+---
+
+## P005
+
+HasColumnType no reconocido.
+
+Causa:
+
+Referencias EF Core incompletas.
+
+Solución:
+
+Agregar paquetes faltantes.
+
+---
+
+## P006
+
+Add-Migration ejecutado desde Developer PowerShell.
+
+Solución:
+
+Usar la Consola del Administrador de paquetes.
+
+---
+
+## P007
+
+RatingConfiguration e InvitationConfiguration utilizaban propiedades inexistentes.
+
+Solución:
+
+Validar nombres contra las entidades reales antes de generar configuraciones.
+
+---
+
+## P008
+
+Git inicializado fuera de la raíz del proyecto.
+
+Solución:
+
+Reinicializar Git en la carpeta correcta.
 
 ---
 
@@ -471,19 +545,28 @@ Objetivos pequeños.
 # 18. ESTADO ACTUAL
 
 Arquitectura:
-Completada
+Completada ✅
 
 Entidades:
-Completadas
+Completadas ✅
 
 Configuraciones EF:
-En progreso
+Completadas ✅
 
 Migración inicial:
-Pendiente
+Completada ✅
 
 Base de datos:
-Pendiente
+Completada ✅
+
+Repositorio Git:
+Completado ✅
+
+GitHub:
+Completado ✅
+
+BLOQUE 1 - FUNDACIÓN:
+COMPLETADO ✅
 
 JWT:
 Pendiente
@@ -496,3 +579,36 @@ Pendiente
 
 Propuestas:
 Pendiente
+
+BLOQUE 2 - AUTH:
+Pendiente
+
+BLOQUE 3 - USUARIOS:
+Pendiente
+
+BLOQUE 4 - PROYECTOS:
+Pendiente
+
+BLOQUE 5 - PROPUESTAS:
+Pendiente
+
+---
+
+# 19. HITOS COMPLETADOS
+
+## HITO 1
+
+Fundación del proyecto completada.
+
+Incluye:
+
+* Arquitectura Clean Architecture.
+* Entidades Domain.
+* Enums.
+* EF Core.
+* ApplicationDbContext.
+* Configuraciones EF.
+* Migración InitialCreate.
+* Base de datos OfiProDb.
+* Repositorio GitHub.
+* Documentación base.
