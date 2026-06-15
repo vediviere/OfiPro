@@ -414,6 +414,23 @@ No iniciar Angular hasta tener Auth funcional.
 
 ---
 
+## D013
+
+El primer administrador del sistema se crea mediante seed automático al iniciar la aplicación.
+
+Usuario:
+
+[admin@ofipro.com](mailto:admin@ofipro.com)
+
+Razón:
+
+* Facilita pruebas.
+* Evita inserciones manuales.
+* Servirá como patrón para futuros catálogos.
+
+---
+
+
 # 15. PROBLEMAS DETECTADOS
 
 ## P001
@@ -634,7 +651,7 @@ JWT:
 Completado
 
 Usuarios:
-Pendiente
+Completado
 
 Proyectos:
 Pendiente
@@ -643,8 +660,11 @@ Propuestas:
 Pendiente
 
 Bloques completados:
-- Bloque 1 - Fundación
-- Bloque 2 - Auth
+
+* Bloque 1 - Fundación
+* Bloque 2 - Auth
+* Bloque 3 - Usuarios
 
 Próximo bloque:
-- Bloque 3 - Usuarios
+
+* Bloque 4 - Proyectos

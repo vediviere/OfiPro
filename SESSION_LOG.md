@@ -247,3 +247,108 @@ Bloque 3: Pendiente
 ## Próximo paso
 
 Iniciar Bloque 3 - Usuarios.
+
+
+# =====================================
+# SESIÓN 2026-06-14
+
+## Objetivo
+
+Completar Bloque 2 (Auth) y Bloque 3 (Usuarios).
+
+# =====================================
+
+## Auth
+
+Completado:
+
+* JwtSettings
+* IJwtService
+* JwtService
+* IAuthService
+* AuthService
+* IUserRepository
+* UserRepository
+* AuthController
+* Register
+* Login
+* JWT Authentication
+* JWT Authorization
+* Swagger Authorize
+
+Pruebas:
+
+* POST /api/auth/register → 200
+* POST /api/auth/login → 200
+* GET /api/test/secure → 200
+
+Resultado:
+
+JWT funcionando correctamente.
+
+## Usuarios
+
+Completado:
+
+* UserProfileDto
+* UpdateUserProfileDto
+* IUserService
+* UserService
+* GET /api/users/profile
+* PUT /api/users/profile
+
+Pruebas:
+
+* GET profile → 200
+* PUT profile → 200
+
+## Administración
+
+Completado:
+
+* GET /api/users
+* GET /api/users/{id}
+* PATCH activate
+* PATCH deactivate
+* DELETE soft delete
+
+Pruebas:
+
+* GET /api/users → 200
+
+## Seeder
+
+Completado:
+
+* ApplicationDbSeeder
+* Admin automático
+
+Usuario:
+
+[admin@ofipro.com](mailto:admin@ofipro.com)
+
+## Decisiones
+
+D013
+
+El primer administrador se crea mediante seed automático al iniciar la aplicación.
+
+Razón:
+
+* Facilita pruebas.
+* Evita inserciones manuales.
+* Reutilizable para futuros catálogos.
+
+## Estado
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Pendiente
+
+## Próximo paso
+
+Iniciar Bloque 4 - Proyectos.
