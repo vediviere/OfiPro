@@ -612,3 +612,39 @@ Incluye:
 * Base de datos OfiProDb.
 * Repositorio GitHub.
 * Documentación base.
+
+# 18. ESTADO ACTUAL
+
+Arquitectura:
+Completada
+
+Entidades:
+Completadas
+
+Configuraciones EF:
+Completadas
+
+Migración inicial:
+Completada
+
+Base de datos:
+Completada
+
+JWT:
+Completado
+
+Usuarios:
+Pendiente
+
+Proyectos:
+Pendiente
+
+Propuestas:
+Pendiente
+
+Bloques completados:
+- Bloque 1 - Fundación
+- Bloque 2 - Auth
+
+Próximo bloque:
+- Bloque 3 - Usuarios

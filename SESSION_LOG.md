@@ -173,3 +173,77 @@ Pendientes:
 Estado:
 
 🟢 En tiempo.
+
+# =====================================
+# SESIÓN 2026-06-12
+
+## Objetivo
+
+Completar Bloque 2 - Auth.
+# =====================================
+
+## Completado
+
+- Se creó JwtSettings.
+- Se configuró JWT en appsettings.json.
+- Se implementó IJwtService.
+- Se implementó JwtService.
+- Se configuró Authentication.
+- Se configuró Authorization.
+- Se creó IUserRepository.
+- Se implementó UserRepository.
+- Se implementó AuthService.
+- Se creó AuthController.
+- Se implementó Register.
+- Se implementó Login.
+- Se configuró Swagger Authorize.
+- Se creó TestController protegido.
+
+## Pruebas realizadas
+
+### Register
+
+Resultado:
+
+200 OK
+
+### Login
+
+Resultado:
+
+200 OK
+
+### Endpoint protegido
+
+GET /api/Test/secure
+
+Resultado:
+
+200 OK
+
+## Decisiones tomadas
+
+- JWT contendrá únicamente:
+  - UserId
+  - Email
+  - Role
+
+- Todo usuario nuevo se registra como Cliente.
+
+- User tendrá colección UserRoles.
+
+- BCrypt se implementa en Infrastructure.
+
+- Repository Pattern será obligatorio para acceso a datos.
+
+## Estado del proyecto
+
+Bloque 1: Completo
+
+Bloque 2: Completo
+
+Bloque 3: Pendiente
+
+## Próximo paso
+
+Iniciar Bloque 3 - Usuarios.

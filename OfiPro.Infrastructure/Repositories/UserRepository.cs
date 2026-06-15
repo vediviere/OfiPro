@@ -39,4 +39,18 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .AnyAsync(x => x.Email == email);
     }
+
+    public async Task UpdateAsync(User user)
+    {
+        _context.Users.Update(user);
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<User>> GetAllAsync()
+    {
+        return await _context.Users
+            .Include(x => x.UserRoles)
+            .ToListAsync();
+    }
 }
