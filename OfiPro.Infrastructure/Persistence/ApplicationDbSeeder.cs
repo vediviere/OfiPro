@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BCrypt.Net;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
 
@@ -14,6 +8,7 @@ public static class ApplicationDbSeeder
 {
     public static async Task SeedAsync(ApplicationDbContext context)
     {
+        await SeedCategoriesAsync(context);
         await SeedAdminUserAsync(context);
     }
 
@@ -51,6 +46,100 @@ public static class ApplicationDbSeeder
         });
 
         await context.Users.AddAsync(admin);
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedCategoriesAsync(ApplicationDbContext context)
+    {
+        var hasCategories = await context.Categories.AnyAsync();
+
+        if (hasCategories)
+        {
+            return;
+        }
+
+        var constructionId = Guid.NewGuid();
+        var electricityId = Guid.NewGuid();
+        var plumbingId = Guid.NewGuid();
+
+        var categories = new List<Category>
+    {
+        new Category
+        {
+            Id = constructionId,
+            Name = "Construcción",
+            IsActive = true
+        },
+        new Category
+        {
+            Id = electricityId,
+            Name = "Electricidad",
+            IsActive = true
+        },
+        new Category
+        {
+            Id = plumbingId,
+            Name = "Plomería",
+            IsActive = true
+        }
+    };
+
+        var subcategories = new List<Subcategory>
+    {
+        new Subcategory
+        {
+            Id = Guid.NewGuid(),
+            CategoryId = constructionId,
+            Name = "Albañilería",
+            IsActive = true
+        },
+        new Subcategory
+        {
+            Id = Guid.NewGuid(),
+            CategoryId = constructionId,
+            Name = "Pisos",
+            IsActive = true
+        },
+        new Subcategory
+        {
+            Id = Guid.NewGuid(),
+            CategoryId = constructionId,
+            Name = "Bardas",
+            IsActive = true
+        },
+        new Subcategory
+        {
+            Id = Guid.NewGuid(),
+            CategoryId = electricityId,
+            Name = "Instalación eléctrica",
+            IsActive = true
+        },
+        new Subcategory
+        {
+            Id = Guid.NewGuid(),
+            CategoryId = electricityId,
+            Name = "Reparación eléctrica",
+            IsActive = true
+        },
+        new Subcategory
+        {
+            Id = Guid.NewGuid(),
+            CategoryId = plumbingId,
+            Name = "Instalación de tubería",
+            IsActive = true
+        },
+        new Subcategory
+        {
+            Id = Guid.NewGuid(),
+            CategoryId = plumbingId,
+            Name = "Reparación de fugas",
+            IsActive = true
+        }
+    };
+
+        await context.Categories.AddRangeAsync(categories);
+        await context.Subcategories.AddRangeAsync(subcategories);
 
         await context.SaveChangesAsync();
     }

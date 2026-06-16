@@ -352,3 +352,114 @@ Bloque 4 - Proyectos → Pendiente
 ## Próximo paso
 
 Iniciar Bloque 4 - Proyectos.
+
+# =====================================
+
+# SESIÓN 2026-06-15
+
+## Objetivo
+
+Completar Bloque 4 - Proyectos.
+
+# =====================================
+
+## Seeder
+
+Completado:
+
+* SeedCategoriesAsync
+* Categorías iniciales
+* Subcategorías iniciales
+
+## Repositorio
+
+Completado:
+
+* IProjectRepository
+* ProjectRepository
+
+Métodos:
+
+* GetByIdAsync
+* GetAllAsync
+* GetByUserIdAsync
+* AddAsync
+* UpdateAsync
+* UpdateRequirementsAsync
+
+## Servicios
+
+Completado:
+
+* IProjectService
+* ProjectService
+
+Casos de uso:
+
+* CreateAsync
+* GetByIdAsync
+* GetAllAsync
+* GetMyProjectsAsync
+* UpdateAsync
+* UpdateRequirementsAsync
+* DeleteAsync
+
+## Controller
+
+Completado:
+
+* ProjectsController
+
+Endpoints:
+
+* POST /api/projects
+* GET /api/projects
+* GET /api/projects/my-projects
+* GET /api/projects/{id}
+* PUT /api/projects/{id}
+* PUT /api/projects/{id}/requirements
+* DELETE /api/projects/{id}
+
+## Pruebas
+
+POST /api/projects → 200
+
+GET /api/projects → 200
+
+GET /api/projects/my-projects → 200
+
+GET /api/projects/{id} → 200
+
+PUT /api/projects/{id} → 200
+
+PUT /api/projects/{id}/requirements → 200
+
+DELETE /api/projects/{id} → 200
+
+## Decisiones
+
+D014
+
+ProjectRequirements se administran mediante endpoint independiente.
+
+Razón:
+
+* Responsabilidad separada.
+* Arquitectura consistente.
+* Mejor escalabilidad.
+
+## Estado
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Pendiente
+
+## Próximo paso
+
+Iniciar Bloque 5 - Propuestas.

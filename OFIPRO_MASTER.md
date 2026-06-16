@@ -430,6 +430,23 @@ Razón:
 
 ---
 
+## D014
+
+ProjectRequirements se gestionan mediante endpoint independiente.
+
+Endpoints:
+
+PUT /api/projects/{id}
+
+PUT /api/projects/{id}/requirements
+
+Razón:
+
+Separación de responsabilidades entre Project y ProjectRequirement.
+
+---
+
+
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -559,58 +576,6 @@ Objetivos pequeños.
 
 ---
 
-# 18. ESTADO ACTUAL
-
-Arquitectura:
-Completada ✅
-
-Entidades:
-Completadas ✅
-
-Configuraciones EF:
-Completadas ✅
-
-Migración inicial:
-Completada ✅
-
-Base de datos:
-Completada ✅
-
-Repositorio Git:
-Completado ✅
-
-GitHub:
-Completado ✅
-
-BLOQUE 1 - FUNDACIÓN:
-COMPLETADO ✅
-
-JWT:
-Pendiente
-
-Usuarios:
-Pendiente
-
-Proyectos:
-Pendiente
-
-Propuestas:
-Pendiente
-
-BLOQUE 2 - AUTH:
-Pendiente
-
-BLOQUE 3 - USUARIOS:
-Pendiente
-
-BLOQUE 4 - PROYECTOS:
-Pendiente
-
-BLOQUE 5 - PROPUESTAS:
-Pendiente
-
----
-
 # 19. HITOS COMPLETADOS
 
 ## HITO 1
@@ -630,6 +595,54 @@ Incluye:
 * Repositorio GitHub.
 * Documentación base.
 
+---
+
+## HITO 2
+
+Auth completado.
+
+Incluye:
+
+* Register.
+* Login.
+* JWT.
+* Swagger Authorize.
+* Endpoint protegido.
+* Roles funcionando.
+
+---
+
+## HITO 3
+
+Usuarios completado.
+
+Incluye:
+
+* Obtener perfil.
+* Actualizar perfil.
+* Endpoints administrativos.
+* Soft Delete.
+* Seeder automático de administrador.
+
+---
+
+## HITO 4
+
+Proyectos completado.
+
+Incluye:
+
+* Crear proyecto.
+* Consultar proyectos.
+* Consultar mis proyectos.
+* Consultar proyecto por Id.
+* Actualizar datos generales.
+* Actualizar requerimientos por endpoint separado.
+* Eliminar proyecto con Soft Delete.
+* Seeder de categorías y subcategorías.
+
+---
+
 # 18. ESTADO ACTUAL
 
 Arquitectura:
@@ -654,7 +667,7 @@ Usuarios:
 Completado
 
 Proyectos:
-Pendiente
+Completado
 
 Propuestas:
 Pendiente
@@ -664,7 +677,8 @@ Bloques completados:
 * Bloque 1 - Fundación
 * Bloque 2 - Auth
 * Bloque 3 - Usuarios
+* Bloque 4 - Proyectos
 
 Próximo bloque:
 
-* Bloque 4 - Proyectos
+* Bloque 5 - Propuestas
