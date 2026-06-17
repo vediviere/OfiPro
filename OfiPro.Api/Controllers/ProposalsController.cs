@@ -67,23 +67,21 @@ public class ProposalsController : ControllerBase
     [HttpPatch("{id}/accept")]
     public async Task<IActionResult> Accept(Guid id)
     {
-        await _proposalService.AcceptAsync(id);
+        var userId = GetUserId();
 
-        return Ok(new
-        {
-            message = "Propuesta aceptada."
-        });
+        await _proposalService.AcceptAsync(userId, id);
+
+        return Ok(new { message = "Propuesta aceptada." });
     }
 
     [HttpPatch("{id}/reject")]
     public async Task<IActionResult> Reject(Guid id)
     {
-        await _proposalService.RejectAsync(id);
+        var userId = GetUserId();
 
-        return Ok(new
-        {
-            message = "Propuesta rechazada."
-        });
+        await _proposalService.RejectAsync(userId, id);
+
+        return Ok(new { message = "Propuesta rechazada." });
     }
 
     [HttpPatch("{id}/withdraw")]

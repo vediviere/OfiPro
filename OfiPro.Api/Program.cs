@@ -6,6 +6,7 @@ using OfiPro.Application.Interfaces;
 using OfiPro.Infrastructure.Persistence;
 using OfiPro.Infrastructure.Repositories;
 using OfiPro.Infrastructure.Services;
+using OfiPro.Api.Middlewares;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -92,6 +93,7 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -109,6 +111,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

@@ -2,6 +2,7 @@
 using OfiPro.Application.Interfaces;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
+using OfiPro.Application.Common.Exceptions;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -134,23 +135,27 @@ public class ProposalService : IProposalService
         return proposals.Select(MapToDto).ToList();
     }
 
-    public async Task AcceptAsync(Guid proposalId)
+    public async Task AcceptAsync(Guid ownerUserId, Guid proposalId)
     {
         var proposal = await _proposalRepository.GetByIdAsync(proposalId);
 
         if (proposal is null)
         {
-            throw new Exception("Propuesta no encontrada.");
+            throw new NotFoundException("Propuesta no encontrada.");
+        }
+
+        if (proposal.ProjectRequirement.Project.CreatedByUserId != ownerUserId)
+        {
+            throw new ForbiddenException("No tienes permiso para aceptar esta propuesta.");
         }
 
         if (proposal.Status != ProposalStatus.Pendiente)
         {
-            throw new Exception("Solo se pueden aceptar propuestas pendientes.");
+            throw new BadRequestException("Solo se pueden aceptar propuestas pendientes.");
         }
 
-        var requirementProposals =
-            await _proposalRepository.GetByProjectRequirementAsync(
-                proposal.ProjectRequirementId);
+        var requirementProposals = await _proposalRepository.GetByProjectRequirementAsync(
+            proposal.ProjectRequirementId);
 
         foreach (var item in requirementProposals)
         {
@@ -162,18 +167,23 @@ public class ProposalService : IProposalService
         await _proposalRepository.SaveChangesAsync();
     }
 
-    public async Task RejectAsync(Guid proposalId)
+    public async Task RejectAsync(Guid ownerUserId, Guid proposalId)
     {
         var proposal = await _proposalRepository.GetByIdAsync(proposalId);
 
         if (proposal is null)
         {
-            throw new Exception("Propuesta no encontrada.");
+            throw new NotFoundException("Propuesta no encontrada.");
+        }
+
+        if (proposal.ProjectRequirement.Project.CreatedByUserId != ownerUserId)
+        {
+            throw new ForbiddenException("No tienes permiso para rechazar esta propuesta.");
         }
 
         if (proposal.Status != ProposalStatus.Pendiente)
         {
-            throw new Exception("Solo se pueden rechazar propuestas pendientes.");
+            throw new BadRequestException("Solo se pueden rechazar propuestas pendientes.");
         }
 
         proposal.Status = ProposalStatus.Rechazada;

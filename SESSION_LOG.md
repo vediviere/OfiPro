@@ -601,3 +601,108 @@ Bloque 6 - Contrataciones → Pendiente
 ## Próximo paso
 
 Iniciar Bloque 6 - Contrataciones.
+
+
+# =====================================
+
+# SESIÓN 2026-06-17
+
+## Objetivo
+
+Completar Bloque 5.5 - Seguridad y Calidad Base.
+
+# =====================================
+
+## Seguridad JWT
+
+Completado:
+
+* JWT Key removida de appsettings.json.
+* JWT Key configurada mediante User Secrets.
+* Login validado después del cambio.
+
+## Autorización de propuestas
+
+Completado:
+
+* AcceptAsync ahora recibe el UserId del usuario autenticado.
+* RejectAsync ahora recibe el UserId del usuario autenticado.
+* Se valida Project.CreatedByUserId contra el UserId del token.
+* Solo el propietario del proyecto puede aceptar propuestas.
+* Solo el propietario del proyecto puede rechazar propuestas.
+
+## Validaciones DTO
+
+Completado:
+
+* Validaciones agregadas en CreateProjectDto.
+* Validaciones agregadas en CreateProjectRequirementDto.
+* Validaciones agregadas en CreateProposalDto.
+* Se validan textos requeridos.
+* Se validan longitudes máximas.
+* Se valida que Price no acepte valores negativos o cero.
+
+## Excepciones
+
+Completado:
+
+* NotFoundException.
+* ForbiddenException.
+* BadRequestException.
+* ExceptionMiddleware.
+* Registro del middleware en Program.cs.
+
+## Pruebas
+
+JWT:
+
+* Login → 200
+
+Validaciones:
+
+* Propuesta con precio negativo → 400
+
+Excepciones:
+
+* Propuesta inexistente → 404
+* Propuesta no pendiente → 400
+* Usuario no propietario intentando rechazar propuesta → 403
+
+Autorización:
+
+* Usuario no propietario no pudo aceptar/rechazar propuesta.
+* Usuario propietario sí pudo aceptar/rechazar propuesta.
+
+## Decisiones
+
+D018
+
+Los secretos no deben guardarse en appsettings.json ni en el repositorio.
+
+D019
+
+Aceptar o rechazar propuestas requiere validar al propietario del proyecto.
+
+D020
+
+Las pruebas que requieran IDs se apoyarán en consultas directas a base de datos.
+
+## Estado
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 6 - Contrataciones → Pendiente
+
+## Próximo paso
+
+Iniciar Bloque 6 - Contrataciones.

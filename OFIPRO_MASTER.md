@@ -494,6 +494,49 @@ Si existe una solución correcta y escalable que pueda implementarse dentro del 
 
 ---
 
+## D018
+
+Los secretos no deben guardarse en appsettings.json ni en el repositorio.
+
+Resultado:
+
+La clave JWT se mueve a User Secrets en entorno local.
+
+Razón:
+
+Evitar exponer credenciales o claves sensibles en GitHub.
+
+---
+
+## D019
+
+Aceptar o rechazar propuestas requiere validar al propietario del proyecto.
+
+Resultado:
+
+Solo el usuario que creó el proyecto puede aceptar o rechazar propuestas asociadas a sus requerimientos.
+
+Razón:
+
+Evitar que usuarios autenticados manipulen propuestas ajenas.
+
+---
+
+## D020
+
+Las pruebas que requieran IDs se apoyarán en consultas directas a base de datos.
+
+Resultado:
+
+Cuando se necesite ProjectId, ProjectRequirementId o ProposalId, se consultará SQL Server para evitar confusión entre identificadores.
+
+Razón:
+
+El flujo Project → Requirement → Proposal maneja varios Guid y puede provocar errores durante pruebas manuales.
+
+---
+
+
 # 15. PROBLEMAS DETECTADOS
 
 ## P001
@@ -599,6 +642,52 @@ Eliminar la relación antigua.
 Generar migración correctiva.
 
 ---
+
+## P010
+
+JWT Key expuesta en appsettings.json.
+
+Riesgo:
+
+* La clave podía quedar visible en GitHub.
+* Cualquier persona con acceso al repositorio podía conocer la clave usada para firmar tokens.
+
+Solución:
+
+Mover la clave JWT fuera de appsettings.json.
+Configurar User Secrets para entorno local.
+
+---
+
+## P011
+
+Aceptar y rechazar propuestas no validaba correctamente al propietario del proyecto.
+
+Riesgo:
+
+* Un usuario autenticado podía intentar manipular propuestas de proyectos ajenos.
+
+Solución:
+
+Validar Project.CreatedByUserId contra el UserId del token antes de aceptar o rechazar propuestas.
+
+---
+
+## P012
+
+Excepciones de negocio respondían como error 500.
+
+Riesgo:
+
+* Errores de permisos, datos inválidos o recursos inexistentes no devolvían códigos HTTP adecuados.
+
+Solución:
+
+Crear excepciones personalizadas.
+Implementar middleware global de excepciones.
+
+---
+
 
 # 16. RIESGOS
 
@@ -728,6 +817,26 @@ Incluye:
 
 ---
 
+## HITO 5.5
+
+Seguridad y Calidad Base completado.
+
+Incluye:
+
+* JWT Key removida de appsettings.json.
+* JWT Key configurada mediante User Secrets.
+* Autorización reforzada en aceptar propuesta.
+* Autorización reforzada en rechazar propuesta.
+* Validaciones base en DTOs de proyectos.
+* Validaciones base en DTOs de requerimientos.
+* Validaciones base en DTOs de propuestas.
+* Excepciones personalizadas.
+* Middleware global de excepciones.
+* Respuestas HTTP correctas para errores 400, 403 y 404.
+
+---
+
+
 # 18. ESTADO ACTUAL
 
 Arquitectura:
@@ -746,7 +855,7 @@ Base de datos:
 Completada
 
 JWT:
-Completado
+Completado y reforzado
 
 Usuarios:
 Completado
@@ -755,7 +864,7 @@ Proyectos:
 Completado
 
 Propuestas:
-Completado
+Completado y reforzado
 
 Bloques completados:
 
@@ -764,6 +873,7 @@ Bloques completados:
 * Bloque 3 - Usuarios
 * Bloque 4 - Proyectos
 * Bloque 5 - Propuestas
+* Bloque 5.5 - Seguridad y Calidad Base
 
 Próximo bloque:
 

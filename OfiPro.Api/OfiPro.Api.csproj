@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>efd93c28-387d-4ed1-bd89-3aa97b9c044c</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +20,6 @@
 
   <ItemGroup>
     <Folder Include="Extensions\" />
-    <Folder Include="Middlewares\" />
   </ItemGroup>
 
   <ItemGroup>
