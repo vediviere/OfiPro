@@ -487,6 +487,13 @@ Evitar dejar contratistas esperando una respuesta indefinidamente.
 
 ---
 
+## D017
+No se aceptarán soluciones temporales que generen retrabajo conocido.
+
+Si existe una solución correcta y escalable que pueda implementarse dentro del alcance actual, se elegirá esa solución.
+
+---
+
 # 15. PROBLEMAS DETECTADOS
 
 ## P001
