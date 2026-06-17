@@ -463,3 +463,141 @@ Bloque 5 - Propuestas → Pendiente
 ## Próximo paso
 
 Iniciar Bloque 5 - Propuestas.
+
+
+# =====================================
+
+# SESIÓN 2026-06-16
+
+## Objetivo
+
+Completar Bloque 5 - Propuestas.
+
+# =====================================
+
+## Corrección de modelo
+
+Completado:
+
+* Proposal ahora se relaciona con ProjectRequirement.
+* Se eliminó la relación obsoleta Proposal → Project.
+* Se agregó navegación ProjectRequirement → Proposals.
+* Se generó migración correctiva.
+
+Problema detectado:
+
+* FK_Proposals_Projects_ProjectId seguía existiendo.
+
+Solución:
+
+* Eliminar ProjectId de Proposal.
+* Corregir ProposalConfiguration.
+* Crear migración RemoveOldProjectRelationFromProposal.
+
+## DTOs
+
+Completado:
+
+* CreateProposalDto
+* UpdateProposalDto
+* ProposalDto
+
+## Repositorio
+
+Completado:
+
+* IProposalRepository
+* ProposalRepository
+
+## Servicio
+
+Completado:
+
+* IProposalService
+* ProposalService
+
+Reglas implementadas:
+
+* Un contratista solo puede tener una propuesta activa por ProjectRequirement.
+* Una propuesta retirada puede volver a crearse.
+* Solo propuestas pendientes pueden modificarse.
+* Solo propuestas pendientes pueden retirarse.
+
+## Controller
+
+Completado:
+
+* ProposalsController
+
+Endpoints:
+
+* POST /api/proposals
+* PUT /api/proposals/{id}
+* GET /api/proposals/my-proposals
+* GET /api/proposals/{id}
+* GET /api/proposals/requirement/{id}
+* PATCH /api/proposals/{id}/accept
+* PATCH /api/proposals/{id}/reject
+* PATCH /api/proposals/{id}/withdraw
+
+## Pruebas
+
+POST /api/proposals → 200
+
+GET /api/proposals/my-proposals → 200
+
+GET /api/proposals/{id} → 200
+
+PUT /api/proposals/{id} → 200
+
+PATCH withdraw → 200
+
+PATCH accept → 200
+
+PATCH reject → 200
+
+## Regla D016 validada
+
+Prueba realizada:
+
+* Contratista A crea propuesta.
+* Contratista B crea propuesta.
+* Cliente acepta propuesta A.
+
+Resultado:
+
+* Propuesta A → Aceptada.
+* Propuesta B → Rechazada.
+
+Funcionamiento correcto.
+
+## Refactor técnico
+
+Completado:
+
+* ProposalRepository.UpdateAsync → SaveChangesAsync
+* ProjectRepository.UpdateAsync → SaveChangesAsync
+
+Se conserva:
+
+* UserRepository.UpdateAsync(User user)
+
+porque realiza una actualización explícita.
+
+## Estado
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 6 - Contrataciones → Pendiente
+
+## Próximo paso
+
+Iniciar Bloque 6 - Contrataciones.

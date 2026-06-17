@@ -446,7 +446,46 @@ Separación de responsabilidades entre Project y ProjectRequirement.
 
 ---
 
+## D015
 
+Un contratista solo puede tener una propuesta activa por ProjectRequirement.
+
+Resultado:
+
+La combinación:
+
+* ProjectRequirementId
+* ContractorUserId
+
+debe ser única a nivel de negocio.
+
+Si el contratista desea modificar una propuesta deberá actualizar la existente.
+
+No podrá crear una segunda propuesta activa para el mismo requerimiento.
+
+---
+
+---
+
+## D016
+
+Al aceptar una propuesta todas las demás propuestas del mismo ProjectRequirement se rechazan automáticamente.
+
+Resultado:
+
+Cuando una propuesta cambia a:
+
+* Aceptada
+
+todas las demás propuestas pendientes asociadas al mismo ProjectRequirement cambian a:
+
+* Rechazada
+
+Razón:
+
+Evitar dejar contratistas esperando una respuesta indefinidamente.
+
+---
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -531,6 +570,26 @@ Git inicializado fuera de la raíz del proyecto.
 Solución:
 
 Reinicializar Git en la carpeta correcta.
+
+---
+
+---
+
+## P009
+
+Proposal mantenía una relación obsoleta con Project.
+
+Síntomas:
+
+* Existía ProjectId en Proposals.
+* Existía FK_Proposals_Projects_ProjectId.
+* Las propuestas no estaban correctamente asociadas a ProjectRequirement.
+
+Solución:
+
+Migrar Proposal para relacionarse exclusivamente con ProjectRequirement.
+Eliminar la relación antigua.
+Generar migración correctiva.
 
 ---
 
@@ -643,6 +702,25 @@ Incluye:
 
 ---
 
+## HITO 5
+
+Propuestas completado.
+
+Incluye:
+
+* Crear propuesta.
+* Actualizar propuesta.
+* Consultar mis propuestas.
+* Consultar propuesta por Id.
+* Retirar propuesta.
+* Rechazar propuesta.
+* Aceptar propuesta.
+* Rechazo automático de propuestas competidoras.
+* Migración Proposal → ProjectRequirement.
+* Refactor SaveChangesAsync en repositories.
+
+---
+
 # 18. ESTADO ACTUAL
 
 Arquitectura:
@@ -670,7 +748,7 @@ Proyectos:
 Completado
 
 Propuestas:
-Pendiente
+Completado
 
 Bloques completados:
 
@@ -678,7 +756,8 @@ Bloques completados:
 * Bloque 2 - Auth
 * Bloque 3 - Usuarios
 * Bloque 4 - Proyectos
+* Bloque 5 - Propuestas
 
 Próximo bloque:
 
-* Bloque 5 - Propuestas
+* Bloque 6 - Contrataciones
