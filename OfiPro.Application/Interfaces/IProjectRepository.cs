@@ -8,6 +8,6 @@ public interface IProjectRepository
     Task<List<Project>> GetAllAsync();
     Task<List<Project>> GetByUserIdAsync(Guid userId);
     Task AddAsync(Project project);
-    Task UpdateAsync(Project project);
+    Task SaveChangesAsync();
     Task UpdateRequirementsAsync(Project project, List<ProjectRequirement> requirements);
 }

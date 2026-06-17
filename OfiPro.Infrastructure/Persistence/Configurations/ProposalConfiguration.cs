@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OfiPro.Domain.Entities;
 
@@ -15,9 +10,9 @@ public class ProposalConfiguration : IEntityTypeConfiguration<Proposal>
     {
         builder.HasKey(x => x.Id);
 
-        builder.HasOne(x => x.Project)
-            .WithMany()
-            .HasForeignKey(x => x.ProjectId)
+        builder.HasOne(x => x.ProjectRequirement)
+            .WithMany(x => x.Proposals)
+            .HasForeignKey(x => x.ProjectRequirementId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.ContractorUser)

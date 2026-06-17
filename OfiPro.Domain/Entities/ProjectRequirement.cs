@@ -10,4 +10,5 @@ public class ProjectRequirement
     public Guid SubcategoryId { get; set; }
     public Subcategory Subcategory { get; set; } = null!;
     public string Description { get; set; } = string.Empty;
+    public List<Proposal> Proposals { get; set; } = new();
 }

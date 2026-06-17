@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OfiPro.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using OfiPro.Infrastructure.Persistence;
 namespace OfiPro.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260616205529_ChangeProposalToProjectRequirement")]
+    partial class ChangeProposalToProjectRequirement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -311,6 +314,9 @@ namespace OfiPro.Infrastructure.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ProjectRequirementId")
                         .HasColumnType("uniqueidentifier");
 
@@ -330,6 +336,8 @@ namespace OfiPro.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ContractorUserId");
+
+                    b.HasIndex("ProjectId");
 
                     b.HasIndex("ProjectRequirementId");
 
@@ -592,6 +600,12 @@ namespace OfiPro.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("OfiPro.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("OfiPro.Domain.Entities.ProjectRequirement", "ProjectRequirement")
                         .WithMany("Proposals")
                         .HasForeignKey("ProjectRequirementId")
@@ -599,6 +613,8 @@ namespace OfiPro.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ContractorUser");
+
+                    b.Navigation("Project");
 
                     b.Navigation("ProjectRequirement");
                 });

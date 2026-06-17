@@ -1,31 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OfiPro.Domain.Enums;
+﻿using OfiPro.Domain.Enums;
 
-namespace OfiPro.Domain.Entities;
+namespace OfiPro.Application.DTOs.Proposal;
 
-public class Proposal
+public class ProposalDto
 {
     public Guid Id { get; set; }
     public Guid ProjectRequirementId { get; set; }
-    public ProjectRequirement ProjectRequirement { get; set; } = null!;
+    public Guid ProjectId { get; set; }
+    public string ProjectTitle { get; set; } = string.Empty;
+    public string RequirementDescription { get; set; } = string.Empty;
     public Guid ContractorUserId { get; set; }
-    public User ContractorUser { get; set; } = null!;
+    public string ContractorName { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public string EstimatedTime { get; set; } = string.Empty;
     public bool IncludesMaterials { get; set; }
     public string ScopeDescription { get; set; } = string.Empty;
-
-    // Ejemplo: "Esta propuesta cubre albañilería y plomería"
-
     public string Includes { get; set; } = string.Empty;
     public string DoesNotInclude { get; set; } = string.Empty;
     public bool HasWarranty { get; set; }
     public string WarrantyDescription { get; set; } = string.Empty;
     public string Comment { get; set; } = string.Empty;
-    public ProposalStatus Status { get; set; } = ProposalStatus.Pendiente;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public ProposalStatus Status { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

@@ -60,7 +60,7 @@ public class ProjectRepository : IProjectRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(Project project)
+    public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
     }

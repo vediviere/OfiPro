@@ -107,7 +107,7 @@ public class ProjectService : IProjectService
         project.Urgency = request.Urgency;
         project.AvailableMaterials = request.AvailableMaterials;
 
-        await _projectRepository.UpdateAsync(project);
+        await _projectRepository.SaveChangesAsync();
 
         var updatedProject = await _projectRepository.GetByIdAsync(project.Id);
 
@@ -183,7 +183,7 @@ public class ProjectService : IProjectService
 
         project.DeletedAt = DateTime.UtcNow;
 
-        await _projectRepository.UpdateAsync(project);
+        await _projectRepository.SaveChangesAsync();
     }
 
     private static ProjectDto MapToDto(Project project)
