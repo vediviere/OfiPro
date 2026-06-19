@@ -27,7 +27,7 @@ public class ProposalService : IProposalService
         if (existingProposal is not null &&
             existingProposal.Status != ProposalStatus.Retirada)
         {
-            throw new Exception("Ya tienes una propuesta activa para este requerimiento.");
+            throw new BadRequestException("Ya tienes una propuesta activa para este requerimiento.");
         }
 
         var proposal = new Proposal
@@ -54,7 +54,7 @@ public class ProposalService : IProposalService
 
         if (createdProposal is null)
         {
-            throw new Exception("No se pudo obtener la propuesta creada.");
+            throw new BadRequestException("No se pudo obtener la propuesta creada.");
         }
 
         return MapToDto(createdProposal);
@@ -69,17 +69,17 @@ public class ProposalService : IProposalService
 
         if (proposal is null)
         {
-            throw new Exception("Propuesta no encontrada.");
+            throw new NotFoundException("Propuesta no encontrada.");
         }
 
         if (proposal.ContractorUserId != contractorUserId)
         {
-            throw new Exception("No tienes permiso para modificar esta propuesta.");
+            throw new ForbiddenException("No tienes permiso para modificar esta propuesta.");
         }
 
         if (proposal.Status != ProposalStatus.Pendiente)
         {
-            throw new Exception("Solo se pueden modificar propuestas pendientes.");
+            throw new BadRequestException("Solo se pueden modificar propuestas pendientes.");
         }
 
         proposal.Price = request.Price;
@@ -98,7 +98,7 @@ public class ProposalService : IProposalService
 
         if (updatedProposal is null)
         {
-            throw new Exception("No se pudo obtener la propuesta actualizada.");
+            throw new BadRequestException("No se pudo obtener la propuesta actualizada.");
         }
 
         return MapToDto(updatedProposal);
@@ -119,7 +119,7 @@ public class ProposalService : IProposalService
 
         if (proposal is null)
         {
-            throw new Exception("Propuesta no encontrada.");
+            throw new NotFoundException("Propuesta no encontrada.");
         }
 
         return MapToDto(proposal);
@@ -199,17 +199,17 @@ public class ProposalService : IProposalService
 
         if (proposal is null)
         {
-            throw new Exception("Propuesta no encontrada.");
+            throw new NotFoundException("Propuesta no encontrada.");
         }
 
         if (proposal.ContractorUserId != contractorUserId)
         {
-            throw new Exception("No tienes permiso para retirar esta propuesta.");
+            throw new ForbiddenException("No tienes permiso para retirar esta propuesta.");
         }
 
         if (proposal.Status != ProposalStatus.Pendiente)
         {
-            throw new Exception("Solo se pueden retirar propuestas pendientes.");
+            throw new BadRequestException("Solo se pueden retirar propuestas pendientes.");
         }
 
         proposal.Status = ProposalStatus.Retirada;

@@ -8,7 +8,7 @@ namespace OfiPro.Api.Controllers;
 [Route("api/[controller]")]
 public class TestController : ControllerBase
 {
-    [Authorize]
+    [Authorize(Roles = "Administrador")]
     [HttpGet("secure")]
     public IActionResult Secure()
     {

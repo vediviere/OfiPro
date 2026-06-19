@@ -536,6 +536,52 @@ El flujo Project → Requirement → Proposal maneja varios Guid y puede provoca
 
 ---
 
+## D021
+
+Las excepciones de negocio no deben lanzarse con Exception genérica.
+
+Resultado:
+
+Se implementan excepciones específicas:
+
+* BadRequestException
+* ForbiddenException
+* NotFoundException
+
+Razón:
+
+Permitir respuestas HTTP correctas y consistentes.
+
+---
+
+## D022
+
+Los controladores no deben manejar errores de negocio manualmente.
+
+Resultado:
+
+AuthController elimina try/catch redundantes y delega el manejo de errores al ExceptionMiddleware.
+
+Razón:
+
+Mantener consistencia en respuestas y evitar duplicación de lógica.
+
+---
+
+## D023
+
+Todos los DTOs de actualización deben tener validaciones.
+
+Resultado:
+
+Se agregan DataAnnotations a DTOs Update para evitar modificaciones inválidas.
+
+Razón:
+
+Proteger integridad de datos tanto en creación como actualización.
+
+---
+
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -688,6 +734,50 @@ Implementar middleware global de excepciones.
 
 ---
 
+## P013
+
+Los DTOs de actualización no tenían validaciones.
+
+Riesgo:
+
+* Se podían enviar títulos vacíos.
+* Se podían enviar precios negativos.
+* Se podían enviar textos incompletos.
+
+Solución:
+
+Agregar DataAnnotations a todos los DTOs Update.
+
+---
+
+## P014
+
+AuthController interceptaba excepciones manualmente.
+
+Riesgo:
+
+Las respuestas no seguían el formato estándar del middleware global.
+
+Solución:
+
+Eliminar try/catch redundantes.
+
+---
+
+## P015
+
+La expiración JWT estaba duplicada y desincronizada.
+
+Riesgo:
+
+Inconsistencia entre configuración y respuesta del login.
+
+Solución:
+
+Unificar expiración.
+
+---
+
 
 # 16. RIESGOS
 
@@ -836,6 +926,21 @@ Incluye:
 
 ---
 
+## HITO 5.6
+
+Limpieza de Consistencia API completado.
+
+Incluye:
+
+* Reemplazo de excepciones genéricas.
+* Eliminación de try/catch redundantes.
+* Validaciones en DTOs Update.
+* Confirmación de filtro Soft Delete en proyectos.
+* Unificación de expiración JWT.
+* Protección de TestController.
+
+---
+
 
 # 18. ESTADO ACTUAL
 
@@ -874,6 +979,7 @@ Bloques completados:
 * Bloque 4 - Proyectos
 * Bloque 5 - Propuestas
 * Bloque 5.5 - Seguridad y Calidad Base
+* * Bloque 5.6 - Limpieza de Consistencia API
 
 Próximo bloque:
 

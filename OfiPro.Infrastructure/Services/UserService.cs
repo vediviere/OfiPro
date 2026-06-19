@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OfiPro.Application.Common.Exceptions;
 using OfiPro.Application.DTOs.User;
 using OfiPro.Application.Interfaces;
 
@@ -23,7 +19,7 @@ public class UserService : IUserService
 
         if (user is null)
         {
-            throw new Exception("Usuario no encontrado.");
+            throw new NotFoundException("Usuario no encontrado.");
         }
 
         return new UserProfileDto
@@ -47,7 +43,7 @@ public class UserService : IUserService
 
         if (user is null)
         {
-            throw new Exception("Usuario no encontrado.");
+            throw new NotFoundException("Usuario no encontrado.");
         }
 
         user.Name = request.Name;
@@ -96,7 +92,7 @@ public class UserService : IUserService
 
         if (user is null || user.DeletedAt != null)
         {
-            throw new Exception("Usuario no encontrado.");
+            throw new NotFoundException("Usuario no encontrado.");
         }
 
         return new UserProfileDto
@@ -118,7 +114,7 @@ public class UserService : IUserService
 
         if (user is null || user.DeletedAt != null)
         {
-            throw new Exception("Usuario no encontrado.");
+            throw new NotFoundException("Usuario no encontrado.");
         }
 
         user.IsActive = true;
@@ -132,7 +128,7 @@ public class UserService : IUserService
 
         if (user is null || user.DeletedAt != null)
         {
-            throw new Exception("Usuario no encontrado.");
+            throw new NotFoundException("Usuario no encontrado.");
         }
 
         user.IsActive = false;
@@ -146,7 +142,7 @@ public class UserService : IUserService
 
         if (user is null || user.DeletedAt != null)
         {
-            throw new Exception("Usuario no encontrado.");
+            throw new NotFoundException("Usuario no encontrado.");
         }
 
         user.IsActive = false;

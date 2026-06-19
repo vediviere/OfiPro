@@ -2,6 +2,7 @@
 using OfiPro.Application.Interfaces;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
+using OfiPro.Application.Common.Exceptions;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -23,7 +24,7 @@ public class AuthService : IAuthService
     {
         if (await _userRepository.EmailExistsAsync(request.Email))
         {
-            throw new Exception("El correo ya está registrado.");
+            throw new BadRequestException("El correo ya está registrado.");
         }
 
         var user = new User
@@ -56,7 +57,7 @@ public class AuthService : IAuthService
             FullName = $"{user.Name} {user.LastName}",
             Email = user.Email,
             Token = token,
-            ExpiresAt = DateTime.UtcNow.AddHours(8)
+            ExpiresAt = DateTime.UtcNow.AddMinutes(480)
         };
     }
 
@@ -67,7 +68,7 @@ public class AuthService : IAuthService
 
         if (user is null)
         {
-            throw new Exception("Credenciales inválidas.");
+            throw new BadRequestException("Credenciales inválidas.");
         }
 
         var isValidPassword =
@@ -77,7 +78,7 @@ public class AuthService : IAuthService
 
         if (!isValidPassword)
         {
-            throw new Exception("Credenciales inválidas.");
+            throw new BadRequestException("Credenciales inválidas.");
         }
 
         var token = _jwtService.GenerateToken(user);
@@ -88,7 +89,7 @@ public class AuthService : IAuthService
             FullName = $"{user.Name} {user.LastName}",
             Email = user.Email,
             Token = token,
-            ExpiresAt = DateTime.UtcNow.AddHours(8)
+            ExpiresAt = DateTime.UtcNow.AddMinutes(480)
         };
     }
 }

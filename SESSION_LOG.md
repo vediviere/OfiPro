@@ -701,6 +701,100 @@ Bloque 5 - Propuestas → Completo
 
 Bloque 5.5 - Seguridad y Calidad Base → Completo
 
+Bloque 5.6 - Limpieza de Consistencia API.
+
+## Próximo paso
+
+Iniciar Bloque 5.6 - Limpieza de Consistencia API.
+
+# =====================================
+
+# SESIÓN 2026-06-17 (PARTE 2)
+
+## Objetivo
+
+Completar Bloque 5.6 - Limpieza de Consistencia API.
+
+# =====================================
+
+## Excepciones
+
+Completado:
+
+* Reemplazo de Exception genérica en servicios.
+* Implementación consistente de:
+  * BadRequestException
+  * ForbiddenException
+  * NotFoundException
+
+Pruebas:
+
+* Login inválido → 400
+* Proyecto inexistente → 404
+* Proyecto ajeno → 403
+* Propuesta ajena → 403
+
+## AuthController
+
+Completado:
+
+* Eliminación de try/catch redundantes.
+* Delegación total al ExceptionMiddleware.
+
+Resultado:
+
+Formato estándar unificado en toda la API.
+
+## DTOs Update
+
+Completado:
+
+* UpdateProjectDto
+* UpdateProjectRequirementsDto
+* UpdateProposalDto
+* UpdateUserProfileDto
+
+Pruebas:
+
+* Título vacío → 400
+* Precio negativo → 400
+
+## Soft Delete
+
+Validado:
+
+* ProjectRepository.GetAllAsync ya excluye DeletedAt != null.
+
+No se requirió cambio.
+
+## JWT
+
+Completado:
+
+* Expiración sincronizada entre configuración y respuesta de login.
+
+## TestController
+
+Completado:
+
+* Restricción a rol Administrador.
+
+## Estado
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
 Bloque 6 - Contrataciones → Pendiente
 
 ## Próximo paso

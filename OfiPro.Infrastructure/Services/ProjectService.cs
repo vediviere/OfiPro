@@ -2,6 +2,7 @@
 using OfiPro.Application.Interfaces;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
+using OfiPro.Application.Common.Exceptions;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -44,7 +45,7 @@ public class ProjectService : IProjectService
 
         if (createdProject is null)
         {
-            throw new Exception("No se pudo obtener el proyecto creado.");
+            throw new BadRequestException("No se pudo obtener el proyecto creado.");
         }
 
         return MapToDto(createdProject);
@@ -56,7 +57,7 @@ public class ProjectService : IProjectService
 
         if (project is null)
         {
-            throw new Exception("Proyecto no encontrado.");
+            throw new NotFoundException("Proyecto no encontrado.");
         }
 
         return MapToDto(project);
@@ -86,17 +87,17 @@ public class ProjectService : IProjectService
 
         if (project is null)
         {
-            throw new Exception("Proyecto no encontrado.");
+            throw new NotFoundException("Proyecto no encontrado.");
         }
 
         if (project.CreatedByUserId != userId)
         {
-            throw new Exception("No tienes permiso para modificar este proyecto.");
+            throw new ForbiddenException("No tienes permiso para modificar este proyecto.");
         }
 
         if (project.Status != ProjectStatus.Publicado)
         {
-            throw new Exception("Solo se pueden modificar proyectos publicados.");
+            throw new BadRequestException("Solo se pueden modificar proyectos publicados.");
         }
 
         project.Title = request.Title;
@@ -113,7 +114,7 @@ public class ProjectService : IProjectService
 
         if (updatedProject is null)
         {
-            throw new Exception("No se pudo obtener el proyecto actualizado.");
+            throw new BadRequestException("No se pudo obtener el proyecto actualizado.");
         }
 
         return MapToDto(updatedProject);
@@ -125,17 +126,17 @@ public class ProjectService : IProjectService
 
         if (project is null)
         {
-            throw new Exception("Proyecto no encontrado.");
+            throw new NotFoundException("Proyecto no encontrado.");
         }
 
         if (project.CreatedByUserId != userId)
         {
-            throw new Exception("No tienes permiso para modificar este proyecto.");
+            throw new ForbiddenException("No tienes permiso para modificar este proyecto.");
         }
 
         if (project.Status != ProjectStatus.Publicado)
         {
-            throw new Exception("Solo se pueden modificar proyectos publicados.");
+            throw new BadRequestException("Solo se pueden modificar proyectos publicados.");
         }
 
         var requirements = request.Requirements
@@ -156,7 +157,7 @@ public class ProjectService : IProjectService
 
         if (updatedProject is null)
         {
-            throw new Exception("No se pudo obtener el proyecto actualizado.");
+            throw new BadRequestException("No se pudo obtener el proyecto actualizado.");
         }
 
         return MapToDto(updatedProject);
@@ -168,17 +169,17 @@ public class ProjectService : IProjectService
 
         if (project is null)
         {
-            throw new Exception("Proyecto no encontrado.");
+            throw new NotFoundException("Proyecto no encontrado.");
         }
 
         if (project.CreatedByUserId != userId)
         {
-            throw new Exception("No tienes permiso para eliminar este proyecto.");
+            throw new ForbiddenException("No tienes permiso para eliminar este proyecto.");
         }
 
         if (project.Status != ProjectStatus.Publicado)
         {
-            throw new Exception("Solo se pueden eliminar proyectos publicados.");
+            throw new BadRequestException("Solo se pueden eliminar proyectos publicados.");
         }
 
         project.DeletedAt = DateTime.UtcNow;
