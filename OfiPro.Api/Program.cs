@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using OfiPro.Application.DTOs.Auth;
 using OfiPro.Application.Interfaces;
 using OfiPro.Infrastructure.Persistence;
 using OfiPro.Infrastructure.Repositories;
 using OfiPro.Infrastructure.Services;
 using OfiPro.Api.Middlewares;
 using System.Text;
+using OfiPro.Application.Common.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 

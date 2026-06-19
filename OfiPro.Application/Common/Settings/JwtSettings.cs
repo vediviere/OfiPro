@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OfiPro.Application.DTOs.Auth;
+﻿namespace OfiPro.Application.Common.Settings;
 
 public class JwtSettings
 {

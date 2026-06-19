@@ -3,6 +3,8 @@ using OfiPro.Application.Interfaces;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
 using OfiPro.Application.Common.Exceptions;
+using Microsoft.Extensions.Options;
+using OfiPro.Application.Common.Settings;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -10,13 +12,16 @@ public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly IJwtService _jwtService;
+    private readonly JwtSettings _jwtSettings;
 
     public AuthService(
-        IUserRepository userRepository,
-        IJwtService jwtService)
+    IUserRepository userRepository,
+    IJwtService jwtService,
+    IOptions<JwtSettings> jwtSettings)
     {
         _userRepository = userRepository;
         _jwtService = jwtService;
+        _jwtSettings = jwtSettings.Value;
     }
 
     public async Task<AuthResponseDto> RegisterAsync(
@@ -57,7 +62,7 @@ public class AuthService : IAuthService
             FullName = $"{user.Name} {user.LastName}",
             Email = user.Email,
             Token = token,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(480)
+            ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiresInMinutes)
         };
     }
 
@@ -89,7 +94,7 @@ public class AuthService : IAuthService
             FullName = $"{user.Name} {user.LastName}",
             Email = user.Email,
             Token = token,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(480)
+            ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiresInMinutes)
         };
     }
 }
