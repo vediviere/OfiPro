@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OfiPro.Application.DTOs.Auth;
-using OfiPro.Application.Interfaces;
+using OfiPro.Application.Interfaces.Services;
 
 namespace OfiPro.Api.Controllers;
 

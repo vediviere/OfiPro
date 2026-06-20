@@ -604,6 +604,51 @@ Facilitar pruebas, depuración y consumo desde frontend.
 
 ---
 
+## D025
+
+Un usuario puede tener más de un rol.
+
+Resultado:
+
+Un usuario registrado inicialmente como Cliente puede activar también el rol Contratista.
+
+Razón:
+
+En OfiPro no existen usuarios completamente separados entre clientes y contratistas. Un mismo usuario puede publicar proyectos y también enviar propuestas si activa su perfil profesional.
+
+---
+
+## D026
+
+Solo usuarios con rol Contratista pueden enviar propuestas.
+
+Resultado:
+
+El endpoint de creación de propuestas valida que el usuario autenticado tenga el rol Contratista.
+
+Razón:
+
+Evitar que cualquier usuario registrado como Cliente pueda enviar propuestas sin haber activado su perfil profesional.
+
+---
+
+## D027
+
+Las interfaces de Application deben separarse por tipo.
+
+Resultado:
+
+Las interfaces se organizan en:
+
+* Interfaces/Repositories
+* Interfaces/Services
+
+Razón:
+
+Evitar mezclar contratos de repositorios con contratos de servicios y mantener la arquitectura limpia conforme el proyecto crezca.
+
+---
+
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -985,6 +1030,62 @@ Incluye:
 
 ---
 
+## HITO 6.8
+
+Refactor de nombres descriptivos en DTOs completado.
+
+Incluye:
+
+* UserProfileDto usa UserId.
+* ProjectDto usa ProjectId.
+* ProjectRequirementDto usa ProjectRequirementId.
+* ProposalDto usa ProposalId.
+* ContractDto usa ContractId.
+* Mapeos actualizados.
+* Endpoints principales probados correctamente.
+
+Razón:
+
+Facilitar pruebas, depuración, consultas SQL y consumo desde frontend.
+
+---
+
+## HITO 6.9
+
+Flujo mínimo de Contratista completado.
+
+Incluye:
+
+* Validación de rol Contratista al crear propuestas.
+* Métodos HasRoleAsync y AddRoleAsync en UserRepository.
+* Endpoint PATCH /api/users/activate-contractor.
+* Activación de rol Contratista para usuario autenticado.
+* Pruebas de autorización en creación de propuestas.
+
+Resultado:
+
+Un usuario Cliente puede activar su rol Contratista y, a partir de eso, enviar propuestas.
+
+---
+
+## HITO 6.10
+
+Orden de interfaces de Application completado.
+
+Incluye:
+
+* Interfaces/Repositories.
+* Interfaces/Services.
+* Namespaces actualizados.
+* Compilación validada.
+* Pruebas básicas correctas después del refactor.
+
+Resultado:
+
+La capa Application queda mejor organizada para continuar con Evidencias, Ratings y Perfil Profesional.
+
+---
+
 
 # 18. ESTADO ACTUAL
 
@@ -1025,8 +1126,10 @@ Bloques completados:
 * Bloque 5.5 - Seguridad y Calidad Base
 * * Bloque 5.6 - Limpieza de Consistencia API
 * Bloque 6 - Contrataciones
+* * Bloque 6.8 - Refactor de nombres descriptivos en DTOs
+* * Bloque 6.9 - Flujo mínimo de Contratista
+* * Bloque 6.10 - Orden de interfaces Application
 
 Próximo bloque:
 
-* Bloque 6.8 - Refactor de nombres descriptivos en DTOs
 * Bloque 7 - Evidencias

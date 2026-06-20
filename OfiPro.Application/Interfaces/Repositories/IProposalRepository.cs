@@ -1,6 +1,6 @@
 ﻿using OfiPro.Domain.Entities;
 
-namespace OfiPro.Application.Interfaces;
+namespace OfiPro.Application.Interfaces.Repositories;
 
 public interface IProposalRepository
 {

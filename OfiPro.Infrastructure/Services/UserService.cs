@@ -1,6 +1,8 @@
 ﻿using OfiPro.Application.Common.Exceptions;
 using OfiPro.Application.DTOs.User;
-using OfiPro.Application.Interfaces;
+using OfiPro.Application.Interfaces.Repositories;
+using OfiPro.Application.Interfaces.Services;
+using OfiPro.Domain.Enums;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -24,7 +26,7 @@ public class UserService : IUserService
 
         return new UserProfileDto
         {
-            Id = user.Id,
+            UserId = user.Id,
             Name = user.Name,
             LastName = user.LastName,
             Email = user.Email,
@@ -56,7 +58,7 @@ public class UserService : IUserService
 
         return new UserProfileDto
         {
-            Id = user.Id,
+            UserId = user.Id,
             Name = user.Name,
             LastName = user.LastName,
             Email = user.Email,
@@ -74,7 +76,7 @@ public class UserService : IUserService
             .Where(x => x.DeletedAt == null)
             .Select(user => new UserProfileDto
             {
-                Id = user.Id,
+                UserId = user.Id,
                 Name = user.Name,
                 LastName = user.LastName,
                 Email = user.Email,
@@ -97,7 +99,7 @@ public class UserService : IUserService
 
         return new UserProfileDto
         {
-            Id = user.Id,
+            UserId = user.Id,
             Name = user.Name,
             LastName = user.LastName,
             Email = user.Email,
@@ -149,5 +151,33 @@ public class UserService : IUserService
         user.DeletedAt = DateTime.UtcNow;
 
         await _userRepository.UpdateAsync(user);
+    }
+
+    public async Task ActivateContractorAsync(Guid userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+
+        if (user is null || user.DeletedAt != null)
+        {
+            throw new NotFoundException("Usuario no encontrado.");
+        }
+
+        if (!user.IsActive)
+        {
+            throw new BadRequestException("No se puede activar como contratista un usuario inactivo.");
+        }
+
+        var alreadyIsContractor = await _userRepository.HasRoleAsync(
+            userId,
+            UserRoleType.Contratista);
+
+        if (alreadyIsContractor)
+        {
+            return;
+        }
+
+        await _userRepository.AddRoleAsync(
+            userId,
+            UserRoleType.Contratista);
     }
 }

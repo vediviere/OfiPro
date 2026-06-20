@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OfiPro.Application.DTOs.User;
 
-namespace OfiPro.Application.Interfaces;
+namespace OfiPro.Application.Interfaces.Services;
 
 public interface IUserService
 {
@@ -18,4 +18,5 @@ public interface IUserService
     Task ActivateAsync(Guid id);
     Task DeactivateAsync(Guid id);
     Task DeleteAsync(Guid id);
+    Task ActivateContractorAsync(Guid userId);
 }

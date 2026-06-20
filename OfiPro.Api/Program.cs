@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OfiPro.Api.Middlewares;
 using OfiPro.Application.Common.Settings;
-using OfiPro.Application.Interfaces;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
 using OfiPro.Infrastructure.Persistence;

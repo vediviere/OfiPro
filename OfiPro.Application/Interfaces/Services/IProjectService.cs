@@ -1,6 +1,6 @@
 ﻿using OfiPro.Application.DTOs.Project;
 
-namespace OfiPro.Application.Interfaces;
+namespace OfiPro.Application.Interfaces.Services;
 
 public interface IProjectService
 {

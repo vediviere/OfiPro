@@ -4,7 +4,7 @@ namespace OfiPro.Application.DTOs.Proposal;
 
 public class ProposalDto
 {
-    public Guid Id { get; set; }
+    public Guid ProposalId { get; set; }
     public Guid ProjectRequirementId { get; set; }
     public Guid ProjectId { get; set; }
     public string ProjectTitle { get; set; } = string.Empty;

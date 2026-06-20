@@ -1,10 +1,11 @@
 ﻿using OfiPro.Application.DTOs.Auth;
-using OfiPro.Application.Interfaces;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
 using OfiPro.Application.Common.Exceptions;
 using Microsoft.Extensions.Options;
 using OfiPro.Application.Common.Settings;
+using OfiPro.Application.Interfaces.Repositories;
+using OfiPro.Application.Interfaces.Services;
 
 namespace OfiPro.Infrastructure.Services;
 

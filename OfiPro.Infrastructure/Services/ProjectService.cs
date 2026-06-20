@@ -1,8 +1,9 @@
 ﻿using OfiPro.Application.DTOs.Project;
-using OfiPro.Application.Interfaces;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
 using OfiPro.Application.Common.Exceptions;
+using OfiPro.Application.Interfaces.Repositories;
+using OfiPro.Application.Interfaces.Services;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -191,7 +192,7 @@ public class ProjectService : IProjectService
     {
         return new ProjectDto
         {
-            Id = project.Id,
+            ProjectId = project.Id,
             CreatedByUserId = project.CreatedByUserId,
             CreatedByUserName = $"{project.CreatedByUser.Name} {project.CreatedByUser.LastName}",
             Title = project.Title,
@@ -205,7 +206,7 @@ public class ProjectService : IProjectService
             CreatedAt = project.CreatedAt,
             Requirements = project.Requirements.Select(requirement => new ProjectRequirementDto
             {
-                Id = requirement.Id,
+                ProjectRequirementId = requirement.Id,
                 CategoryId = requirement.CategoryId,
                 CategoryName = requirement.Category.Name,
                 SubcategoryId = requirement.SubcategoryId,

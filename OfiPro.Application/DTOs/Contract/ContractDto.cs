@@ -4,7 +4,7 @@ namespace OfiPro.Application.DTOs.Contract;
 
 public class ContractDto
 {
-    public Guid Id { get; set; }
+    public Guid ContractId { get; set; }
     public Guid ProposalId { get; set; }
     public Guid ProjectRequirementId { get; set; }
     public Guid ClientUserId { get; set; }

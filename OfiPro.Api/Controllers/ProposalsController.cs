@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OfiPro.Application.DTOs.Proposal;
-using OfiPro.Application.Interfaces;
+using OfiPro.Application.Interfaces.Services;
 using System.Security.Claims;
 
 namespace OfiPro.Api.Controllers;

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OfiPro.Application.DTOs.Auth;
 
-namespace OfiPro.Application.Interfaces;
+namespace OfiPro.Application.Interfaces.Services;
 
 public interface IAuthService
 {

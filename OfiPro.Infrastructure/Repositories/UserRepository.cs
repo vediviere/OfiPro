@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OfiPro.Application.Interfaces;
 using OfiPro.Domain.Entities;
 using OfiPro.Infrastructure.Persistence;
+using OfiPro.Domain.Enums;
+using OfiPro.Application.Interfaces.Repositories;
 
 namespace OfiPro.Infrastructure.Repositories;
 
@@ -51,6 +52,33 @@ public class UserRepository : IUserRepository
     {
         return await _context.Users
             .Include(x => x.UserRoles)
+            .Where(x => x.DeletedAt == null)
             .ToListAsync();
+    }
+
+    public async Task<bool> HasRoleAsync(Guid userId, UserRoleType role)
+    {
+        return await _context.UserRoles
+            .AnyAsync(x => x.UserId == userId && x.Role == role);
+    }
+
+    public async Task AddRoleAsync(Guid userId, UserRoleType role)
+    {
+        var alreadyHasRole = await HasRoleAsync(userId, role);
+
+        if (alreadyHasRole)
+        {
+            return;
+        }
+
+        var userRole = new UserRole
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Role = role
+        };
+
+        await _context.UserRoles.AddAsync(userRole);
+        await _context.SaveChangesAsync();
     }
 }

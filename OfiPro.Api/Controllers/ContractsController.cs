@@ -55,8 +55,13 @@ public class ContractsController : ControllerBase
 
     private Guid GetUserId()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        return Guid.Parse(userId!);
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            throw new UnauthorizedAccessException("Token inválido.");
+        }
+
+        return userId;
     }
 }

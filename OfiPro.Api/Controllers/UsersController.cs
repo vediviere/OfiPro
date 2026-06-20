@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OfiPro.Application.DTOs.User;
-using OfiPro.Application.Interfaces;
+using OfiPro.Application.Interfaces.Services;
 using System.Security.Claims;
 
 namespace OfiPro.Api.Controllers;
@@ -21,15 +21,7 @@ public class UsersController : ControllerBase
     [HttpGet("profile")]
     public async Task<IActionResult> GetProfile()
     {
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (!Guid.TryParse(userIdClaim, out var userId))
-        {
-            return Unauthorized(new
-            {
-                message = "Token inválido."
-            });
-        }
+        var userId = GetUserId();
 
         var profile = await _userService.GetProfileAsync(userId);
 
@@ -39,19 +31,24 @@ public class UsersController : ControllerBase
     [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfile(UpdateUserProfileDto request)
     {
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (!Guid.TryParse(userIdClaim, out var userId))
-        {
-            return Unauthorized(new
-            {
-                message = "Token inválido."
-            });
-        }
+        var userId = GetUserId();
 
         var profile = await _userService.UpdateProfileAsync(userId, request);
 
         return Ok(profile);
+    }
+
+    [HttpPatch("activate-contractor")]
+    public async Task<IActionResult> ActivateContractor()
+    {
+        var userId = GetUserId();
+
+        await _userService.ActivateContractorAsync(userId);
+
+        return Ok(new
+        {
+            message = "Perfil de contratista activado."
+        });
     }
 
     [HttpGet]
@@ -106,5 +103,17 @@ public class UsersController : ControllerBase
         {
             message = "Usuario eliminado."
         });
+    }
+
+    private Guid GetUserId()
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            throw new UnauthorizedAccessException("Token inválido.");
+        }
+
+        return userId;
     }
 }

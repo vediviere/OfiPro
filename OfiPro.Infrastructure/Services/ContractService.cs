@@ -155,7 +155,7 @@ public class ContractService : IContractService
     {
         return new ContractDto
         {
-            Id = contract.Id,
+            ContractId = contract.Id,
             ProposalId = contract.ProposalId,
             ProjectRequirementId = contract.ProjectRequirementId,
             ClientUserId = contract.ClientUserId,

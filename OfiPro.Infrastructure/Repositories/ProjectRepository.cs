@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OfiPro.Application.Interfaces;
+using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Domain.Entities;
 using OfiPro.Infrastructure.Persistence;
 

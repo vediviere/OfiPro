@@ -1,9 +1,10 @@
 ﻿using OfiPro.Application.Common.Exceptions;
 using OfiPro.Application.DTOs.Proposal;
-using OfiPro.Application.Interfaces;
 using OfiPro.Application.Interfaces.Repositories;
+using OfiPro.Application.Interfaces.Services;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
+using OfiPro.Infrastructure.Repositories;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -11,17 +12,26 @@ public class ProposalService : IProposalService
 {
     private readonly IProposalRepository _proposalRepository;
     private readonly IContractRepository _contractRepository;
+    private readonly IUserRepository _userRepository;
 
-    public ProposalService(IProposalRepository proposalRepository, IContractRepository contractRepository)
+    public ProposalService(IProposalRepository proposalRepository, IContractRepository contractRepository, IUserRepository userRepository)
     {
         _proposalRepository = proposalRepository;
         _contractRepository = contractRepository;
+        _userRepository = userRepository;
     }
 
-    public async Task<ProposalDto> CreateAsync(
-        Guid contractorUserId,
-        CreateProposalDto request)
+    public async Task<ProposalDto> CreateAsync(Guid contractorUserId, CreateProposalDto request)
     {
+        var isContractor = await _userRepository.HasRoleAsync(
+        contractorUserId,
+        UserRoleType.Contratista);
+
+        if (!isContractor)
+        {
+            throw new ForbiddenException("Solo los contratistas pueden enviar propuestas.");
+        }
+
         var existingProposal =
             await _proposalRepository.GetByRequirementAndContractorAsync(
                 request.ProjectRequirementId,
@@ -107,8 +117,7 @@ public class ProposalService : IProposalService
         return MapToDto(updatedProposal);
     }
 
-    public async Task<List<ProposalDto>> GetMyProposalsAsync(
-        Guid contractorUserId)
+    public async Task<List<ProposalDto>> GetMyProposalsAsync(Guid contractorUserId)
     {
         var proposals =
             await _proposalRepository.GetByContractorAsync(contractorUserId);
@@ -128,8 +137,7 @@ public class ProposalService : IProposalService
         return MapToDto(proposal);
     }
 
-    public async Task<List<ProposalDto>> GetByProjectRequirementAsync(
-        Guid projectRequirementId)
+    public async Task<List<ProposalDto>> GetByProjectRequirementAsync(Guid projectRequirementId)
     {
         var proposals =
             await _proposalRepository.GetByProjectRequirementAsync(
@@ -244,7 +252,7 @@ public class ProposalService : IProposalService
     {
         return new ProposalDto
         {
-            Id = proposal.Id,
+            ProposalId = proposal.Id,
             ProjectRequirementId = proposal.ProjectRequirementId,
             ProjectId = proposal.ProjectRequirement.ProjectId,
             ProjectTitle = proposal.ProjectRequirement.Project.Title,

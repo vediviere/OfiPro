@@ -4,7 +4,7 @@ namespace OfiPro.Application.DTOs.Project;
 
 public class ProjectDto
 {
-    public Guid Id { get; set; }
+    public Guid ProjectId { get; set; }
     public Guid CreatedByUserId { get; set; }
     public string CreatedByUserName { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
