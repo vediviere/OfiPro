@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OfiPro.Api.Middlewares;
+using OfiPro.Application.Common.Settings;
 using OfiPro.Application.Interfaces;
+using OfiPro.Application.Interfaces.Repositories;
+using OfiPro.Application.Interfaces.Services;
 using OfiPro.Infrastructure.Persistence;
 using OfiPro.Infrastructure.Repositories;
 using OfiPro.Infrastructure.Services;
-using OfiPro.Api.Middlewares;
 using System.Text;
-using OfiPro.Application.Common.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +64,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProposalRepository, ProposalRepository>();
 builder.Services.AddScoped<IProposalService, ProposalService>();
+builder.Services.AddScoped<IContractRepository, ContractRepository>();
+builder.Services.AddScoped<IContractService, ContractService>();
 
 var jwtSettings = builder.Configuration
     .GetSection("Jwt")

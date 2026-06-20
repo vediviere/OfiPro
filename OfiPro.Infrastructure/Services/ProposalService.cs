@@ -1,18 +1,21 @@
-﻿using OfiPro.Application.DTOs.Proposal;
+﻿using OfiPro.Application.Common.Exceptions;
+using OfiPro.Application.DTOs.Proposal;
 using OfiPro.Application.Interfaces;
+using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
-using OfiPro.Application.Common.Exceptions;
 
 namespace OfiPro.Infrastructure.Services;
 
 public class ProposalService : IProposalService
 {
     private readonly IProposalRepository _proposalRepository;
+    private readonly IContractRepository _contractRepository;
 
-    public ProposalService(IProposalRepository proposalRepository)
+    public ProposalService(IProposalRepository proposalRepository, IContractRepository contractRepository)
     {
         _proposalRepository = proposalRepository;
+        _contractRepository = contractRepository;
     }
 
     public async Task<ProposalDto> CreateAsync(
@@ -162,6 +165,26 @@ public class ProposalService : IProposalService
             item.Status = item.Id == proposal.Id
                 ? ProposalStatus.Aceptada
                 : ProposalStatus.Rechazada;
+        }
+
+        var contractExists = await _contractRepository.ExistsByProposalIdAsync(proposal.Id);
+
+        if (!contractExists)
+        {
+            var contract = new Contract
+            {
+                Id = Guid.NewGuid(),
+                ProposalId = proposal.Id,
+                ProjectRequirementId = proposal.ProjectRequirementId,
+                ClientUserId = proposal.ProjectRequirement.Project.CreatedByUserId,
+                ContractorUserId = proposal.ContractorUserId,
+                AgreedPrice = proposal.Price,
+                EstimatedTime = proposal.EstimatedTime,
+                Status = ContractStatus.PendienteInicio,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _contractRepository.AddAsync(contract);
         }
 
         await _proposalRepository.SaveChangesAsync();

@@ -34,4 +34,5 @@ public class ApplicationDbContext : DbContext
     public DbSet<Evidence> Evidences => Set<Evidence>();
     public DbSet<Rating> Ratings => Set<Rating>();
     public DbSet<Invitation> Invitations => Set<Invitation>();
+    public DbSet<Contract> Contracts => Set<Contract>();
 }
