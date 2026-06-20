@@ -800,3 +800,106 @@ Bloque 6 - Contrataciones → Pendiente
 ## Próximo paso
 
 Iniciar Bloque 6 - Contrataciones.
+
+# =====================================
+
+# SESIÓN 2026-06-18
+
+## Objetivo
+
+Iniciar y completar funcionalmente Bloque 6 - Contrataciones.
+
+# =====================================
+
+## Núcleo de contratación
+
+Completado:
+
+* ContractStatus.
+* Entidad Contract.
+* ContractConfiguration.
+* Tabla Contracts en SQL Server.
+* IContractRepository.
+* ContractRepository.
+* IContractService.
+* ContractService.
+* ContractsController.
+
+## Flujo automático
+
+Completado:
+
+* Al aceptar una propuesta se crea automáticamente una contratación.
+* La contratación inicia en estado PendienteInicio.
+* Se guarda ProposalId.
+* Se guarda ProjectRequirementId.
+* Se guarda ClientUserId.
+* Se guarda ContractorUserId.
+* Se guarda AgreedPrice.
+* Se guarda EstimatedTime.
+
+## Endpoints creados
+
+* GET /api/contracts/mine
+* GET /api/contracts/{id}
+* PATCH /api/contracts/{id}/status
+
+## Estados implementados
+
+* PendienteInicio
+* EnProceso
+* PendienteConfirmacion
+* Finalizado
+* Cancelado
+
+## Reglas implementadas
+
+* Solo el contratista puede iniciar una contratación.
+* Solo el contratista puede marcar una contratación como pendiente de confirmación.
+* Solo el cliente puede finalizar una contratación.
+* Cliente o contratista pueden cancelar una contratación activa.
+* Una contratación finalizada no puede cambiar de estado.
+* Una contratación cancelada no puede cambiar de estado.
+
+## Pruebas realizadas
+
+* Aceptar propuesta crea contratación automáticamente → 200
+* GET /api/contracts/mine → 200
+* GET /api/contracts/{id} → 200
+* PendienteInicio → EnProceso → 200
+* EnProceso → PendienteConfirmacion → 200
+* PendienteConfirmacion → Finalizado → 200
+* Cancelación de contratación → 200
+* Intentar mover contratación cancelada → 400
+
+## Decisiones
+
+D024
+
+Los DTOs de respuesta deben usar identificadores descriptivos para facilitar pruebas y consumo desde frontend.
+
+## Estado
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo funcionalmente
+
+## Pendiente técnico
+
+Realizar Bloque 6.8 - Refactor de nombres descriptivos en DTOs.
+
+## Próximo paso
+
+Iniciar Bloque 6.8 - Refactor de nombres descriptivos en DTOs antes de comenzar Bloque 7 - Evidencias.

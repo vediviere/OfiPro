@@ -582,6 +582,28 @@ Proteger integridad de datos tanto en creación como actualización.
 
 ---
 
+## D024
+
+Los DTOs de respuesta deben usar identificadores descriptivos.
+
+Resultado:
+
+En respuestas públicas de API se usará:
+
+* ProjectId
+* ProjectRequirementId
+* ProposalId
+* ContractId
+* UserId
+
+en lugar de exponer únicamente Id cuando pueda generar confusión.
+
+Razón:
+
+Facilitar pruebas, depuración y consumo desde frontend.
+
+---
+
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -941,6 +963,28 @@ Incluye:
 
 ---
 
+## HITO 6
+
+Contrataciones completado funcionalmente.
+
+Incluye:
+
+* Entidad Contract.
+* Enum ContractStatus.
+* Tabla Contracts.
+* ContractRepository.
+* ContractService.
+* ContractsController.
+* Creación automática de contratación al aceptar propuesta.
+* Consulta de mis contrataciones.
+* Consulta de contratación por Id.
+* Cambio de estados.
+* Validación de permisos por cliente y contratista.
+* Cancelación de contrataciones.
+* Bloqueo de cambios en contrataciones finalizadas o canceladas.
+
+---
+
 
 # 18. ESTADO ACTUAL
 
@@ -980,7 +1024,9 @@ Bloques completados:
 * Bloque 5 - Propuestas
 * Bloque 5.5 - Seguridad y Calidad Base
 * * Bloque 5.6 - Limpieza de Consistencia API
+* Bloque 6 - Contrataciones
 
 Próximo bloque:
 
-* Bloque 6 - Contrataciones
+* Bloque 6.8 - Refactor de nombres descriptivos en DTOs
+* Bloque 7 - Evidencias
