@@ -1002,3 +1002,78 @@ Iniciar Bloque 7 - Evidencias.
 ## Próximo paso
 
 Crear el módulo de Evidencias asociado a contrataciones.
+
+# =====================================
+
+# SESIÓN 2026-06-20
+
+## Objetivo
+
+Resolver diagnóstico posterior al Bloque 6 antes de iniciar Bloque 7 - Evidencias.
+
+# =====================================
+
+## Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7
+
+Completado:
+
+* Se revisó diagnóstico del estado actual del backend.
+* Se identificó un filtro redundante en UserService.GetAllAsync.
+* Se eliminó el filtro DeletedAt == null del servicio porque el repositorio ya filtra usuarios eliminados.
+* Se detectó que GET /api/proposals/requirement/{projectRequirementId} permitía consultar propuestas a cualquier usuario autenticado.
+* Se decidió que solo el dueño del proyecto puede consultar las propuestas de un requerimiento.
+* Se agregó validación de propietario antes de devolver propuestas.
+* Se agregó GetProjectRequirementOwnerUserIdAsync en IProposalRepository.
+* Se implementó GetProjectRequirementOwnerUserIdAsync en ProposalRepository.
+* Se actualizó ProposalService.GetByProjectRequirementAsync para recibir userId y projectRequirementId.
+* Se actualizó ProposalsController para enviar el userId autenticado al servicio.
+
+## Razón del ajuste
+
+El endpoint de propuestas por requerimiento podía exponer información sensible de competencia entre contratistas, como precio, tiempos estimados, garantías y descripción de la propuesta.
+
+El comportamiento correcto para el modelo de OfiPro es que solo el cliente dueño del proyecto pueda ver todas las propuestas recibidas.
+
+## Resultado
+
+El endpoint GET /api/proposals/requirement/{projectRequirementId} quedó protegido.
+
+Comportamiento validado:
+
+* Dueño del proyecto → 200 OK.
+* Usuario no dueño → 403 Forbidden.
+* Requerimiento inexistente → 404 Not Found.
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+## Pendiente inmediato
+
+Antes de iniciar Bloque 7 - Evidencias, revisar duda conceptual surgida del Bloque 6.
+
+## Próximo paso
+
+Conversar y resolver la duda puntual relacionada con Bloque 6 antes de continuar con Evidencias.

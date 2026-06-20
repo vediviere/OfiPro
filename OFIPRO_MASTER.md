@@ -649,6 +649,39 @@ Evitar mezclar contratos de repositorios con contratos de servicios y mantener l
 
 ---
 
+## D028
+
+Las propuestas asociadas a un requerimiento solo pueden ser consultadas por el dueño del proyecto.
+
+Resultado:
+
+El endpoint GET /api/proposals/requirement/{projectRequirementId} valida que el usuario autenticado sea el propietario del proyecto al que pertenece el requerimiento.
+
+Razón:
+
+Evitar que un contratista pueda ver propuestas de otros contratistas, incluyendo precios, tiempos, garantías o descripciones, antes de enviar su propia propuesta.
+
+Impacto:
+
+Se protege la competencia entre contratistas y se evita manipulación de precios u ofertas.
+
+---
+
+## D029
+
+La validación de soft delete debe hacerse preferentemente desde repositorio.
+
+Resultado:
+
+Se eliminó el filtro redundante DeletedAt == null en UserService.GetAllAsync, ya que UserRepository.GetAllAsync ya devuelve únicamente usuarios no eliminados.
+
+Razón:
+
+Evitar código duplicado, reducir confusión y mantener la responsabilidad de filtrado de datos en la capa de repositorio.
+
+---
+
+
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -1086,6 +1119,32 @@ La capa Application queda mejor organizada para continuar con Evidencias, Rating
 
 ---
 
+## HITO 6.11
+
+Correcciones de diagnóstico pre-Bloque 7 completadas.
+
+Incluye:
+
+* Eliminación de filtro redundante DeletedAt == null en UserService.GetAllAsync.
+* Validación de propietario en GET /api/proposals/requirement/{projectRequirementId}.
+* Nuevo método GetProjectRequirementOwnerUserIdAsync en IProposalRepository.
+* Implementación de GetProjectRequirementOwnerUserIdAsync en ProposalRepository.
+* Actualización de ProposalService.GetByProjectRequirementAsync para recibir userId.
+* Restricción para que solo el dueño del proyecto pueda consultar propuestas de un requerimiento.
+
+Resultado:
+
+Se eliminó código muerto y se cerró un hueco de seguridad donde un contratista podía consultar propuestas de competidores.
+
+Pruebas realizadas:
+
+* Dueño del proyecto consultando propuestas del requerimiento → 200 OK.
+* Usuario no dueño consultando propuestas del requerimiento → 403 Forbidden.
+* Requerimiento inexistente → 404 Not Found.
+
+---
+
+
 
 # 18. ESTADO ACTUAL
 
@@ -1129,6 +1188,7 @@ Bloques completados:
 * * Bloque 6.8 - Refactor de nombres descriptivos en DTOs
 * * Bloque 6.9 - Flujo mínimo de Contratista
 * * Bloque 6.10 - Orden de interfaces Application
+* * Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7
 
 Próximo bloque:
 

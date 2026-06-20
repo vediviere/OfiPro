@@ -59,7 +59,9 @@ public class ProposalsController : ControllerBase
     [HttpGet("requirement/{projectRequirementId}")]
     public async Task<IActionResult> GetByProjectRequirement(Guid projectRequirementId)
     {
-        var proposals = await _proposalService.GetByProjectRequirementAsync(projectRequirementId);
+        var userId = GetUserId();
+
+        var proposals = await _proposalService.GetByProjectRequirementAsync(userId, projectRequirementId);
 
         return Ok(proposals);
     }

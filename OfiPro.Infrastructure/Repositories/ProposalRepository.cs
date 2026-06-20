@@ -43,9 +43,7 @@ public class ProposalRepository : IProposalRepository
             .ToListAsync();
     }
 
-    public async Task<Proposal?> GetByRequirementAndContractorAsync(
-        Guid projectRequirementId,
-        Guid contractorUserId)
+    public async Task<Proposal?> GetByRequirementAndContractorAsync(Guid projectRequirementId, Guid contractorUserId)
     {
         return await _context.Proposals
             .FirstOrDefaultAsync(x =>
@@ -63,5 +61,13 @@ public class ProposalRepository : IProposalRepository
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<Guid?> GetProjectRequirementOwnerUserIdAsync(Guid projectRequirementId)
+    {
+        return await _context.ProjectRequirements
+            .Where(x => x.Id == projectRequirementId)
+            .Select(x => (Guid?)x.Project.CreatedByUserId)
+            .FirstOrDefaultAsync();
     }
 }

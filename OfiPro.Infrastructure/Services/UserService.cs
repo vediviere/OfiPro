@@ -68,12 +68,12 @@ public class UserService : IUserService
             IsActive = user.IsActive
         };
     }
+
     public async Task<List<UserProfileDto>> GetAllAsync()
     {
         var users = await _userRepository.GetAllAsync();
 
         return users
-            .Where(x => x.DeletedAt == null)
             .Select(user => new UserProfileDto
             {
                 UserId = user.Id,

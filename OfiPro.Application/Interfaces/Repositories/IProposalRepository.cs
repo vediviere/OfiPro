@@ -10,4 +10,5 @@ public interface IProposalRepository
     Task<Proposal?> GetByRequirementAndContractorAsync(Guid projectRequirementId, Guid contractorUserId);
     Task AddAsync(Proposal proposal);
     Task SaveChangesAsync();
+    Task<Guid?> GetProjectRequirementOwnerUserIdAsync(Guid projectRequirementId);
 }

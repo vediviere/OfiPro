@@ -12,7 +12,7 @@ public interface IProposalService
 
     Task<ProposalDto> GetByIdAsync(Guid proposalId);
 
-    Task<List<ProposalDto>> GetByProjectRequirementAsync(Guid projectRequirementId);
+    Task<List<ProposalDto>> GetByProjectRequirementAsync(Guid userId, Guid projectRequirementId);
 
     Task AcceptAsync(Guid ownerUserId, Guid proposalId);
 

@@ -137,11 +137,23 @@ public class ProposalService : IProposalService
         return MapToDto(proposal);
     }
 
-    public async Task<List<ProposalDto>> GetByProjectRequirementAsync(Guid projectRequirementId)
+    public async Task<List<ProposalDto>> GetByProjectRequirementAsync(Guid userId, Guid projectRequirementId)
     {
-        var proposals =
-            await _proposalRepository.GetByProjectRequirementAsync(
-                projectRequirementId);
+        var ownerUserId = await _proposalRepository.GetProjectRequirementOwnerUserIdAsync(
+            projectRequirementId);
+
+        if (ownerUserId is null)
+        {
+            throw new NotFoundException("Requerimiento no encontrado.");
+        }
+
+        if (ownerUserId != userId)
+        {
+            throw new ForbiddenException("No tienes permiso para consultar las propuestas de este requerimiento.");
+        }
+
+        var proposals = await _proposalRepository.GetByProjectRequirementAsync(
+            projectRequirementId);
 
         return proposals.Select(MapToDto).ToList();
     }
@@ -272,4 +284,5 @@ public class ProposalService : IProposalService
             CreatedAt = proposal.CreatedAt
         };
     }
+
 }
