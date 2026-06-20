@@ -1212,3 +1212,103 @@ El flujo principal de OfiPro ya conecta:
 Proyecto → Requerimiento → Propuesta → Contrato → Evidencia
 
 Esto representa un avance importante hacia un MVP funcional real.
+
+
+
+# =====================================
+
+# SESIÓN 2026-06-20
+
+## Objetivo
+
+Resolver diagnóstico posterior al Bloque 7 - Evidencias V1.
+
+# =====================================
+
+## Bloque 7.1 - Corrección de diagnóstico de Evidencias
+
+Diagnóstico recibido:
+
+* EvidenceType existía en dominio pero no se usaba.
+* FileType era un string libre sin restricción de formato.
+* EvidencesController fue verificado y el binding estaba correcto gracias a ApiController.
+
+Decisión tomada:
+
+No eliminar EvidenceType. Se decidió integrarlo formalmente al módulo de Evidencias porque aporta valor al negocio.
+
+Valores definidos:
+
+* Antes = 1
+* Durante = 2
+* Despues = 3
+
+Completado:
+
+* Se agregó EvidenceType a la entidad Evidence.
+* Se agregó EvidenceType a EvidenceDto.
+* Se agregó EvidenceType a CreateEvidenceDto.
+* Se agregó validación de EvidenceType en CreateEvidenceDto.
+* Se configuró EvidenceType en EvidenceConfiguration.
+* Se generó migración AddEvidenceTypeToEvidences.
+* Se aplicó migración a la base de datos.
+* Se agregó validación de FileType permitido.
+* FileType quedó limitado a image/jpeg, image/png y application/pdf.
+* Se normalizó FileType antes de guardar.
+
+Pruebas realizadas:
+
+* Crear evidencia con EvidenceType válido y FileType image/jpeg → 200 OK.
+* Crear evidencia con FileType inválido → 400 Bad Request.
+* Crear evidencia con EvidenceType inválido → 400 Bad Request.
+* Consultar evidencia creada → devuelve EvidenceType correctamente.
+* Base de datos guarda EvidenceType correctamente.
+
+Resultado:
+
+El módulo de Evidencias queda más ordenado, útil y seguro.
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+## Pendiente
+
+Definir el siguiente bloque funcional.
+
+Opciones posibles:
+
+* Calificaciones y reputación.
+* Perfil profesional del contratista.
+* Carga real de archivos para evidencias.
+* Mejoras de flujo de contratación.
+
+## Observación
+
+EvidenceType refuerza el enfoque mobile-first futuro, porque permitirá organizar evidencias tomadas desde celular según la etapa del trabajo: antes, durante y después.

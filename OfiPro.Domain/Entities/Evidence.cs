@@ -1,4 +1,6 @@
-﻿namespace OfiPro.Domain.Entities;
+﻿using OfiPro.Domain.Enums;
+
+namespace OfiPro.Domain.Entities;
 
 public class Evidence
 {
@@ -9,6 +11,7 @@ public class Evidence
 
     public Guid UploadedByUserId { get; set; }
     public User UploadedByUser { get; set; } = null!;
+    public EvidenceType EvidenceType { get; set; } = EvidenceType.Antes;
 
     public string Title { get; set; } = string.Empty;
 

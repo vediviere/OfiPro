@@ -793,7 +793,51 @@ Mantener trazabilidad de las evidencias registradas, especialmente porque pueden
 
 ---
 
+## D036
 
+Las evidencias deben clasificarse por fase del trabajo.
+
+Resultado:
+
+Se utiliza el enum EvidenceType dentro de la entidad Evidence.
+
+Valores definidos:
+
+* Antes = 1
+* Durante = 2
+* Despues = 3
+
+Razón:
+
+Una evidencia no debe ser solamente un archivo o URL aislada. Para OfiPro es importante saber si la evidencia corresponde al estado inicial del trabajo, a un avance o al resultado final.
+
+Impacto:
+
+Las evidencias podrán organizarse mejor en frontend, app móvil, historial del contrato, validaciones de cierre y posibles aclaraciones entre cliente y contratista.
+
+---
+
+## D037
+
+FileType de evidencias debe validarse contra tipos permitidos.
+
+Resultado:
+
+CreateEvidenceDto valida que FileType solo acepte:
+
+* image/jpeg
+* image/png
+* application/pdf
+
+Razón:
+
+Evitar que el sistema acepte valores libres como ejecutable, script u otros tipos no esperados.
+
+Impacto:
+
+Aunque en esta etapa FileUrl sigue siendo texto, la validación deja preparado el módulo para una futura carga real de archivos con mayor seguridad.
+
+---
 
 
 # 15. PROBLEMAS DETECTADOS
@@ -1308,6 +1352,43 @@ El flujo Proyecto → Requerimiento → Propuesta → Contrato → Evidencia que
 
 ---
 
+## HITO 7.1
+
+Corrección de diagnóstico de Evidencias completada.
+
+Incluye:
+
+* Se integró EvidenceType a la entidad Evidence.
+* Se agregó EvidenceType a EvidenceDto.
+* Se agregó EvidenceType a CreateEvidenceDto.
+* Se configuró EvidenceType en EF como entero.
+* Se generó y aplicó migración AddEvidenceTypeToEvidences.
+* Se corrigió el problema de enum huérfano.
+* Se validó FileType contra una lista de valores permitidos.
+* Se normalizó FileType con Trim y ToLowerInvariant.
+* Se validaron casos correctos e incorrectos desde Swagger.
+
+Reglas agregadas:
+
+* EvidenceType es obligatorio.
+* EvidenceType solo permite valores definidos en el enum.
+* FileType solo permite image/jpeg, image/png o application/pdf.
+
+Pruebas realizadas:
+
+* Evidencia con EvidenceType válido y FileType válido → 200 OK.
+* Evidencia con FileType inválido → 400 Bad Request.
+* Evidencia con EvidenceType inválido → 400 Bad Request.
+* Evidencia creada correctamente aparece en BD con EvidenceType.
+* Evidencia consultada devuelve EvidenceType en la respuesta.
+
+Resultado:
+
+El módulo de Evidencias V1 queda más completo, seguro y preparado para una futura app móvil y carga real de archivos.
+
+---
+
+
 ## ESTADO ACTUAL ACTUALIZADO
 
 Módulos completados:
@@ -1325,6 +1406,7 @@ Módulos completados:
 * Bloque 6.10 - Orden de interfaces Application
 * Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7
 * Bloque 7 - Evidencias V1
+* Bloque 7.1 - Corrección de diagnóstico de Evidencias
 
 Próximo bloque pendiente por definir:
 

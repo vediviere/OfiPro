@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OfiPro.Domain.Entities;
+using OfiPro.Domain.Enums;
 
 namespace OfiPro.Infrastructure.Persistence.Configurations;
 
@@ -9,6 +10,11 @@ public class EvidenceConfiguration : IEntityTypeConfiguration<Evidence>
     public void Configure(EntityTypeBuilder<Evidence> builder)
     {
         builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.EvidenceType)
+            .IsRequired()
+            .HasConversion<int>()
+            .HasDefaultValue(EvidenceType.Antes);
 
         builder.Property(x => x.Title)
             .IsRequired()

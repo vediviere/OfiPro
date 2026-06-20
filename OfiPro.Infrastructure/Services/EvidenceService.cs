@@ -43,15 +43,21 @@ public class EvidenceService : IEvidenceService
             throw new BadRequestException("No se pueden subir evidencias a una contratación finalizada o cancelada.");
         }
 
+        if (request.EvidenceType is null)
+        {
+            throw new BadRequestException("El tipo de evidencia es obligatorio.");
+        }
+
         var evidence = new Evidence
         {
             Id = Guid.NewGuid(),
             ContractId = contractId,
             UploadedByUserId = userId,
-            Title = request.Title,
-            Description = request.Description,
-            FileUrl = request.FileUrl,
-            FileType = request.FileType,
+            EvidenceType = request.EvidenceType.Value,
+            Title = request.Title.Trim(),
+            Description = request.Description.Trim(),
+            FileUrl = request.FileUrl.Trim(),
+            FileType = request.FileType.Trim().ToLowerInvariant(),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -127,6 +133,7 @@ public class EvidenceService : IEvidenceService
             UploadedByUserName = evidence.UploadedByUser is null
                 ? string.Empty
                 : $"{evidence.UploadedByUser.Name} {evidence.UploadedByUser.LastName}".Trim(),
+            EvidenceType = evidence.EvidenceType,
             Title = evidence.Title,
             Description = evidence.Description,
             FileUrl = evidence.FileUrl,

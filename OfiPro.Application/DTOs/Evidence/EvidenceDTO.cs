@@ -1,4 +1,6 @@
-﻿namespace OfiPro.Application.DTOs.Evidence;
+﻿using OfiPro.Domain.Enums;
+
+namespace OfiPro.Application.DTOs.Evidence;
 
 public class EvidenceDto
 {
@@ -11,4 +13,5 @@ public class EvidenceDto
     public string FileUrl { get; set; } = string.Empty;
     public string FileType { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public EvidenceType EvidenceType { get; set; }
 }
