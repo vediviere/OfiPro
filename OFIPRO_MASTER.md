@@ -681,6 +681,119 @@ Evitar código duplicado, reducir confusión y mantener la responsabilidad de fi
 
 ---
 
+## D030
+
+OfiPro será una plataforma mobile-first, pero no tendrá una etapa PWA.
+
+Resultado:
+
+La estrategia de producto queda definida así:
+
+* Backend/API sólido como base central.
+* Web responsiva necesaria para operación inicial y administración.
+* App móvil real en una etapa posterior.
+* No se desarrollará PWA como paso intermedio.
+
+Razón:
+
+OfiPro apunta a usuarios que probablemente operarán desde celular, especialmente contratistas en campo y clientes que requieren seguimiento rápido. Sin embargo, una PWA se considera un paso intermedio que consumiría tiempo y recursos sin aportar el valor suficiente frente a una app móvil real.
+
+Impacto:
+
+El backend debe mantenerse preparado para ser consumido tanto por web como por app móvil, con DTOs claros, rutas simples, errores consistentes y seguridad bien definida.
+
+---
+
+## D031
+
+Las evidencias estarán asociadas a una contratación.
+
+Resultado:
+
+La entidad Evidence se relaciona directamente con Contract.
+
+Flujo conceptual:
+
+Project → ProjectRequirement → Proposal aceptada → Contract → Evidence
+
+Razón:
+
+Una evidencia no pertenece solamente a un proyecto ni a una propuesta. La evidencia sirve para comprobar avances o actividades dentro de un trabajo ya contratado.
+
+---
+
+## D032
+
+La primera versión de Evidencias usará FileUrl como texto.
+
+Resultado:
+
+No se implementa todavía carga real de archivos. La evidencia almacena una URL de archivo mediante el campo FileUrl.
+
+Razón:
+
+Subir archivos reales implica un bloque adicional de seguridad y almacenamiento:
+
+* Validar tamaño.
+* Validar extensión.
+* Definir ubicación física o nube.
+* Generar URL pública.
+* Proteger archivos.
+* Limpiar archivos eliminados.
+* Controlar posibles abusos.
+
+Para V1 se prioriza validar la lógica de negocio antes de implementar almacenamiento real.
+
+---
+
+## D033
+
+Solo el contratista de la contratación puede subir evidencias.
+
+Resultado:
+
+El servicio de evidencias valida que el usuario autenticado sea el ContractorUserId del contrato.
+
+Razón:
+
+Evitar que clientes, otros contratistas o usuarios ajenos puedan registrar evidencias dentro de una contratación que no les corresponde.
+
+---
+
+## D034
+
+Cliente y contratista pueden consultar evidencias de una contratación.
+
+Resultado:
+
+Las evidencias de un contrato pueden ser consultadas por:
+
+* El cliente dueño de la contratación.
+* El contratista asignado a la contratación.
+
+Cualquier otro usuario recibe acceso denegado.
+
+Razón:
+
+Las evidencias contienen información del avance del trabajo y solo deben estar disponibles para las partes involucradas.
+
+---
+
+## D035
+
+Las evidencias se eliminan mediante soft delete.
+
+Resultado:
+
+Al eliminar una evidencia se asigna DeletedAt, pero no se elimina físicamente de la base de datos.
+
+Razón:
+
+Mantener trazabilidad de las evidencias registradas, especialmente porque pueden formar parte del historial del trabajo, aclaraciones o revisiones posteriores.
+
+---
+
+
 
 
 # 15. PROBLEMAS DETECTADOS
@@ -1144,38 +1257,60 @@ Pruebas realizadas:
 
 ---
 
+## HITO 7
 
+Evidencias V1 completado funcionalmente.
 
-# 18. ESTADO ACTUAL
+Incluye:
 
-Arquitectura:
-Completada
+* Creación de entidad Evidence.
+* Creación de tabla Evidences mediante migración.
+* Configuración EF de Evidence.
+* Creación de EvidenceDto.
+* Creación de CreateEvidenceDto.
+* Creación de IEvidenceRepository.
+* Implementación de EvidenceRepository.
+* Creación de IEvidenceService.
+* Implementación de EvidenceService.
+* Registro de dependencias en Program.cs.
+* Creación de EvidencesController.
+* Endpoint POST /api/contracts/{contractId}/evidences.
+* Endpoint GET /api/contracts/{contractId}/evidences.
+* Endpoint DELETE /api/evidences/{evidenceId}.
+* Validación de permisos para subir evidencias.
+* Validación de permisos para consultar evidencias.
+* Eliminación lógica de evidencias mediante DeletedAt.
 
-Entidades:
-Completadas
+Reglas implementadas:
 
-Configuraciones EF:
-Completadas
+* Solo el contratista asignado al contrato puede subir evidencias.
+* Cliente y contratista pueden consultar evidencias del contrato.
+* Usuarios ajenos no pueden consultar evidencias.
+* El cliente no puede subir evidencias.
+* No se pueden subir evidencias a contratos finalizados o cancelados.
+* No se pueden eliminar evidencias de contratos finalizados o cancelados.
+* Solo quien subió la evidencia puede eliminarla.
 
-Migración inicial:
-Completada
+Pruebas realizadas:
 
-Base de datos:
-Completada
+* Contratista subiendo evidencia → 200 OK.
+* Evidencia guardada correctamente en BD.
+* Contratista consultando evidencias → 200 OK.
+* Cliente dueño consultando evidencias → 200 OK.
+* Cliente intentando subir evidencia → 403 Forbidden.
+* Eliminación de evidencia por contratista → 204 No Content.
+* Evidencia eliminada deja de aparecer en consultas.
+* DeletedAt se asigna correctamente en BD.
 
-JWT:
-Completado y reforzado
+Resultado:
 
-Usuarios:
-Completado
+El flujo Proyecto → Requerimiento → Propuesta → Contrato → Evidencia quedó funcionando de forma completa en V1.
 
-Proyectos:
-Completado
+---
 
-Propuestas:
-Completado y reforzado
+## ESTADO ACTUAL ACTUALIZADO
 
-Bloques completados:
+Módulos completados:
 
 * Bloque 1 - Fundación
 * Bloque 2 - Auth
@@ -1183,13 +1318,17 @@ Bloques completados:
 * Bloque 4 - Proyectos
 * Bloque 5 - Propuestas
 * Bloque 5.5 - Seguridad y Calidad Base
-* * Bloque 5.6 - Limpieza de Consistencia API
+* Bloque 5.6 - Limpieza de Consistencia API
 * Bloque 6 - Contrataciones
-* * Bloque 6.8 - Refactor de nombres descriptivos en DTOs
-* * Bloque 6.9 - Flujo mínimo de Contratista
-* * Bloque 6.10 - Orden de interfaces Application
-* * Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7
+* Bloque 6.8 - Refactor de nombres descriptivos en DTOs
+* Bloque 6.9 - Flujo mínimo de Contratista
+* Bloque 6.10 - Orden de interfaces Application
+* Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7
+* Bloque 7 - Evidencias V1
 
-Próximo bloque:
+Próximo bloque pendiente por definir:
 
-* Bloque 7 - Evidencias
+* Calificaciones y reputación
+* Perfil profesional del contratista
+* Carga real de archivos para evidencias
+* Mejoras de flujo de contratación

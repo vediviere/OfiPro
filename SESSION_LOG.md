@@ -1077,3 +1077,138 @@ Antes de iniciar Bloque 7 - Evidencias, revisar duda conceptual surgida del Bloq
 ## Próximo paso
 
 Conversar y resolver la duda puntual relacionada con Bloque 6 antes de continuar con Evidencias.
+
+
+# =====================================
+
+# SESIÓN 2026-06-20
+
+## Objetivo
+
+Iniciar y completar Bloque 7 - Evidencias V1.
+
+# =====================================
+
+## Decisión estratégica previa
+
+Antes de iniciar Evidencias se discutió la orientación futura de plataforma.
+
+Conclusión:
+
+OfiPro será pensado como plataforma mobile-first, pero no se tomará el camino PWA.
+
+Ruta acordada:
+
+* Terminar backend/API correctamente.
+* Crear web responsiva necesaria.
+* En una etapa posterior, desarrollar app móvil real.
+* Evitar PWA como paso intermedio para no consumir recursos en una ruta que no se considera prioritaria.
+
+Razón:
+
+El usuario final probablemente usará OfiPro desde celular, especialmente para evidencias, seguimiento, ubicación, notificaciones y operación en campo. Sin embargo, abrir el frente móvil ahora sería prematuro. Primero se debe consolidar el backend.
+
+# =====================================
+
+## Bloque 7 - Evidencias V1
+
+Completado:
+
+* Se creó la entidad Evidence en Domain.
+* Se agregó DbSet<Evidence> en ApplicationDbContext.
+* Se creó EvidenceConfiguration.
+* Se generó migración AddEvidences.
+* Se actualizó la base de datos.
+* Se creó EvidenceDto.
+* Se creó CreateEvidenceDto.
+* Se creó IEvidenceRepository.
+* Se implementó EvidenceRepository.
+* Se creó IEvidenceService.
+* Se implementó EvidenceService.
+* Se registraron IEvidenceRepository y IEvidenceService en Program.cs.
+* Se creó EvidencesController.
+
+Endpoints creados:
+
+* POST /api/contracts/{contractId}/evidences
+* GET /api/contracts/{contractId}/evidences
+* DELETE /api/evidences/{evidenceId}
+
+Reglas implementadas:
+
+* Solo el contratista de la contratación puede subir evidencias.
+* Cliente y contratista pueden consultar evidencias del contrato.
+* Usuarios ajenos no pueden consultar evidencias.
+* Cliente no puede subir evidencias.
+* Las evidencias no se suben a contratos finalizados o cancelados.
+* Las evidencias no se eliminan si el contrato está finalizado o cancelado.
+* Solo el usuario que subió la evidencia puede eliminarla.
+* La eliminación se realiza mediante soft delete.
+
+Pruebas realizadas:
+
+* Se creó un contrato limpio desde flujo real:
+
+  * Cliente crea proyecto.
+  * Contratista envía propuesta.
+  * Cliente acepta propuesta.
+  * Sistema crea contrato automáticamente.
+* Contratista subió evidencia correctamente.
+* Evidencia apareció en tabla Evidences.
+* Contratista consultó evidencias correctamente.
+* Cliente dueño consultó evidencias correctamente.
+* Cliente intentó subir evidencia y recibió 403.
+* Contratista eliminó evidencia correctamente.
+* DeletedAt se asignó en BD.
+* Evidencia eliminada ya no apareció en consultas.
+
+Resultado:
+
+Bloque 7 - Evidencias V1 quedó completado funcionalmente.
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+## Pendiente
+
+Definir siguiente bloque.
+
+Opciones posibles:
+
+* Calificaciones y reputación.
+* Perfil profesional del contratista.
+* Carga real de archivos para evidencias.
+* Mejoras de flujo de contratación.
+
+## Observación
+
+El flujo principal de OfiPro ya conecta:
+
+Proyecto → Requerimiento → Propuesta → Contrato → Evidencia
+
+Esto representa un avance importante hacia un MVP funcional real.
