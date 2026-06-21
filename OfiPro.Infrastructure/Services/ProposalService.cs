@@ -69,7 +69,7 @@ public class ProposalService : IProposalService
 
         if (createdProposal is null)
         {
-            throw new Exception("No se pudo obtener la propuesta creada.");
+            throw new BadRequestException("No se pudo obtener la propuesta creada.");
         }
 
         await _notificationService.CreateAsync(new CreateNotificationDto

@@ -35,10 +35,15 @@ public class EvidenceService : IEvidenceService
             throw new ForbiddenException("Solo el contratista de esta contratación puede subir evidencias.");
         }
 
+        if (contract.Status == ContractStatus.PendienteInicio)
+        {
+            throw new BadRequestException("No se pueden agregar evidencias a una contratación que aún no ha iniciado.");
+        }
+
         if (contract.Status == ContractStatus.Finalizado ||
             contract.Status == ContractStatus.Cancelado)
         {
-            throw new BadRequestException("No se pueden subir evidencias a una contratación finalizada o cancelada.");
+            throw new BadRequestException("No se pueden agregar evidencias a una contratación finalizada o cancelada.");
         }
 
         if (request.EvidenceType is null)
@@ -77,9 +82,7 @@ public class EvidenceService : IEvidenceService
         return MapToDto(evidence);
     }
 
-    public async Task<List<EvidenceDto>> GetByContractIdAsync(
-        Guid userId,
-        Guid contractId)
+    public async Task<List<EvidenceDto>> GetByContractIdAsync(Guid userId, Guid contractId)
     {
         var contract = await _contractRepository.GetByIdAsync(contractId);
 
@@ -104,9 +107,7 @@ public class EvidenceService : IEvidenceService
             .ToList();
     }
 
-    public async Task DeleteAsync(
-        Guid userId,
-        Guid evidenceId)
+    public async Task DeleteAsync(Guid userId, Guid evidenceId)
     {
         var evidence = await _evidenceRepository.GetByIdAsync(evidenceId);
 

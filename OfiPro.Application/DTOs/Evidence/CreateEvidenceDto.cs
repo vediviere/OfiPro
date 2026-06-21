@@ -17,6 +17,7 @@ public class CreateEvidenceDto : IValidatableObject
 
     [Required]
     [StringLength(500)]
+    [Url]
     public string FileUrl { get; set; } = string.Empty;
 
     [Required]
