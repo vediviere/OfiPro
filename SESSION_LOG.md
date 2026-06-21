@@ -1312,3 +1312,84 @@ Opciones posibles:
 ## Observación
 
 EvidenceType refuerza el enfoque mobile-first futuro, porque permitirá organizar evidencias tomadas desde celular según la etapa del trabajo: antes, durante y después.
+
+
+# =====================================
+
+# SESIÓN 2026-06-20
+
+## Objetivo
+
+Revisar implicaciones de cultura informática, comodidad humana y uso real de OfiPro antes de continuar con nuevos módulos.
+
+# =====================================
+
+## Discusión estratégica
+
+Se analizó que, aunque la web responsiva es necesaria, el usuario operativo de OfiPro probablemente usará más el celular que una computadora.
+
+Se identificó un riesgo importante:
+
+Un contratista podría no tener el hábito de abrir Google, buscar la página, iniciar sesión y revisar manualmente si tiene nuevas propuestas, contratos o evidencias pendientes.
+
+Conclusión:
+
+La app móvil real no debe considerarse un lujo futuro, sino una pieza importante para la operación diaria del contratista.
+
+Sin embargo, no se abrirá el frente móvil todavía. Primero se continuará consolidando el backend/API.
+
+## Decisiones tomadas
+
+* La web seguirá siendo necesaria.
+* La PWA sigue descartada.
+* La app móvil real se mantiene como etapa futura importante.
+* La API debe seguir preparándose para web y móvil.
+* El backend debe empezar a considerar comportamiento mobile-first.
+* El próximo bloque será Notificaciones internas base.
+
+## Razón del ajuste
+
+En un marketplace, no basta con que existan funciones. También debe existir actividad.
+
+Si el contratista no se entera rápido de nuevas oportunidades o cambios en sus contratos, no participa.
+
+Si el contratista no participa, el cliente no recibe propuestas.
+
+Si el cliente no recibe propuestas, la plataforma pierde valor.
+
+## Próximo bloque definido
+
+Bloque 7.2 - Notificaciones internas base.
+
+Objetivo del próximo bloque:
+
+Crear el módulo base de notificaciones internas para registrar eventos importantes dentro del sistema, aunque todavía no existan push notifications reales.
+
+Posibles endpoints:
+
+* GET /api/notifications
+* GET /api/notifications/unread-count
+* PATCH /api/notifications/{notificationId}/read
+* PATCH /api/notifications/read-all
+
+Eventos futuros a notificar:
+
+* Nueva propuesta recibida.
+* Propuesta aceptada.
+* Propuesta rechazada.
+* Contrato creado.
+* Contrato iniciado.
+* Evidencia subida.
+* Contrato finalizado.
+
+## Estado al cierre
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Pendiente por iniciar
+
+## Nota
+
+Se recomienda continuar en un nuevo chat debido a la lentitud acumulada de la conversación actual.

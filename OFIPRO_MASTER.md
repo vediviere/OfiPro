@@ -839,6 +839,64 @@ Aunque en esta etapa FileUrl sigue siendo texto, la validación deja preparado e
 
 ---
 
+## D038
+
+OfiPro debe considerar la cultura informática y la comodidad del usuario final.
+
+Resultado:
+
+Se reconoce que la app móvil real tendrá un papel central en la operación diaria de OfiPro, especialmente para contratistas como albañiles, plomeros, pintores, electricistas y trabajadores de campo.
+
+Razón:
+
+Aunque una web responsiva es necesaria, el usuario operativo difícilmente tendrá el hábito de abrir el navegador, buscar la página, iniciar sesión y revisar constantemente si tiene nuevas oportunidades o actualizaciones.
+
+La experiencia más natural para este tipo de usuario será recibir una notificación, abrir la app y responder de forma rápida.
+
+Impacto:
+
+La web seguirá existiendo, pero no debe ser vista como el canal principal de operación diaria del contratista.
+
+Distribución estratégica:
+
+* Web: presencia formal, administración, operación básica y paneles.
+* App móvil real: operación diaria, notificaciones, evidencias, seguimiento y respuesta rápida.
+* API: centro del sistema para web y móvil.
+
+---
+
+## D039
+
+Antes de avanzar a nuevos módulos grandes, se debe preparar el backend para notificaciones internas.
+
+Resultado:
+
+Se define como próximo bloque el módulo base de notificaciones internas.
+
+Razón:
+
+Si los contratistas no se enteran de nuevas oportunidades, propuestas aceptadas, contratos iniciados o evidencias solicitadas, el marketplace puede sentirse inactivo para clientes y contratistas.
+
+Las notificaciones internas permitirán registrar eventos importantes aunque todavía no exista push notification real.
+
+Eventos futuros importantes:
+
+* Nueva propuesta recibida.
+* Propuesta aceptada.
+* Propuesta rechazada.
+* Contrato creado.
+* Contrato iniciado.
+* Contrato pendiente de confirmación.
+* Evidencia subida.
+* Contrato finalizado.
+
+Impacto:
+
+El backend quedará preparado para que, más adelante, una app móvil real pueda consumir notificaciones y posteriormente integrarse con push notifications.
+
+---
+
+
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -1407,6 +1465,7 @@ Módulos completados:
 * Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7
 * Bloque 7 - Evidencias V1
 * Bloque 7.1 - Corrección de diagnóstico de Evidencias
+* Bloque 7.2 - Notificaciones internas base
 
 Próximo bloque pendiente por definir:
 
@@ -1414,3 +1473,7 @@ Próximo bloque pendiente por definir:
 * Perfil profesional del contratista
 * Carga real de archivos para evidencias
 * Mejoras de flujo de contratación
+* App móvil real en etapa posterior.
+* No desarrollar PWA.
+* Preparar endpoints para consumo mobile-first.
+* Implementar notificaciones internas antes de continuar con módulos grandes.
