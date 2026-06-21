@@ -4,7 +4,7 @@ using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
-using OfiPro.Infrastructure.Repositories;
+using OfiPro.Application.DTOs.Notification;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -13,12 +13,14 @@ public class ProposalService : IProposalService
     private readonly IProposalRepository _proposalRepository;
     private readonly IContractRepository _contractRepository;
     private readonly IUserRepository _userRepository;
+    private readonly INotificationService _notificationService;
 
-    public ProposalService(IProposalRepository proposalRepository, IContractRepository contractRepository, IUserRepository userRepository)
+    public ProposalService(IProposalRepository proposalRepository, IContractRepository contractRepository, IUserRepository userRepository, INotificationService notificationService)
     {
         _proposalRepository = proposalRepository;
         _contractRepository = contractRepository;
         _userRepository = userRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<ProposalDto> CreateAsync(Guid contractorUserId, CreateProposalDto request)
@@ -67,8 +69,18 @@ public class ProposalService : IProposalService
 
         if (createdProposal is null)
         {
-            throw new BadRequestException("No se pudo obtener la propuesta creada.");
+            throw new Exception("No se pudo obtener la propuesta creada.");
         }
+
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            UserId = createdProposal.ProjectRequirement.Project.CreatedByUserId,
+            Type = NotificationType.ProposalReceived,
+            Title = "Nueva propuesta recibida",
+            Message = "Un contratista envió una propuesta para tu proyecto.",
+            RelatedEntityType = "Proposal",
+            RelatedEntityId = createdProposal.Id
+        });
 
         return MapToDto(createdProposal);
     }
@@ -180,11 +192,15 @@ public class ProposalService : IProposalService
         var requirementProposals = await _proposalRepository.GetByProjectRequirementAsync(
             proposal.ProjectRequirementId);
 
-        foreach (var item in requirementProposals)
+        var rejectedProposals = requirementProposals
+            .Where(x => x.Id != proposal.Id && x.Status == ProposalStatus.Pendiente)
+            .ToList();
+
+        proposal.Status = ProposalStatus.Aceptada;
+
+        foreach (var rejectedProposal in rejectedProposals)
         {
-            item.Status = item.Id == proposal.Id
-                ? ProposalStatus.Aceptada
-                : ProposalStatus.Rechazada;
+            rejectedProposal.Status = ProposalStatus.Rechazada;
         }
 
         var contractExists = await _contractRepository.ExistsByProposalIdAsync(proposal.Id);
@@ -208,6 +224,29 @@ public class ProposalService : IProposalService
         }
 
         await _proposalRepository.SaveChangesAsync();
+
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            UserId = proposal.ContractorUserId,
+            Type = NotificationType.ProposalAccepted,
+            Title = "Propuesta aceptada",
+            Message = "Tu propuesta fue aceptada por el cliente.",
+            RelatedEntityType = "Proposal",
+            RelatedEntityId = proposal.Id
+        });
+
+        foreach (var rejectedProposal in rejectedProposals)
+        {
+            await _notificationService.CreateAsync(new CreateNotificationDto
+            {
+                UserId = rejectedProposal.ContractorUserId,
+                Type = NotificationType.ProposalRejected,
+                Title = "Propuesta rechazada",
+                Message = "Tu propuesta fue rechazada porque el cliente aceptó otra propuesta para este requerimiento.",
+                RelatedEntityType = "Proposal",
+                RelatedEntityId = rejectedProposal.Id
+            });
+        }
     }
 
     public async Task RejectAsync(Guid ownerUserId, Guid proposalId)
@@ -232,6 +271,16 @@ public class ProposalService : IProposalService
         proposal.Status = ProposalStatus.Rechazada;
 
         await _proposalRepository.SaveChangesAsync();
+
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            UserId = proposal.ContractorUserId,
+            Type = NotificationType.ProposalRejected,
+            Title = "Propuesta rechazada",
+            Message = "Tu propuesta fue rechazada por el cliente.",
+            RelatedEntityType = "Proposal",
+            RelatedEntityId = proposal.Id
+        });
     }
 
     public async Task WithdrawAsync(

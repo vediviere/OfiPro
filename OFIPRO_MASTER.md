@@ -1,10 +1,10 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 1.1
+Versión: 1.2
 
 Fecha de creación: 2026-06-08
 
-Última actualización: 2026-06-09
+Última actualización: 2026-06-21
 
 Estado: En desarrollo
 
@@ -266,9 +266,10 @@ Permitir que un usuario:
 * Subcategory
 * Project
 * ProjectRequirement
-* ProjectPhoto
 * Proposal
+* Contract
 * Evidence
+* Notification
 * Rating
 * Invitation
 
@@ -310,6 +311,19 @@ EvidenceType
 * Antes
 * Durante
 * Despues
+
+NotificationType
+
+* General
+* ProposalReceived
+* ProposalAccepted
+* ProposalRejected
+* ContractCreated
+* ContractStarted
+* ContractFinished
+* ContractCancelled
+* EvidenceUploaded
+* ContractPendingConfirmation
 
 ---
 
@@ -896,6 +910,88 @@ El backend quedará preparado para que, más adelante, una app móvil real pueda
 
 ---
 
+## D040
+
+Las notificaciones internas se almacenan en base de datos.
+
+Resultado:
+
+Se crea la entidad Notification para registrar avisos internos asociados a usuarios.
+
+Las notificaciones incluyen:
+
+* Usuario destinatario.
+* Tipo de notificación.
+* Título.
+* Mensaje.
+* Entidad relacionada.
+* Id de entidad relacionada.
+* Estado de lectura.
+* Fecha de creación.
+* Fecha de lectura.
+* Eliminación lógica mediante DeletedAt.
+
+Razón:
+
+Antes de implementar push notifications reales, OfiPro necesita registrar eventos importantes dentro del backend para que web y app móvil puedan consultarlos.
+
+Impacto:
+
+El sistema ya puede mostrar una bandeja o campana de notificaciones internas aunque todavía no exista una app móvil real ni integración con Firebase, APNs u otro proveedor de push notifications.
+
+---
+
+## D041
+
+Las notificaciones deben generarse desde los servicios de negocio.
+
+Resultado:
+
+Las notificaciones no se crean manualmente desde un endpoint público.
+
+Se generan desde los servicios correspondientes cuando ocurre un evento real del sistema.
+
+Eventos implementados:
+
+* Contratista envía propuesta → se notifica al cliente.
+* Cliente acepta propuesta → se notifica al contratista aceptado.
+* Cliente rechaza propuesta → se notifica al contratista.
+* Cliente acepta una propuesta y otras quedan rechazadas automáticamente → se notifica a los contratistas rechazados.
+* Contratista sube evidencia → se notifica al cliente.
+* Contratista inicia contratación → se notifica al cliente.
+* Contratista marca contratación como pendiente de confirmación → se notifica al cliente.
+* Cliente finaliza contratación → se notifica al contratista.
+* Cliente o contratista cancela contratación → se notifica a la otra parte.
+
+Razón:
+
+La notificación es consecuencia de una acción de negocio, no una acción aislada del usuario.
+
+Impacto:
+
+Si en el futuro una acción se ejecuta desde web, app móvil o cualquier otro cliente, la notificación seguirá generándose porque vive en el servicio y no en el controlador.
+
+---
+
+## D042
+
+Las fechas del backend se guardan en UTC.
+
+Resultado:
+
+CreatedAt, ReadAt y demás fechas internas se guardan usando UTC.
+
+Razón:
+
+El backend debe ser consistente para web, app móvil y posibles usuarios en diferentes zonas horarias.
+
+Impacto:
+
+SQL Server puede mostrar una hora aparentemente diferente a la hora local de México, pero eso es correcto. La conversión a hora local debe hacerse en frontend o app móvil al mostrar la información al usuario.
+
+---
+
+
 
 
 # 15. PROBLEMAS DETECTADOS
@@ -1092,6 +1188,40 @@ Solución:
 Unificar expiración.
 
 ---
+
+## P016
+
+La hora guardada en base de datos puede parecer incorrecta.
+
+Síntoma:
+
+Al revisar registros en SQL Server, CreatedAt puede mostrar una hora distinta a la hora local del usuario.
+
+Ejemplo:
+
+* SQL Server muestra 2026-06-21 20:24.
+* Hora local México corresponde aproximadamente a 2026-06-21 14:24.
+
+Causa:
+
+El backend guarda fechas en UTC mediante DateTime.UtcNow.
+
+Solución:
+
+Mantener UTC en base de datos.
+
+La conversión a hora local debe hacerse únicamente al mostrar la fecha en frontend o app móvil.
+
+Resultado:
+
+No se cambia a DateTime.Now.
+
+Razón:
+
+Guardar fechas en UTC evita problemas futuros con zonas horarias, app móvil, usuarios en distintas regiones y consistencia de datos.
+
+---
+
 
 
 # 16. RIESGOS
@@ -1446,6 +1576,91 @@ El módulo de Evidencias V1 queda más completo, seguro y preparado para una fut
 
 ---
 
+## HITO 7.2
+
+Notificaciones internas base completado.
+
+Incluye:
+
+* Creación de entidad Notification.
+* Creación de enum NotificationType.
+* Configuración EF de Notification.
+* Creación de tabla Notifications mediante migración.
+* Creación de NotificationDto.
+* Creación de CreateNotificationDto.
+* Creación de INotificationRepository.
+* Implementación de NotificationRepository.
+* Creación de INotificationService.
+* Implementación de NotificationService.
+* Registro de dependencias en Program.cs.
+* Creación de NotificationsController.
+* Endpoints protegidos con JWT para consultar y administrar notificaciones.
+* Soft delete de notificaciones mediante DeletedAt.
+* Contador de notificaciones no leídas.
+* Marcado individual de notificación como leída.
+* Marcado masivo de notificaciones como leídas.
+
+Endpoints creados:
+
+* GET /api/notifications
+* GET /api/notifications/unread
+* GET /api/notifications/unread-count
+* PATCH /api/notifications/{notificationId}/read
+* PATCH /api/notifications/read-all
+* DELETE /api/notifications/{notificationId}
+
+Eventos conectados:
+
+* Contratista envía propuesta → cliente recibe notificación.
+* Cliente acepta propuesta → contratista aceptado recibe notificación.
+* Cliente rechaza propuesta → contratista recibe notificación.
+* Cliente acepta una propuesta → contratistas pendientes rechazados automáticamente reciben notificación.
+* Contratista sube evidencia → cliente recibe notificación.
+* Contratista inicia contratación → cliente recibe notificación.
+* Contratista marca contratación como pendiente de confirmación → cliente recibe notificación.
+* Cliente finaliza contratación → contratista recibe notificación.
+* Cliente o contratista cancela contratación → la otra parte recibe notificación.
+
+Reglas implementadas:
+
+* Las notificaciones se consultan usando el UserId del JWT.
+* Un usuario solo puede consultar sus propias notificaciones.
+* Un usuario solo puede marcar como leídas sus propias notificaciones.
+* Un usuario solo puede eliminar sus propias notificaciones.
+* Las notificaciones eliminadas no aparecen en consultas.
+* Las notificaciones no se crean desde endpoint público.
+* Las notificaciones se generan desde servicios de negocio.
+* Las fechas se guardan en UTC.
+
+Pruebas realizadas:
+
+* Inserción manual de notificación de prueba en SQL Server → consulta correcta desde Swagger.
+* GET /api/notifications → 200 OK.
+* GET /api/notifications/unread → 200 OK.
+* GET /api/notifications/unread-count → 200 OK.
+* PATCH /api/notifications/{notificationId}/read → 200 OK.
+* PATCH /api/notifications/read-all → 200 OK.
+* DELETE /api/notifications/{notificationId} → 204 No Content.
+* Soft delete validado en BD.
+* Contratista crea propuesta → cliente recibe notificación.
+* Cliente acepta propuesta → contratista recibe notificación.
+* Cliente rechaza propuesta → contratista recibe notificación.
+* Contratista sube evidencia → cliente recibe notificación.
+* Contratista cambia contrato a EnProceso → cliente recibe notificación.
+* Contratista cambia contrato a PendienteConfirmacion → cliente recibe notificación.
+* Cliente cambia contrato a Finalizado → contratista recibe notificación.
+
+Resultado:
+
+El backend de OfiPro ya cuenta con un módulo funcional de notificaciones internas conectado a eventos reales del marketplace.
+
+Impacto:
+
+El sistema queda mejor preparado para consumo mobile-first y para una futura app móvil real con push notifications.
+
+---
+
+
 
 ## ESTADO ACTUAL ACTUALIZADO
 
@@ -1467,13 +1682,19 @@ Módulos completados:
 * Bloque 7.1 - Corrección de diagnóstico de Evidencias
 * Bloque 7.2 - Notificaciones internas base
 
-Próximo bloque pendiente por definir:
+Próximo bloque recomendado:
 
-* Calificaciones y reputación
+* Bloque 8 - Calificaciones y reputación V1
+
+Opciones posteriores:
+
 * Perfil profesional del contratista
 * Carga real de archivos para evidencias
 * Mejoras de flujo de contratación
-* App móvil real en etapa posterior.
+* App móvil real en etapa posterior
+
+Notas estratégicas vigentes:
+
 * No desarrollar PWA.
-* Preparar endpoints para consumo mobile-first.
-* Implementar notificaciones internas antes de continuar con módulos grandes.
+* Mantener enfoque mobile-first.
+* Preparar endpoints para consumo web responsivo y app móvil real.

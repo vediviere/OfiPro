@@ -1393,3 +1393,213 @@ Bloque 7.2 - Notificaciones internas base → Pendiente por iniciar
 ## Nota
 
 Se recomienda continuar en un nuevo chat debido a la lentitud acumulada de la conversación actual.
+
+
+# =====================================
+
+# SESIÓN 2026-06-21
+
+## Objetivo
+
+Iniciar, implementar, probar y cerrar Bloque 7.2 - Notificaciones internas base.
+
+# =====================================
+
+## Contexto
+
+Antes de iniciar el bloque se confirmó que OfiPro será una plataforma mobile-first, pero sin construir una PWA.
+
+La estrategia sigue siendo:
+
+* Terminar backend/API correctamente.
+* Mantener web responsiva como canal necesario.
+* Dejar app móvil real para una etapa posterior.
+* Preparar el backend para comportamiento móvil desde ahora.
+
+El motivo principal del bloque fue evitar que la plataforma dependa de que el usuario revise manualmente la web para enterarse de nuevas propuestas, cambios de estado o evidencias.
+
+## Bloque 7.2 - Notificaciones internas base
+
+Completado:
+
+* Se creó NotificationType.
+* Se creó la entidad Notification.
+* Se creó NotificationConfiguration.
+* Se agregó DbSet<Notification> en ApplicationDbContext.
+* Se generó migración para Notifications.
+* Se actualizó la base de datos.
+* Se creó NotificationDto.
+* Se creó CreateNotificationDto.
+* Se creó INotificationRepository.
+* Se implementó NotificationRepository.
+* Se creó INotificationService.
+* Se implementó NotificationService.
+* Se registraron INotificationRepository e INotificationService en Program.cs.
+* Se creó NotificationsController.
+
+Endpoints creados:
+
+* GET /api/notifications
+* GET /api/notifications/unread
+* GET /api/notifications/unread-count
+* PATCH /api/notifications/{notificationId}/read
+* PATCH /api/notifications/read-all
+* DELETE /api/notifications/{notificationId}
+
+## Reglas implementadas
+
+* Las notificaciones pertenecen a un usuario específico.
+* El UserId se obtiene desde el JWT.
+* Un usuario solo puede consultar sus propias notificaciones.
+* Un usuario solo puede marcar como leídas sus propias notificaciones.
+* Un usuario solo puede eliminar sus propias notificaciones.
+* Las notificaciones eliminadas usan soft delete mediante DeletedAt.
+* No existe endpoint público para crear notificaciones.
+* Las notificaciones se crean desde servicios de negocio.
+* Las fechas se guardan en UTC.
+
+## Eventos conectados
+
+Propuestas:
+
+* Contratista envía propuesta → cliente recibe notificación.
+* Cliente acepta propuesta → contratista recibe notificación.
+* Cliente rechaza propuesta → contratista recibe notificación.
+* Cuando una propuesta es aceptada y otras pendientes se rechazan automáticamente, los contratistas rechazados reciben notificación.
+
+Evidencias:
+
+* Contratista sube evidencia → cliente recibe notificación.
+
+Contrataciones:
+
+* Contratista cambia contrato a EnProceso → cliente recibe notificación.
+* Contratista cambia contrato a PendienteConfirmacion → cliente recibe notificación.
+* Cliente cambia contrato a Finalizado → contratista recibe notificación.
+* Cliente o contratista cancela contrato → la otra parte recibe notificación.
+
+## Pruebas realizadas
+
+Notificaciones base:
+
+* Notificación insertada manualmente en SQL Server.
+* GET /api/notifications → 200 OK.
+* GET /api/notifications/unread → 200 OK.
+* GET /api/notifications/unread-count → 200 OK.
+* PATCH /api/notifications/{notificationId}/read → 200 OK.
+* PATCH /api/notifications/read-all → 200 OK.
+* DELETE /api/notifications/{notificationId} → 204 No Content.
+* Soft delete validado en base de datos.
+
+Flujo de propuestas:
+
+* Cliente crea proyecto nuevo.
+* Contratista crea propuesta.
+* Cliente recibe notificación por nueva propuesta.
+* Cliente acepta propuesta.
+* Contratista recibe notificación por propuesta aceptada.
+* Cliente rechaza propuesta.
+* Contratista recibe notificación por propuesta rechazada.
+
+Flujo de evidencias:
+
+* Contratista sube evidencia.
+* Cliente recibe notificación por nueva evidencia.
+* Contador de no leídas validado desde Swagger.
+
+Flujo de contrataciones:
+
+* Contratista cambia contratación a EnProceso.
+* Cliente recibe notificación.
+* Contratista cambia contratación a PendienteConfirmacion.
+* Cliente recibe notificación.
+* Cliente cambia contratación a Finalizado.
+* Contratista recibe notificación.
+
+## Observación técnica
+
+Durante las pruebas se detectó que SQL Server muestra horas en UTC, por ejemplo una hora aparentemente distinta a la hora local de México.
+
+Decisión:
+
+No cambiar a DateTime.Now.
+
+Se mantiene DateTime.UtcNow en backend y base de datos.
+
+Razón:
+
+El backend debe guardar fechas de forma consistente para web, app móvil y posibles usuarios en diferentes zonas horarias. La conversión a hora local debe hacerse al mostrar la información en frontend o app móvil.
+
+## Resultado
+
+Bloque 7.2 - Notificaciones internas base quedó completado y probado.
+
+El backend ya registra eventos reales del marketplace como notificaciones internas.
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+## Evaluación de velocidad
+
+Ritmo: 🟡 Medio.
+
+El bloque se sintió pesado porque cruzó varias capas y varios módulos ya existentes:
+
+* Domain.
+* Application.
+* Infrastructure.
+* Api.
+* Base de datos.
+* Propuestas.
+* Evidencias.
+* Contrataciones.
+* Pruebas con Swagger.
+* Validaciones con SQL Server.
+
+Aunque tomó más tiempo, el avance fue correcto porque cada flujo quedó probado antes de cerrar el bloque.
+
+## Pendiente inmediato
+
+* Ejecutar build final.
+* Revisar git status.
+* Hacer commit del Bloque 7 completo.
+* Subir cambios al repositorio.
+
+## Próximo bloque recomendado
+
+Bloque 8 - Calificaciones y reputación V1.
+
+Razón:
+
+Después de que una contratación finaliza, OfiPro necesita cerrar el ciclo con una calificación para construir confianza, historial y reputación del contratista.
+
+# =====================================

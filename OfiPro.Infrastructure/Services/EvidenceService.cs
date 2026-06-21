@@ -4,6 +4,7 @@ using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
+using OfiPro.Application.DTOs.Notification;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -11,19 +12,16 @@ public class EvidenceService : IEvidenceService
 {
     private readonly IEvidenceRepository _evidenceRepository;
     private readonly IContractRepository _contractRepository;
+    private readonly INotificationService _notificationService;
 
-    public EvidenceService(
-        IEvidenceRepository evidenceRepository,
-        IContractRepository contractRepository)
+    public EvidenceService(IEvidenceRepository evidenceRepository, IContractRepository contractRepository, INotificationService notificationService)
     {
         _evidenceRepository = evidenceRepository;
         _contractRepository = contractRepository;
+        _notificationService = notificationService;
     }
 
-    public async Task<EvidenceDto> CreateAsync(
-        Guid userId,
-        Guid contractId,
-        CreateEvidenceDto request)
+    public async Task<EvidenceDto> CreateAsync(Guid userId, Guid contractId, CreateEvidenceDto request)
     {
         var contract = await _contractRepository.GetByIdAsync(contractId);
 
@@ -63,6 +61,16 @@ public class EvidenceService : IEvidenceService
 
         await _evidenceRepository.AddAsync(evidence);
         await _evidenceRepository.SaveChangesAsync();
+
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            UserId = contract.ClientUserId,
+            Type = NotificationType.EvidenceUploaded,
+            Title = "Nueva evidencia subida",
+            Message = "El contratista subió una evidencia en tu contratación.",
+            RelatedEntityType = "Contract",
+            RelatedEntityId = contract.Id
+        });
 
         evidence.UploadedByUser = contract.ContractorUser;
 

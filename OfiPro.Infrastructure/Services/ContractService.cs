@@ -2,6 +2,7 @@
 using OfiPro.Application.DTOs.Contract;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
+using OfiPro.Application.DTOs.Notification;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
 
@@ -10,10 +11,12 @@ namespace OfiPro.Infrastructure.Services;
 public class ContractService : IContractService
 {
     private readonly IContractRepository _contractRepository;
+    private readonly INotificationService _notificationService;
 
-    public ContractService(IContractRepository contractRepository)
+    public ContractService(IContractRepository contractRepository, INotificationService notificationService)
     {
         _contractRepository = contractRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<List<ContractDto>> GetMyContractsAsync(Guid userId)
@@ -54,6 +57,8 @@ public class ContractService : IContractService
         ApplyStatusChange(contract, request.Status);
 
         await _contractRepository.SaveChangesAsync();
+
+        await CreateStatusNotificationAsync(contract, userId, request.Status);
     }
 
     private static void ValidateUserCanChangeStatus(Contract contract, Guid userId, ContractStatus newStatus)
@@ -149,6 +154,67 @@ public class ContractService : IContractService
         {
             contract.CancelledAt = DateTime.UtcNow;
         }
+    }
+
+    private async Task CreateStatusNotificationAsync(Contract contract, Guid changedByUserId, ContractStatus newStatus)
+    {
+        var recipientUserId = newStatus switch
+        {
+            ContractStatus.EnProceso => contract.ClientUserId,
+            ContractStatus.PendienteConfirmacion => contract.ClientUserId,
+            ContractStatus.Finalizado => contract.ContractorUserId,
+            ContractStatus.Cancelado => changedByUserId == contract.ClientUserId
+                ? contract.ContractorUserId
+                : contract.ClientUserId,
+            _ => Guid.Empty
+        };
+
+        if (recipientUserId == Guid.Empty)
+        {
+            return;
+        }
+
+        var cancelledMessage = changedByUserId == contract.ClientUserId
+            ? "El cliente canceló la contratación."
+            : "El contratista canceló la contratación.";
+
+        var notificationData = newStatus switch
+        {
+            ContractStatus.EnProceso => (
+                Type: NotificationType.ContractStarted,
+                Title: "Contratación iniciada",
+                Message: "El contratista inició la contratación."),
+
+            ContractStatus.PendienteConfirmacion => (
+                Type: NotificationType.ContractPendingConfirmation,
+                Title: "Contratación pendiente de confirmación",
+                Message: "El contratista marcó la contratación como pendiente de confirmación."),
+
+            ContractStatus.Finalizado => (
+                Type: NotificationType.ContractFinished,
+                Title: "Contratación finalizada",
+                Message: "El cliente finalizó la contratación."),
+
+            ContractStatus.Cancelado => (
+                Type: NotificationType.ContractCancelled,
+                Title: "Contratación cancelada",
+                Message: cancelledMessage),
+
+            _ => (
+                Type: NotificationType.General,
+                Title: "Actualización de contratación",
+                Message: "El estado de tu contratación fue actualizado.")
+        };
+
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            UserId = recipientUserId,
+            Type = notificationData.Type,
+            Title = notificationData.Title,
+            Message = notificationData.Message,
+            RelatedEntityType = "Contract",
+            RelatedEntityId = contract.Id
+        });
     }
 
     private static ContractDto MapToDto(Contract contract)
