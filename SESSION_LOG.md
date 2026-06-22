@@ -1603,3 +1603,246 @@ Razón:
 Después de que una contratación finaliza, OfiPro necesita cerrar el ciclo con una calificación para construir confianza, historial y reputación del contratista.
 
 # =====================================
+
+
+# SESIÓN 2026-06-21
+
+## Objetivo
+
+Iniciar, implementar, probar y cerrar Bloque 8 - Calificaciones y reputación V1, además de reforzar el módulo con Bloque 8.1 - Endurecimiento de Ratings y reputación.
+
+# =====================================
+
+## Contexto
+
+Después de cerrar Notificaciones internas base, se decidió continuar con Calificaciones y reputación porque el flujo de OfiPro necesitaba cerrar el ciclo de confianza después de una contratación finalizada.
+
+Decisión previa importante:
+
+Las calificaciones no serán solamente del cliente hacia el contratista.
+
+El modelo correcto para OfiPro será bidireccional:
+
+* Cliente califica al contratista.
+* Contratista califica al cliente.
+
+Razón:
+
+OfiPro no solo necesita contratistas confiables. También necesita clientes confiables que expliquen bien el trabajo, respeten acuerdos y mantengan buena comunicación.
+
+## Bloque 8 - Calificaciones y reputación V1
+
+Completado:
+
+* Se revisó el estado actual de Rating.
+* Se detectó que Rating ya existía, pero estaba orientado a Project.
+* Se corrigió Rating para asociarse a Contract.
+* Se reemplazaron campos anteriores por:
+  * ContractId
+  * RaterUserId
+  * RatedUserId
+  * Score
+  * Comment
+  * CreatedAt
+  * DeletedAt
+* Se actualizó RatingConfiguration.
+* Se configuró relación Rating → Contract.
+* Se configuraron relaciones Rating → RaterUser y Rating → RatedUser.
+* Se agregó restricción única por ContractId, RaterUserId y RatedUserId.
+* Se agregó check constraint para Score entre 1 y 5.
+* Se creó CreateRatingDto.
+* Se creó RatingDto.
+* Se creó UserReputationDto.
+* Se creó IRatingRepository.
+* Se implementó RatingRepository.
+* Se creó IRatingService.
+* Se implementó RatingService.
+* Se registraron IRatingRepository e IRatingService en Program.cs.
+* Se creó RatingsController.
+* Se generó migración UpdateRatingsForContracts.
+* Se actualizó la base de datos.
+
+Endpoints creados:
+
+* POST /api/contracts/{contractId}/ratings
+* GET /api/contracts/{contractId}/ratings
+* GET /api/users/{userId}/reputation
+
+Reglas implementadas:
+
+* Solo se puede calificar si el contrato está Finalizado.
+* Solo cliente y contratista del contrato pueden calificar.
+* Un usuario no puede calificarse a sí mismo.
+* Solo debe existir una calificación por dirección por contrato.
+* Cliente puede calificar al contratista.
+* Contratista puede calificar al cliente.
+* El usuario que califica se obtiene desde el JWT.
+* El usuario calificado se calcula automáticamente desde el contrato.
+* Score debe estar entre 1 y 5.
+
+Pruebas realizadas:
+
+* Se probó contrato finalizado.
+* Cliente calificó al contratista → 200 OK.
+* Contratista calificó al cliente → 200 OK.
+* GET /api/contracts/{contractId}/ratings → 200 OK.
+* Se validó que aparecieran las dos direcciones:
+  * Cliente → Contratista
+  * Contratista → Cliente
+* Se verificaron registros en SQL Server.
+* GET /api/users/{userId}/reputation → 200 OK.
+
+Resultado:
+
+Bloque 8 - Calificaciones y reputación V1 quedó completado y probado correctamente.
+
+## Bloque 8.1 - Endurecimiento de Ratings y reputación
+
+Objetivo:
+
+Mejorar el módulo recién creado para dejarlo más útil para perfiles públicos, web responsiva y futura app móvil real.
+
+Completado:
+
+* Se agregó LastRatingAt a UserReputationDto.
+* Se mejoró GetByRatedUserIdAsync para incluir RaterUser y RatedUser.
+* Se creó endpoint para historial interno de calificaciones recibidas.
+* Se creó PublicReceivedRatingDto.
+* Se creó PublicUserReputationDto.
+* Se creó endpoint público limpio de ratings recibidos.
+* Se creó endpoint público completo de reputación.
+* Se separó la información interna de la información pública.
+
+Endpoints creados:
+
+* GET /api/users/{userId}/ratings/received
+* GET /api/users/{userId}/ratings/public
+* GET /api/users/{userId}/reputation/public
+
+Reglas aplicadas:
+
+* El historial interno puede mostrar datos completos.
+* La vista pública no expone ContractId.
+* La vista pública no expone RaterUserId.
+* La vista pública no expone RatedUserId.
+* La reputación pública devuelve promedio, total, última fecha y comentarios recibidos.
+* La app móvil podrá obtener la reputación pública completa en una sola llamada.
+
+Pruebas realizadas:
+
+* GET /api/users/{userId}/reputation con LastRatingAt → 200 OK.
+* GET /api/users/{userId}/ratings/received → 200 OK.
+* GET /api/users/{userId}/ratings/public → 200 OK.
+* GET /api/users/{userId}/reputation/public → 200 OK.
+* Se validó que las respuestas públicas no expusieran IDs internos innecesarios.
+
+Resultado:
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación quedó completado y probado correctamente.
+
+## Decisiones importantes
+
+D043
+
+Las calificaciones deben ser bidireccionales.
+
+D044
+
+Una contratación solo puede calificarse cuando está finalizada.
+
+D045
+
+Solo cliente y contratista de una contratación pueden calificarla.
+
+D046
+
+Solo puede existir una calificación por dirección en cada contratación.
+
+D047
+
+La reputación pública no debe exponer datos internos de la contratación.
+
+D048
+
+La app móvil debe poder consultar reputación pública en una sola llamada.
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+Bloque 8 - Calificaciones y reputación V1 → Completo
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+
+## Evaluación de velocidad
+
+Ritmo: 🟢 Bueno.
+
+El avance fue más rápido que el bloque de notificaciones porque el módulo de Ratings fue más lineal y se apoyó en patrones ya existentes:
+
+* DTOs.
+* Repositories.
+* Services.
+* Controller.
+* Migración.
+* Swagger.
+* Validación con SQL Server.
+
+El bloque 8.1 también avanzó bien porque no requirió migración y se enfocó en mejorar endpoints de lectura y separación entre datos internos y públicos.
+
+## Pendiente inmediato
+
+* Actualizar documentación.
+* Revisar git status.
+* Hacer commit del Bloque 8 y Bloque 8.1.
+* Subir cambios al repositorio.
+
+## Próximo bloque recomendado
+
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web.
+
+Razón:
+
+El backend ya cuenta con módulos principales de flujo:
+
+* Auth.
+* Usuarios.
+* Proyectos.
+* Propuestas.
+* Contrataciones.
+* Evidencias.
+* Notificaciones internas.
+* Calificaciones.
+* Reputación.
+
+El siguiente paso lógico es crear endpoints de resumen para que web y futura app móvil no tengan que hacer muchas llamadas separadas para construir sus pantallas principales.
+
+# =====================================

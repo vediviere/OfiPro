@@ -1,6 +1,6 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 1.2
+Versión: 1.3
 
 Fecha de creación: 2026-06-08
 
@@ -237,7 +237,7 @@ Permitir que un usuario:
 2. Reciba propuestas.
 3. Seleccione una propuesta.
 4. Finalice un trabajo.
-5. Califique al contratista.
+5. Cliente y contratista se califiquen mutuamente al finalizar una contratación.
 
 ---
 
@@ -991,6 +991,164 @@ SQL Server puede mostrar una hora aparentemente diferente a la hora local de Mé
 
 ---
 
+## D043
+
+Las calificaciones deben ser bidireccionales.
+
+Resultado:
+
+La entidad Rating se relaciona con Contract y permite registrar calificaciones en dos direcciones:
+
+* Cliente califica al contratista.
+* Contratista califica al cliente.
+
+Campos principales:
+
+* ContractId
+* RaterUserId
+* RatedUserId
+* Score
+* Comment
+* CreatedAt
+* DeletedAt
+
+Razón:
+
+La confianza en OfiPro no debe depender solamente del comportamiento del contratista. El cliente también debe construir reputación, ya que su claridad, comunicación, respeto y cumplimiento afectan la experiencia del trabajo.
+
+Impacto:
+
+El sistema podrá construir reputación para ambas partes del marketplace.
+
+---
+
+## D044
+
+Una contratación solo puede calificarse cuando está finalizada.
+
+Resultado:
+
+El servicio de calificaciones valida que Contract.Status sea Finalizado antes de permitir crear un Rating.
+
+Razón:
+
+Una calificación antes de finalizar el trabajo podría ser injusta, incompleta o manipulable.
+
+Impacto:
+
+La reputación se construye únicamente a partir de trabajos terminados.
+
+---
+
+## D045
+
+Solo cliente y contratista de una contratación pueden calificarla.
+
+Resultado:
+
+El servicio valida que el usuario autenticado sea ClientUserId o ContractorUserId del contrato.
+
+Reglas aplicadas:
+
+* Usuarios ajenos no pueden calificar la contratación.
+* Un usuario no puede calificarse a sí mismo.
+* Cliente califica automáticamente al contratista.
+* Contratista califica automáticamente al cliente.
+
+Razón:
+
+Evitar calificaciones externas, falsas o manipuladas.
+
+Impacto:
+
+La reputación queda ligada a interacciones reales dentro de la plataforma.
+
+---
+
+## D046
+
+Solo puede existir una calificación por dirección en cada contratación.
+
+Resultado:
+
+Se configura una restricción única para evitar duplicados por:
+
+* ContractId
+* RaterUserId
+* RatedUserId
+
+Razón:
+
+En una contratación solo deben existir como máximo dos calificaciones reales:
+
+* Cliente → Contratista
+* Contratista → Cliente
+
+Impacto:
+
+Evita duplicar calificaciones y protege la integridad de la reputación.
+
+---
+
+## D047
+
+La reputación pública no debe exponer datos internos de la contratación.
+
+Resultado:
+
+Se separan endpoints internos y públicos para ratings.
+
+Vista interna:
+
+* Puede incluir RatingId.
+* Puede incluir ContractId.
+* Puede incluir RaterUserId.
+* Puede incluir RatedUserId.
+
+Vista pública:
+
+* Muestra nombre de quien calificó.
+* Muestra Score.
+* Muestra Comment.
+* Muestra CreatedAt.
+* No expone ContractId ni IDs internos de usuarios.
+
+Razón:
+
+El perfil público debe ser útil para generar confianza, pero no debe revelar información interna innecesaria.
+
+Impacto:
+
+La API queda mejor preparada para perfiles públicos en web y app móvil.
+
+---
+
+## D048
+
+La app móvil debe poder consultar reputación pública en una sola llamada.
+
+Resultado:
+
+Se crea un endpoint público de reputación completa por usuario que devuelve:
+
+* UserId
+* UserName
+* AverageScore
+* TotalRatings
+* LastRatingAt
+* Ratings públicas recibidas
+
+Razón:
+
+Para mobile-first conviene reducir llamadas innecesarias desde la app móvil y entregar datos listos para pintar una pantalla de perfil.
+
+Impacto:
+
+La futura app móvil y la web responsiva podrán mostrar perfiles con reputación de forma más simple y eficiente.
+
+---
+
+
 
 
 
@@ -1219,6 +1377,52 @@ No se cambia a DateTime.Now.
 Razón:
 
 Guardar fechas en UTC evita problemas futuros con zonas horarias, app móvil, usuarios en distintas regiones y consistencia de datos.
+
+---
+
+## P017
+
+El modelo inicial de Rating no estaba alineado con el flujo real de contrataciones.
+
+Síntoma:
+
+Rating estaba orientado a Project y no a Contract.
+
+Riesgo:
+
+* Una calificación podía quedar desconectada del trabajo realmente contratado.
+* No quedaba claro si la calificación correspondía a una propuesta, proyecto o contratación terminada.
+* No se podía controlar correctamente la regla de una calificación por dirección.
+
+Solución:
+
+Modificar Rating para relacionarse directamente con Contract.
+
+Resultado:
+
+La reputación queda ligada a contrataciones finalizadas.
+
+---
+
+## P018
+
+La reputación pública podía exponer información interna innecesaria.
+
+Riesgo:
+
+Si se reutilizaba el DTO interno de Rating para perfiles públicos, la API podía exponer:
+
+* ContractId
+* RaterUserId
+* RatedUserId
+
+Solución:
+
+Crear DTOs públicos separados para reputación y ratings recibidos.
+
+Resultado:
+
+El perfil público muestra información útil sin exponer identificadores internos de contratación.
 
 ---
 
@@ -1660,6 +1864,103 @@ El sistema queda mejor preparado para consumo mobile-first y para una futura app
 
 ---
 
+## HITO 8
+
+Calificaciones y reputación V1 completado.
+
+Incluye:
+
+* Refactor de entidad Rating para asociarse a Contract.
+* Configuración EF de Rating por contratación.
+* Migración para actualizar Ratings.
+* Creación de CreateRatingDto.
+* Creación de RatingDto.
+* Creación de UserReputationDto.
+* Creación de IRatingRepository.
+* Implementación de RatingRepository.
+* Creación de IRatingService.
+* Implementación de RatingService.
+* Registro de dependencias en Program.cs.
+* Creación de RatingsController.
+
+Endpoints creados:
+
+* POST /api/contracts/{contractId}/ratings
+* GET /api/contracts/{contractId}/ratings
+* GET /api/users/{userId}/reputation
+
+Reglas implementadas:
+
+* Solo se puede calificar una contratación finalizada.
+* Solo cliente y contratista de la contratación pueden calificar.
+* Un usuario no puede calificarse a sí mismo.
+* Cliente califica automáticamente al contratista.
+* Contratista califica automáticamente al cliente.
+* Solo puede existir una calificación por dirección por contratación.
+* Score solo permite valores de 1 a 5.
+
+Pruebas realizadas:
+
+* FileUrl inválido en evidencias se mantuvo validado con 400 Bad Request antes de iniciar Ratings.
+* Evidencia en PendienteInicio se mantuvo bloqueada con 400 Bad Request.
+* Evidencia en EnProceso funcionó correctamente.
+* Cliente calificando contratista en contrato Finalizado → 200 OK.
+* Contratista calificando cliente en contrato Finalizado → 200 OK.
+* Consulta de ratings por contrato → 200 OK.
+* Verificación en SQL Server de ratings creados correctamente.
+* Consulta de reputación por usuario → 200 OK.
+
+Resultado:
+
+OfiPro ya puede construir reputación básica a partir de contrataciones finalizadas.
+
+---
+
+## HITO 8.1
+
+Endurecimiento de Ratings y reputación completado.
+
+Incluye:
+
+* Reputación con fecha de última calificación recibida.
+* Historial interno de calificaciones recibidas por usuario.
+* DTO público para ratings recibidos.
+* DTO público de reputación completa.
+* Endpoint público limpio de ratings recibidos.
+* Endpoint público completo de reputación para perfil.
+* Separación entre información interna y pública.
+
+Endpoints creados:
+
+* GET /api/users/{userId}/ratings/received
+* GET /api/users/{userId}/ratings/public
+* GET /api/users/{userId}/reputation/public
+
+Reglas implementadas:
+
+* El historial interno puede mostrar datos completos de Rating.
+* La vista pública no expone ContractId.
+* La vista pública no expone RaterUserId.
+* La vista pública no expone RatedUserId.
+* La reputación pública devuelve promedio, total, última fecha y comentarios recibidos.
+
+Pruebas realizadas:
+
+* GET /api/users/{userId}/reputation con LastRatingAt → 200 OK.
+* GET /api/users/{userId}/ratings/received → 200 OK.
+* GET /api/users/{userId}/ratings/public → 200 OK.
+* GET /api/users/{userId}/reputation/public → 200 OK.
+* Respuestas públicas validadas sin IDs internos innecesarios.
+
+Resultado:
+
+La reputación queda lista para perfiles públicos en web responsiva y futura app móvil real.
+
+Impacto:
+
+OfiPro fortalece su propuesta de confianza con historial visible, promedio de calificaciones y comentarios públicos controlados.
+
+---
 
 
 ## ESTADO ACTUAL ACTUALIZADO
@@ -1681,10 +1982,12 @@ Módulos completados:
 * Bloque 7 - Evidencias V1
 * Bloque 7.1 - Corrección de diagnóstico de Evidencias
 * Bloque 7.2 - Notificaciones internas base
+* Bloque 8 - Calificaciones y reputación V1
+* Bloque 8.1 - Endurecimiento de Ratings y reputación
 
 Próximo bloque recomendado:
 
-* Bloque 8 - Calificaciones y reputación V1
+* Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web
 
 Opciones posteriores:
 
@@ -1692,9 +1995,12 @@ Opciones posteriores:
 * Carga real de archivos para evidencias
 * Mejoras de flujo de contratación
 * App móvil real en etapa posterior
+* Push notifications con FCM cuando exista app móvil real
 
 Notas estratégicas vigentes:
 
 * No desarrollar PWA.
 * Mantener enfoque mobile-first.
 * Preparar endpoints para consumo web responsivo y app móvil real.
+* Mantener DateTime.UtcNow para fechas internas.
+* No implementar push notifications reales hasta tener app móvil real.

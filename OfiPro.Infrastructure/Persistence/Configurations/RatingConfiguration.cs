@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OfiPro.Domain.Entities;
 
@@ -15,37 +10,45 @@ public class RatingConfiguration : IEntityTypeConfiguration<Rating>
     {
         builder.HasKey(x => x.Id);
 
-        builder.HasOne(x => x.Project)
-            .WithMany()
-            .HasForeignKey(x => x.ProjectId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(x => x.EvaluatorUser)
-            .WithMany()
-            .HasForeignKey(x => x.EvaluatorUserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(x => x.EvaluatedUser)
-            .WithMany()
-            .HasForeignKey(x => x.EvaluatedUserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.Property(x => x.Quality)
-            .IsRequired();
-
-        builder.Property(x => x.Punctuality)
-            .IsRequired();
-
-        builder.Property(x => x.Communication)
-            .IsRequired();
-
-        builder.Property(x => x.Professionalism)
-            .IsRequired();
-
-        builder.Property(x => x.CostBenefit)
+        builder.Property(x => x.Score)
             .IsRequired();
 
         builder.Property(x => x.Comment)
-            .HasMaxLength(1500);
+            .HasMaxLength(1000);
+
+        builder.Property(x => x.CreatedAt)
+            .IsRequired();
+
+        builder.Property(x => x.DeletedAt)
+            .IsRequired(false);
+
+        builder.HasOne(x => x.Contract)
+            .WithMany()
+            .HasForeignKey(x => x.ContractId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(x => x.RaterUser)
+            .WithMany()
+            .HasForeignKey(x => x.RaterUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(x => x.RatedUser)
+            .WithMany()
+            .HasForeignKey(x => x.RatedUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(x => new
+        {
+            x.ContractId,
+            x.RaterUserId,
+            x.RatedUserId
+        })
+        .IsUnique()
+        .HasFilter("[DeletedAt] IS NULL");
+
+        builder.ToTable(x =>
+        {
+            x.HasCheckConstraint("CK_Ratings_Score_Range", "[Score] >= 1 AND [Score] <= 5");
+        });
     }
 }
