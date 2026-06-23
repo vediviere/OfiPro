@@ -2202,3 +2202,90 @@ El diagnóstico indica que la entidad y configuración EF ya existen, pero falta
 Este módulo es crítico porque permitirá construir el perfil profesional del contratista y preparar la futura búsqueda/discovery de proveedores.
 
 # =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-22 (PARTE 2)
+
+## Objetivo
+
+Resolver diagnóstico menor del Bloque 9 y ajustar la estrategia de lanzamiento de OfiPro.
+
+# =====================================
+
+## Diagnóstico recibido
+
+Se identificaron dos observaciones menores:
+
+* DashboardRepository accede directamente a ApplicationDbContext.
+* El conteo de usuarios por rol en el dashboard administrativo no filtraba usuarios eliminados.
+
+## Corrección aplicada
+
+Se actualizó DashboardRepository.GetAdminSummaryAsync para que los conteos por rol respeten soft delete.
+
+Ajustes realizados:
+
+* TotalClients ahora filtra User.DeletedAt == null.
+* TotalContractors ahora filtra User.DeletedAt == null.
+* TotalAdmins ahora filtra User.DeletedAt == null.
+
+Resultado:
+
+El dashboard administrativo ya no cuenta usuarios eliminados lógicamente dentro de las métricas por rol.
+
+## Decisión documentada
+
+Se decidió documentar que DashboardRepository puede consultar directamente ApplicationDbContext para lecturas agregadas.
+
+Razón:
+
+El dashboard necesita combinar información de varios módulos:
+
+* Projects
+* Proposals
+* Contracts
+* Notifications
+* Ratings
+* UserRoles
+
+Esto se considera válido únicamente para endpoints de lectura agregada o read-models de dashboard.
+
+No debe usarse para saltarse reglas de negocio ni para operaciones de escritura.
+
+## Ajuste estratégico de lanzamiento
+
+Se aclaró que OfiPro no debe lanzarse al mercado solo con web.
+
+Estrategia actual:
+
+* Terminar backend/API.
+* Construir web responsiva suficiente.
+* Construir app móvil real.
+* Lanzar cuando web y app móvil estén listas para un flujo usable.
+
+Razón:
+
+OfiPro depende mucho de usuarios en campo. La app móvil es crítica para notificaciones, evidencias, seguimiento y respuesta rápida de contratistas.
+
+Impacto:
+
+Los siguientes módulos pasan a considerarse preparación pre-lanzamiento móvil:
+
+* Refresh tokens.
+* Upload real de archivos.
+* FCM Token.
+* Push notifications.
+
+## Pruebas realizadas
+
+* dotnet build → correcto.
+* GET /api/dashboard/admin/summary con admin → 200 OK.
+* Métricas administrativas por rol validadas correctamente.
+* Reglas de autorización de dashboards se mantienen correctas.
+
+## Resultado
+
+Diagnóstico menor de Bloque 9 corregido y documentado.
+
+# =====================================

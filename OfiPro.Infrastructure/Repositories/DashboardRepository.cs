@@ -353,19 +353,25 @@ public class DashboardRepository : IDashboardRepository
             .CountAsync(x => x.DeletedAt == null);
 
         var totalClients = await _context.UserRoles
-            .Where(x => x.Role == UserRoleType.Cliente)
+            .Where(x =>
+                x.Role == UserRoleType.Cliente &&
+                x.User.DeletedAt == null)
             .Select(x => x.UserId)
             .Distinct()
             .CountAsync();
 
         var totalContractors = await _context.UserRoles
-            .Where(x => x.Role == UserRoleType.Contratista)
+            .Where(x =>
+                x.Role == UserRoleType.Contratista &&
+                x.User.DeletedAt == null)
             .Select(x => x.UserId)
             .Distinct()
             .CountAsync();
 
         var totalAdmins = await _context.UserRoles
-            .Where(x => x.Role == UserRoleType.Administrador)
+            .Where(x =>
+                x.Role == UserRoleType.Administrador &&
+                x.User.DeletedAt == null)
             .Select(x => x.UserId)
             .Distinct()
             .CountAsync();

@@ -1282,6 +1282,66 @@ Las pruebas de autorización quedan más claras y se evitan falsos diagnósticos
 
 ---
 
+## D054
+
+DashboardRepository puede consultar directamente ApplicationDbContext para lecturas agregadas.
+
+Resultado:
+
+El módulo de dashboard utiliza consultas directas sobre ApplicationDbContext para construir resúmenes de cliente, contratista y administrador.
+
+Razón:
+
+Los dashboards necesitan combinar información de varios módulos en una sola respuesta:
+
+* Projects
+* Proposals
+* Contracts
+* Notifications
+* Ratings
+* UserRoles
+
+Usar repositorios individuales para cada conteo o resumen generaría más llamadas internas, más complejidad y menor eficiencia.
+
+Regla:
+
+Este patrón queda permitido únicamente para endpoints de lectura agregada o read-models de dashboard.
+
+No debe usarse para modificar reglas de negocio ni para saltarse servicios existentes en operaciones de escritura.
+
+Impacto:
+
+El dashboard puede optimizar consultas transversales, pero queda documentado que depende del schema de varias tablas y debe revisarse cuando cambien entidades relacionadas.
+
+---
+
+## D055
+
+OfiPro no debe lanzarse al mercado solo con web.
+
+Resultado:
+
+La estrategia de salida a mercado queda ajustada:
+
+* Primero terminar backend/API.
+* Después construir web responsiva suficiente.
+* Después construir app móvil real.
+* Lanzar al mercado cuando web y app móvil estén listas para un flujo usable.
+
+Razón:
+
+OfiPro depende mucho de usuarios en campo, especialmente contratistas que necesitan recibir oportunidades, notificaciones, seguimiento y carga de evidencias desde celular.
+
+Lanzar solo con web podría generar fricción porque el usuario operativo no necesariamente tendrá el hábito de abrir navegador, iniciar sesión y revisar manualmente la plataforma.
+
+Impacto:
+
+Elementos como refresh tokens, upload real de archivos, FCM Token y push notifications pasan a ser preparación pre-lanzamiento móvil, no mejoras post-lanzamiento.
+
+---
+
+
+
 ## HITO 8.2
 
 Correcciones de diagnóstico de Ratings y reputación completadas.
@@ -1723,6 +1783,51 @@ Resultado:
 Las pruebas de autorización de dashboard quedan claras y confiables.
 
 ---
+
+## P022
+
+El conteo de usuarios por rol en dashboard administrativo no filtraba usuarios eliminados.
+
+Síntoma:
+
+TotalUsers filtraba DeletedAt == null, pero TotalClients, TotalContractors y TotalAdmins contaban roles aunque el usuario estuviera eliminado lógicamente.
+
+Riesgo:
+
+El dashboard administrativo podía mostrar métricas infladas si existían usuarios eliminados con roles asignados.
+
+Solución:
+
+Agregar filtro por User.DeletedAt == null en los conteos de UserRoles dentro de DashboardRepository.GetAdminSummaryAsync.
+
+Resultado:
+
+Las métricas administrativas de usuarios por rol ahora respetan soft delete.
+
+---
+
+## P023
+
+El conteo de usuarios por rol en dashboard administrativo no filtraba usuarios eliminados.
+
+Síntoma:
+
+TotalUsers filtraba DeletedAt == null, pero TotalClients, TotalContractors y TotalAdmins podían contar roles aunque el usuario estuviera eliminado lógicamente.
+
+Riesgo:
+
+El dashboard administrativo podía mostrar métricas infladas si existían usuarios eliminados con roles asignados.
+
+Solución:
+
+Agregar filtro por User.DeletedAt == null en los conteos de UserRoles dentro de DashboardRepository.GetAdminSummaryAsync.
+
+Resultado:
+
+Las métricas administrativas de usuarios por rol ahora respetan soft delete.
+
+---
+
 
 
 # 16. RIESGOS
