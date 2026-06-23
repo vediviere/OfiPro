@@ -15,5 +15,6 @@ public enum NotificationType
 
     EvidenceUploaded = 9,
 
-    ContractPendingConfirmation = 10
+    ContractPendingConfirmation = 10,
+    RatingReceived = 11
 }

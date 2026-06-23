@@ -1,10 +1,10 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 1.3
+Versión: 1.4
 
 Fecha de creación: 2026-06-08
 
-Última actualización: 2026-06-21
+Última actualización: 2026-06-22
 
 Estado: En desarrollo
 
@@ -1148,9 +1148,241 @@ La futura app móvil y la web responsiva podrán mostrar perfiles con reputació
 
 ---
 
+## D049
 
+Una calificación recibida debe generar notificación interna.
 
+Resultado:
 
+Se agrega NotificationType.RatingReceived.
+
+Cuando un usuario recibe una calificación, el sistema genera una notificación interna para el usuario calificado.
+
+Evento implementado:
+
+* Cliente califica contratista → contratista recibe notificación.
+* Contratista califica cliente → cliente recibe notificación.
+
+Razón:
+
+El módulo de notificaciones ya cubría eventos importantes como propuestas, contratos y evidencias. Faltaba cubrir el cierre natural del ciclo de confianza: recibir una calificación.
+
+Impacto:
+
+La reputación queda mejor integrada al comportamiento mobile-first, permitiendo que web y futura app móvil muestren avisos cuando un usuario recibe una nueva calificación.
+
+---
+
+## D050
+
+Los dashboards deben organizarse por modo de operación.
+
+Resultado:
+
+Se crean endpoints separados para:
+
+* Dashboard de cliente.
+* Dashboard de contratista.
+* Dashboard de administrador.
+
+Regla:
+
+* Un usuario con rol Cliente puede consultar el dashboard de cliente.
+* Un usuario con rol Contratista puede consultar el dashboard de contratista.
+* Un usuario con rol Administrador puede consultar el dashboard administrativo.
+* Un usuario multirol puede consultar los dashboards correspondientes a sus roles.
+
+Razón:
+
+En OfiPro un mismo usuario puede tener más de un rol. Por eso el dashboard no debe interpretarse como usuario exclusivo, sino como modo de operación.
+
+Impacto:
+
+La web y futura app móvil podrán mostrar la experiencia correcta según el modo activo del usuario.
+
+---
+
+## D051
+
+El backend debe exponer los modos disponibles del usuario autenticado.
+
+Resultado:
+
+Se crea el endpoint:
+
+GET /api/dashboard/modes
+
+Este endpoint devuelve:
+
+* UserId.
+* CanUseClientMode.
+* CanUseContractorMode.
+* CanUseAdminMode.
+* AvailableModes.
+* DefaultMode.
+
+Razón:
+
+El frontend o app móvil no debe adivinar qué pantallas mostrar. El backend debe informar claramente qué modos puede usar el usuario autenticado.
+
+Impacto:
+
+Se reduce complejidad en frontend y se prepara mejor la experiencia mobile-first.
+
+---
+
+## D052
+
+El dashboard debe tener un endpoint de contexto del usuario autenticado.
+
+Resultado:
+
+Se crea el endpoint:
+
+GET /api/dashboard/me
+
+Este endpoint devuelve:
+
+* UserId.
+* Name.
+* LastName.
+* FullName.
+* Email.
+* Modes.
+
+Razón:
+
+Después del login, la web o app móvil necesita saber rápidamente quién es el usuario y qué modos puede usar.
+
+Impacto:
+
+La aplicación cliente podrá inicializar la pantalla principal con menos llamadas y menos lógica duplicada.
+
+---
+
+## D053
+
+Los usuarios de prueba deben separarse por escenario.
+
+Resultado:
+
+Para evitar confusiones en pruebas manuales, se define la siguiente estrategia:
+
+* [cliente@ofipro.com](mailto:cliente@ofipro.com) → Cliente puro.
+* [contratista@ofipro.com](mailto:contratista@ofipro.com) → Contratista puro.
+* [admin@ofipro.com](mailto:admin@ofipro.com) → Usuario multirol para pruebas administrativas e híbridas.
+
+Razón:
+
+Un usuario multirol responde correctamente a más de un modo, pero no sirve para probar restricciones negativas de rol.
+
+Impacto:
+
+Las pruebas de autorización quedan más claras y se evitan falsos diagnósticos.
+
+---
+
+## HITO 8.2
+
+Correcciones de diagnóstico de Ratings y reputación completadas.
+
+Incluye:
+
+* Se agregó NotificationType.RatingReceived.
+* Se inyectó INotificationService en RatingService.
+* Se genera notificación interna cuando un usuario recibe una calificación.
+* Se probó notificación al contratista cuando el cliente lo califica.
+* Se probó notificación al cliente cuando el contratista lo califica.
+* Se refactorizó lógica duplicada de reputación.
+* Se agregó método privado para obtener usuario activo.
+* Se agregó método privado para calcular estadísticas de reputación.
+* Se agregó método privado para mapear ratings públicos.
+
+Pruebas realizadas:
+
+* Cliente califica contratista → 200 OK.
+* Contratista recibe notificación RatingReceived → 200 OK.
+* Contratista califica cliente → 200 OK.
+* Cliente recibe notificación RatingReceived → 200 OK.
+* GET /api/users/{userId}/reputation → 200 OK.
+* GET /api/users/{userId}/ratings/public → 200 OK.
+* GET /api/users/{userId}/reputation/public → 200 OK.
+
+Resultado:
+
+El módulo de Ratings y reputación queda corregido, notificado y con menor duplicación interna.
+
+---
+
+---
+
+## HITO 9
+
+Dashboard mínimo / Resúmenes para móvil y web completado.
+
+Incluye:
+
+* Creación de DTOs de dashboard.
+* Creación de IDashboardRepository.
+* Creación de DashboardRepository.
+* Creación de IDashboardService.
+* Creación de DashboardService.
+* Creación de DashboardController.
+* Resumen de cliente.
+* Resumen de contratista.
+* Resumen de administrador.
+* Actividad reciente para cliente.
+* Actividad reciente para contratista.
+* Notificaciones recientes.
+* Contratos recientes.
+* Propuestas pendientes para cliente.
+* Proyectos disponibles para contratista.
+* Modos disponibles del usuario.
+* Contexto del usuario autenticado.
+* Validación de roles por dashboard.
+
+Endpoints creados:
+
+* GET /api/dashboard/client/summary
+* GET /api/dashboard/contractor/summary
+* GET /api/dashboard/admin/summary
+* GET /api/dashboard/modes
+* GET /api/dashboard/me
+
+Reglas implementadas:
+
+* Solo usuarios con rol Cliente pueden consultar el dashboard de cliente.
+* Solo usuarios con rol Contratista pueden consultar el dashboard de contratista.
+* Solo usuarios con rol Administrador pueden consultar el dashboard administrativo.
+* Un usuario multirol puede consultar los dashboards correspondientes a sus roles.
+* El dashboard de contratista muestra proyectos disponibles y actividad reciente.
+* El dashboard de cliente muestra propuestas pendientes y actividad reciente.
+* El dashboard administrativo muestra métricas generales del sistema.
+* El endpoint de modos informa qué vistas puede usar el usuario autenticado.
+
+Pruebas realizadas:
+
+* [cliente@ofipro.com](mailto:cliente@ofipro.com) consulta client summary → 200 OK.
+* [cliente@ofipro.com](mailto:cliente@ofipro.com) consulta contractor summary → 403 Forbidden.
+* [cliente@ofipro.com](mailto:cliente@ofipro.com) consulta admin summary → 403 Forbidden.
+* [contratista@ofipro.com](mailto:contratista@ofipro.com) consulta contractor summary → 200 OK.
+* [contratista@ofipro.com](mailto:contratista@ofipro.com) consulta client summary → 403 Forbidden.
+* [contratista@ofipro.com](mailto:contratista@ofipro.com) consulta admin summary → 403 Forbidden.
+* [admin@ofipro.com](mailto:admin@ofipro.com) consulta client summary → 200 OK.
+* [admin@ofipro.com](mailto:admin@ofipro.com) consulta contractor summary → 200 OK.
+* [admin@ofipro.com](mailto:admin@ofipro.com) consulta admin summary → 200 OK.
+* GET /api/dashboard/modes probado correctamente.
+* GET /api/dashboard/me probado correctamente.
+
+Resultado:
+
+El backend queda preparado para construir pantallas principales de cliente, contratista y administrador sin hacer múltiples llamadas separadas.
+
+Impacto:
+
+OfiPro queda mejor preparado para web responsiva y futura app móvil real con enfoque mobile-first.
+
+---
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -1426,6 +1658,71 @@ El perfil público muestra información útil sin exponer identificadores intern
 
 ---
 
+## P019
+
+Faltaba notificación cuando un usuario recibía una calificación.
+
+Riesgo:
+
+El usuario calificado podía recibir una nueva evaluación sin enterarse dentro del sistema.
+
+Solución:
+
+Agregar NotificationType.RatingReceived y generar la notificación desde RatingService.CreateAsync.
+
+Resultado:
+
+El evento de calificación recibida queda cubierto por el sistema de notificaciones internas.
+
+---
+
+## P020
+
+Existía lógica duplicada entre GetUserReputationAsync y GetPublicUserReputationAsync.
+
+Riesgo:
+
+Cambios futuros en el cálculo de reputación podían aplicarse en un método y olvidarse en el otro.
+
+Solución:
+
+Extraer lógica común a métodos privados para:
+
+* Obtener usuario activo.
+* Calcular promedio, total y última calificación.
+* Mapear ratings públicos.
+
+Resultado:
+
+El módulo de reputación queda más limpio y mantenible.
+
+---
+
+## P021
+
+Las pruebas de dashboard se confundían por usuarios multirol.
+
+Síntoma:
+
+[cliente@ofipro.com](mailto:cliente@ofipro.com) podía consultar el dashboard de contratista porque tenía rol Contratista agregado durante pruebas anteriores.
+
+Causa:
+
+El usuario ya no representaba un cliente puro.
+
+Solución:
+
+Reorganizar roles de prueba:
+
+* [cliente@ofipro.com](mailto:cliente@ofipro.com) queda solo como Cliente.
+* [contratista@ofipro.com](mailto:contratista@ofipro.com) queda solo como Contratista.
+* [admin@ofipro.com](mailto:admin@ofipro.com) queda como usuario multirol.
+
+Resultado:
+
+Las pruebas de autorización de dashboard quedan claras y confiables.
+
+---
 
 
 # 16. RIESGOS
@@ -1984,18 +2281,25 @@ Módulos completados:
 * Bloque 7.2 - Notificaciones internas base
 * Bloque 8 - Calificaciones y reputación V1
 * Bloque 8.1 - Endurecimiento de Ratings y reputación
+* Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación
+* Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web
 
 Próximo bloque recomendado:
 
-* Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web
+* Bloque 10 - ProfessionalProfile
+
+Razón:
+
+El perfil profesional es el último módulo crítico pendiente para discovery de contratistas. La entidad y configuración EF existen, pero falta completar repo, servicio, controller y DTOs.
 
 Opciones posteriores:
 
-* Perfil profesional del contratista
-* Carga real de archivos para evidencias
-* Mejoras de flujo de contratación
-* App móvil real en etapa posterior
-* Push notifications con FCM cuando exista app móvil real
+* Expiración automática de proyectos.
+* Carga real de archivos para evidencias.
+* FCM Token para push notifications futuras.
+* Refresh tokens para mejor UX móvil.
+* Tests automatizados.
+* App móvil real en etapa posterior.
 
 Notas estratégicas vigentes:
 
@@ -2004,3 +2308,8 @@ Notas estratégicas vigentes:
 * Preparar endpoints para consumo web responsivo y app móvil real.
 * Mantener DateTime.UtcNow para fechas internas.
 * No implementar push notifications reales hasta tener app móvil real.
+* Mantener usuarios de prueba separados por escenario:
+
+  * [cliente@ofipro.com](mailto:cliente@ofipro.com) como Cliente puro.
+  * [contratista@ofipro.com](mailto:contratista@ofipro.com) como Contratista puro.
+  * [admin@ofipro.com](mailto:admin@ofipro.com) como usuario multirol.

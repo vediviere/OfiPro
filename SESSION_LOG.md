@@ -1846,3 +1846,359 @@ El backend ya cuenta con módulos principales de flujo:
 El siguiente paso lógico es crear endpoints de resumen para que web y futura app móvil no tengan que hacer muchas llamadas separadas para construir sus pantallas principales.
 
 # =====================================
+
+
+# =====================================
+
+# SESIÓN 2026-06-22
+
+## Objetivo
+
+Continuar OfiPro, implementar Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web, y corregir pendientes menores detectados en el diagnóstico de Bloque 8.
+
+# =====================================
+
+## Contexto inicial
+
+El proyecto ya contaba con:
+
+* Auth.
+* Usuarios.
+* Proyectos.
+* Propuestas.
+* Contrataciones.
+* Evidencias.
+* Notificaciones internas.
+* Ratings y reputación.
+
+Antes de avanzar a nuevos módulos grandes, se decidió crear endpoints de resumen para web responsiva y futura app móvil, evitando que las pantallas principales necesiten demasiadas llamadas separadas.
+
+También se recibió un diagnóstico del Bloque 8 donde se detectaron dos puntos menores:
+
+* Faltaba notificación cuando un usuario recibía una calificación.
+* Existía duplicación entre métodos de reputación.
+
+# =====================================
+
+## Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web
+
+Completado:
+
+* Se creó carpeta DTOs/Dashboard.
+* Se creó ClientDashboardSummaryDto.
+* Se creó DashboardNotificationDto.
+* Se creó ClientDashboardContractDto.
+* Se creó ContractorDashboardSummaryDto.
+* Se creó ContractorDashboardContractDto.
+* Se creó ContractorDashboardProposalDto.
+* Se creó ContractorAvailableProjectDto.
+* Se creó ClientPendingProposalDto.
+* Se creó AdminDashboardSummaryDto.
+* Se creó DashboardModesDto.
+* Se creó DashboardUserContextDto.
+* Se creó IDashboardRepository.
+* Se implementó DashboardRepository.
+* Se creó IDashboardService.
+* Se implementó DashboardService.
+* Se creó DashboardController.
+* Se registraron IDashboardRepository e IDashboardService en Program.cs.
+
+Endpoints creados:
+
+* GET /api/dashboard/client/summary
+* GET /api/dashboard/contractor/summary
+* GET /api/dashboard/admin/summary
+* GET /api/dashboard/modes
+* GET /api/dashboard/me
+
+## Dashboard de cliente
+
+Incluye:
+
+* Total de proyectos.
+* Proyectos abiertos.
+* Propuestas pendientes recibidas.
+* Contratos activos.
+* Contratos pendientes de confirmación.
+* Contratos finalizados.
+* Notificaciones no leídas.
+* Notificaciones recientes.
+* Contratos recientes.
+* Vista previa de propuestas pendientes.
+
+## Dashboard de contratista
+
+Incluye:
+
+* Proyectos disponibles.
+* Propuestas enviadas.
+* Propuestas pendientes.
+* Propuestas aceptadas.
+* Propuestas rechazadas.
+* Contratos activos.
+* Contratos pendientes de inicio.
+* Contratos en proceso.
+* Contratos pendientes de confirmación.
+* Contratos finalizados.
+* Notificaciones no leídas.
+* Promedio de calificación.
+* Total de calificaciones.
+* Notificaciones recientes.
+* Contratos recientes.
+* Propuestas recientes.
+* Vista previa de proyectos disponibles.
+
+## Dashboard de administrador
+
+Incluye:
+
+* Total de usuarios.
+* Total de clientes.
+* Total de contratistas.
+* Total de administradores.
+* Total de proyectos.
+* Proyectos publicados.
+* Proyectos asignados.
+* Proyectos finalizados.
+* Total de contratos.
+* Contratos activos.
+* Contratos finalizados.
+* Contratos cancelados.
+* Total de calificaciones.
+* Notificaciones no leídas.
+
+## Modos disponibles
+
+Se creó endpoint:
+
+GET /api/dashboard/modes
+
+Devuelve:
+
+* UserId.
+* CanUseClientMode.
+* CanUseContractorMode.
+* CanUseAdminMode.
+* AvailableModes.
+* DefaultMode.
+
+Razón:
+
+El frontend o app móvil debe saber qué modos mostrar sin adivinar a partir del token o hacer lógica duplicada.
+
+## Contexto del usuario autenticado
+
+Se creó endpoint:
+
+GET /api/dashboard/me
+
+Devuelve:
+
+* UserId.
+* Name.
+* LastName.
+* FullName.
+* Email.
+* Modes.
+
+Razón:
+
+Después del login, la aplicación cliente necesita identificar rápidamente al usuario y sus modos disponibles.
+
+# =====================================
+
+## Ajuste de roles para pruebas
+
+Durante las pruebas se detectó que [cliente@ofipro.com](mailto:cliente@ofipro.com) tenía también rol Contratista, lo que impedía probar correctamente respuestas 403 en el dashboard de contratista.
+
+Decisión tomada:
+
+Separar usuarios de prueba por escenario.
+
+Resultado:
+
+* [cliente@ofipro.com](mailto:cliente@ofipro.com) queda como Cliente puro.
+* [contratista@ofipro.com](mailto:contratista@ofipro.com) queda como Contratista puro.
+* [admin@ofipro.com](mailto:admin@ofipro.com) queda como usuario multirol para pruebas.
+
+Razón:
+
+Un usuario multirol puede consumir correctamente más de un dashboard, pero no sirve para probar restricciones negativas de rol.
+
+# =====================================
+
+## Pruebas de Bloque 9
+
+Pruebas realizadas con [cliente@ofipro.com](mailto:cliente@ofipro.com):
+
+* GET /api/dashboard/client/summary → 200 OK.
+* GET /api/dashboard/contractor/summary → 403 Forbidden.
+* GET /api/dashboard/admin/summary → 403 Forbidden.
+* GET /api/dashboard/modes → 200 OK.
+* GET /api/dashboard/me → 200 OK.
+
+Pruebas realizadas con [contratista@ofipro.com](mailto:contratista@ofipro.com):
+
+* GET /api/dashboard/contractor/summary → 200 OK.
+* GET /api/dashboard/client/summary → 403 Forbidden.
+* GET /api/dashboard/admin/summary → 403 Forbidden.
+* GET /api/dashboard/modes → 200 OK.
+* GET /api/dashboard/me → 200 OK.
+
+Pruebas realizadas con [admin@ofipro.com](mailto:admin@ofipro.com):
+
+* GET /api/dashboard/client/summary → 200 OK.
+* GET /api/dashboard/contractor/summary → 200 OK.
+* GET /api/dashboard/admin/summary → 200 OK.
+* GET /api/dashboard/modes → 200 OK.
+* GET /api/dashboard/me → 200 OK.
+
+Resultado:
+
+Bloque 9 quedó completado y probado correctamente.
+
+# =====================================
+
+## Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación
+
+Diagnóstico recibido:
+
+* Faltaba notificación al recibir una calificación.
+* GetUserReputationAsync y GetPublicUserReputationAsync duplicaban lógica de reputación.
+
+## RatingReceived notification
+
+Completado:
+
+* Se agregó RatingReceived a NotificationType.
+* Se inyectó INotificationService en RatingService.
+* Se generó notificación interna al usuario calificado dentro de RatingService.CreateAsync.
+* La notificación usa RelatedEntityType = Rating.
+* La notificación usa RelatedEntityId con el Id de la calificación creada.
+
+Pruebas realizadas:
+
+* Cliente calificó contratista.
+* Contratista recibió notificación RatingReceived.
+* Contratista calificó cliente.
+* Cliente recibió notificación RatingReceived.
+* GET /api/notifications devolvió la notificación correctamente.
+* Se validó Type = 11.
+* Se validó IsRead = false.
+* Se validó ReadAt = null.
+
+Resultado:
+
+El evento de calificación recibida ya queda cubierto por el sistema de notificaciones internas.
+
+## Refactor de reputación
+
+Completado:
+
+* Se eliminó duplicación de lógica entre métodos de reputación.
+* Se agregó método privado para obtener usuario activo.
+* Se agregó método privado para calcular estadísticas de reputación.
+* Se agregó método privado para mapear ratings públicos.
+* GetUserReputationAsync reutiliza la lógica común.
+* GetPublicUserReputationAsync reutiliza la lógica común.
+* GetPublicReceivedByUserIdAsync reutiliza mapeo público.
+
+Pruebas realizadas:
+
+* GET /api/users/{userId}/reputation → 200 OK.
+* GET /api/users/{userId}/ratings/public → 200 OK.
+* GET /api/users/{userId}/reputation/public → 200 OK.
+
+Resultado:
+
+El módulo de Ratings y reputación queda más limpio y mantenible.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+Bloque 8 - Calificaciones y reputación V1 → Completo
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+
+Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación → Completo
+
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: 🟢 Bueno.
+
+El avance fue sólido porque se construyó sobre patrones ya existentes:
+
+* DTOs.
+* Repositories.
+* Services.
+* Controllers.
+* Validación de roles.
+* Notificaciones internas.
+* Pruebas con Swagger.
+* Verificación con SQL Server.
+
+El bloque no requirió migraciones y eso permitió avanzar más rápido.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Revisar git status.
+* Hacer commit del Bloque 8.2 y Bloque 9.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 10 - ProfessionalProfile.
+
+Razón:
+
+El diagnóstico indica que la entidad y configuración EF ya existen, pero falta completar:
+
+* DTOs.
+* Repository.
+* Service.
+* Controller.
+* Endpoints.
+* Pruebas.
+
+Este módulo es crítico porque permitirá construir el perfil profesional del contratista y preparar la futura búsqueda/discovery de proveedores.
+
+# =====================================

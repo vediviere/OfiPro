@@ -2,6 +2,7 @@
 using OfiPro.Application.DTOs.Rating;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
+using OfiPro.Application.DTOs.Notification;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
 
@@ -12,12 +13,14 @@ public class RatingService : IRatingService
     private readonly IRatingRepository _ratingRepository;
     private readonly IContractRepository _contractRepository;
     private readonly IUserRepository _userRepository;
+    private readonly INotificationService _notificationService;
 
-    public RatingService(IRatingRepository ratingRepository, IContractRepository contractRepository, IUserRepository userRepository)
+    public RatingService(IRatingRepository ratingRepository, IContractRepository contractRepository, IUserRepository userRepository, INotificationService notificationService)
     {
         _ratingRepository = ratingRepository;
         _contractRepository = contractRepository;
         _userRepository = userRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<RatingDto> CreateAsync(Guid userId, Guid contractId, CreateRatingDto request)
@@ -70,6 +73,16 @@ public class RatingService : IRatingService
         await _ratingRepository.AddAsync(rating);
         await _ratingRepository.SaveChangesAsync();
 
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            UserId = ratedUserId,
+            Type = NotificationType.RatingReceived,
+            Title = "Nueva calificación recibida",
+            Message = $"Has recibido una calificación de {rating.Score} estrella(s).",
+            RelatedEntityType = "Rating",
+            RelatedEntityId = rating.Id
+        });
+
         rating.RaterUser = userId == contract.ClientUserId
             ? contract.ClientUser
             : contract.ContractorUser;
@@ -104,33 +117,19 @@ public class RatingService : IRatingService
 
     public async Task<UserReputationDto> GetUserReputationAsync(Guid userId)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
-
-        if (user is null || user.DeletedAt != null)
-        {
-            throw new NotFoundException("Usuario no encontrado.");
-        }
+        var user = await GetActiveUserOrThrowAsync(userId);
 
         var ratings = await _ratingRepository.GetByRatedUserIdAsync(userId);
 
-        var totalRatings = ratings.Count;
-
-        var averageScore = totalRatings == 0
-            ? 0
-            : Math.Round(ratings.Average(x => x.Score), 2);
-
-        var lastRatingAt = ratings
-            .OrderByDescending(x => x.CreatedAt)
-            .Select(x => (DateTime?)x.CreatedAt)
-            .FirstOrDefault();
+        var stats = CalculateReputationStats(ratings);
 
         return new UserReputationDto
         {
             UserId = user.Id,
             UserName = $"{user.Name} {user.LastName}".Trim(),
-            AverageScore = averageScore,
-            TotalRatings = totalRatings,
-            LastRatingAt = lastRatingAt
+            AverageScore = stats.AverageScore,
+            TotalRatings = stats.TotalRatings,
+            LastRatingAt = stats.LastRatingAt
         };
     }
 
@@ -152,6 +151,34 @@ public class RatingService : IRatingService
 
     public async Task<List<PublicReceivedRatingDto>> GetPublicReceivedByUserIdAsync(Guid userId)
     {
+        await GetActiveUserOrThrowAsync(userId);
+
+        var ratings = await _ratingRepository.GetByRatedUserIdAsync(userId);
+
+        return MapToPublicReceivedRatingDtos(ratings);
+    }
+
+    public async Task<PublicUserReputationDto> GetPublicUserReputationAsync(Guid userId)
+    {
+        var user = await GetActiveUserOrThrowAsync(userId);
+
+        var ratings = await _ratingRepository.GetByRatedUserIdAsync(userId);
+
+        var stats = CalculateReputationStats(ratings);
+
+        return new PublicUserReputationDto
+        {
+            UserId = user.Id,
+            UserName = $"{user.Name} {user.LastName}".Trim(),
+            AverageScore = stats.AverageScore,
+            TotalRatings = stats.TotalRatings,
+            LastRatingAt = stats.LastRatingAt,
+            Ratings = MapToPublicReceivedRatingDtos(ratings)
+        };
+    }
+
+    private async Task<User> GetActiveUserOrThrowAsync(Guid userId)
+    {
         var user = await _userRepository.GetByIdAsync(userId);
 
         if (user is null || user.DeletedAt != null)
@@ -159,8 +186,27 @@ public class RatingService : IRatingService
             throw new NotFoundException("Usuario no encontrado.");
         }
 
-        var ratings = await _ratingRepository.GetByRatedUserIdAsync(userId);
+        return user;
+    }
 
+    private static (int TotalRatings, double AverageScore, DateTime? LastRatingAt) CalculateReputationStats(List<Rating> ratings)
+    {
+        var totalRatings = ratings.Count;
+
+        var averageScore = totalRatings == 0
+            ? 0
+            : Math.Round(ratings.Average(x => x.Score), 2);
+
+        var lastRatingAt = ratings
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => (DateTime?)x.CreatedAt)
+            .FirstOrDefault();
+
+        return (totalRatings, averageScore, lastRatingAt);
+    }
+
+    private static List<PublicReceivedRatingDto> MapToPublicReceivedRatingDtos(List<Rating> ratings)
+    {
         return ratings
             .Select(x => new PublicReceivedRatingDto
             {
@@ -173,50 +219,6 @@ public class RatingService : IRatingService
                 CreatedAt = x.CreatedAt
             })
             .ToList();
-    }
-
-    public async Task<PublicUserReputationDto> GetPublicUserReputationAsync(Guid userId)
-    {
-        var user = await _userRepository.GetByIdAsync(userId);
-
-        if (user is null || user.DeletedAt != null)
-        {
-            throw new NotFoundException("Usuario no encontrado.");
-        }
-
-        var ratings = await _ratingRepository.GetByRatedUserIdAsync(userId);
-
-        var totalRatings = ratings.Count;
-
-        var averageScore = totalRatings == 0
-            ? 0
-            : Math.Round(ratings.Average(x => x.Score), 2);
-
-        var lastRatingAt = ratings
-            .OrderByDescending(x => x.CreatedAt)
-            .Select(x => (DateTime?)x.CreatedAt)
-            .FirstOrDefault();
-
-        return new PublicUserReputationDto
-        {
-            UserId = user.Id,
-            UserName = $"{user.Name} {user.LastName}".Trim(),
-            AverageScore = averageScore,
-            TotalRatings = totalRatings,
-            LastRatingAt = lastRatingAt,
-            Ratings = ratings
-                .Select(x => new PublicReceivedRatingDto
-                {
-                    RaterUserName = x.RaterUser is null
-                        ? string.Empty
-                        : $"{x.RaterUser.Name} {x.RaterUser.LastName}".Trim(),
-
-                    Score = x.Score,
-                    Comment = x.Comment,
-                    CreatedAt = x.CreatedAt
-                })
-                .ToList()
-        };
     }
 
     private static Guid GetRatedUserId(Contract contract, Guid raterUserId)
