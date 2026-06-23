@@ -228,6 +228,11 @@ public class DashboardRepository : IDashboardRepository
                 x.DeletedAt == null)
             .ToListAsync();
 
+        var professionalProfile = await _context.ProfessionalProfiles
+            .FirstOrDefaultAsync(x =>
+                x.UserId == userId &&
+                x.DeletedAt == null);
+
         var totalRatings = receivedRatings.Count;
 
         var averageScore = totalRatings == 0
@@ -340,6 +345,10 @@ public class DashboardRepository : IDashboardRepository
             UnreadNotifications = unreadNotifications,
             AverageScore = averageScore,
             TotalRatings = totalRatings,
+            HasProfessionalProfile = professionalProfile is not null,
+            ProfessionalProfileId = professionalProfile?.Id,
+            IsProfessionalProfileActive = professionalProfile?.IsActive ?? false,
+            MainSpecialty = professionalProfile?.MainSpecialty ?? string.Empty,
             RecentNotifications = recentNotifications,
             RecentContracts = recentContracts,
             RecentProposals = recentProposals,

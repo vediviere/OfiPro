@@ -1,10 +1,10 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 1.4
+Versión: 1.5
 
 Fecha de creación: 2026-06-08
 
-Última actualización: 2026-06-22
+Última actualización: 2026-06-23
 
 Estado: En desarrollo
 
@@ -1340,6 +1340,83 @@ Elementos como refresh tokens, upload real de archivos, FCM Token y push notific
 
 ---
 
+## D056
+
+ProfessionalProfile será la base del descubrimiento de contratistas.
+
+Resultado:
+
+El módulo ProfessionalProfile permite que un usuario con rol Contratista registre información profesional visible para clientes.
+
+El perfil incluye:
+
+Especialidad principal.
+Descripción profesional.
+Años de experiencia.
+Estado activo/inactivo.
+Relación con el usuario.
+
+Razón:
+
+OfiPro no puede depender únicamente de que el cliente publique un proyecto y espere propuestas. También debe permitir que el cliente descubra contratistas de forma activa.
+
+Impacto:
+
+ProfessionalProfile se convierte en la base para búsqueda, comparación, reputación pública y futura visibilidad del contratista dentro de la plataforma.
+
+---
+
+## D057
+
+La búsqueda básica de contratistas entra en V1.
+
+Resultado:
+
+Se crea un endpoint de búsqueda básica de contratistas:
+
+GET /api/contractors
+
+Filtros soportados en V1:
+
+specialty
+state
+city
+
+Razón:
+
+El marketplace necesita cerrar el ciclo de discovery. El cliente debe poder buscar contratistas disponibles sin depender únicamente de propuestas recibidas.
+
+Regla:
+
+La búsqueda solo devuelve perfiles profesionales activos, usuarios activos y usuarios con rol Contratista.
+
+Impacto:
+
+OfiPro ya permite que el cliente encuentre contratistas por especialidad y ubicación usando consultas simples con EF Core, sin necesidad de ElasticSearch en V1.
+
+D058
+
+El dashboard del contratista debe mostrar el estado de su perfil profesional.
+
+Resultado:
+
+El endpoint de dashboard de contratista incluye información del perfil profesional:
+
+HasProfessionalProfile.
+ProfessionalProfileId.
+IsProfessionalProfileActive.
+MainSpecialty.
+
+Razón:
+
+La web y futura app móvil deben poder indicar al contratista si ya tiene perfil profesional o si necesita completarlo para aparecer en búsquedas.
+
+Impacto:
+
+El flujo mobile-first queda mejor preparado porque el home del contratista puede mostrar acciones útiles como completar, activar o revisar su perfil profesional.
+
+---
+
 
 
 ## HITO 8.2
@@ -1374,7 +1451,6 @@ El módulo de Ratings y reputación queda corregido, notificado y con menor dupl
 
 ---
 
----
 
 ## HITO 9
 
@@ -1441,6 +1517,79 @@ El backend queda preparado para construir pantallas principales de cliente, cont
 Impacto:
 
 OfiPro queda mejor preparado para web responsiva y futura app móvil real con enfoque mobile-first.
+
+---
+
+HITO 10
+
+ProfessionalProfile y búsqueda básica de contratistas completado.
+
+Incluye:
+
+Creación de DTOs de ProfessionalProfile.
+Creación de DTO de búsqueda de contratistas.
+Creación de IProfessionalProfileRepository.
+Implementación de ProfessionalProfileRepository.
+Creación de IProfessionalProfileService.
+Implementación de ProfessionalProfileService.
+Registro de dependencias en Program.cs.
+Creación de ProfessionalProfilesController.
+Creación de perfil profesional.
+Consulta de perfil profesional propio.
+Actualización de perfil profesional propio.
+Búsqueda básica de contratistas.
+Consulta pública de perfil de contratista por UserId.
+Validación de rol Contratista para administrar perfil profesional.
+Validación para evitar perfiles profesionales duplicados.
+Filtro para devolver solo perfiles activos.
+Filtro para devolver solo usuarios activos.
+Filtro para devolver solo usuarios con rol Contratista.
+Integración del estado del perfil profesional en el dashboard del contratista.
+
+Endpoints creados:
+
+POST /api/professional-profiles
+GET /api/professional-profiles/me
+PUT /api/professional-profiles/me
+GET /api/contractors
+GET /api/contractors/{userId}
+
+Endpoints actualizados:
+
+GET /api/dashboard/contractor/summary
+
+Reglas implementadas:
+
+Solo usuarios con rol Contratista pueden crear perfil profesional.
+Solo usuarios con rol Contratista pueden consultar y actualizar su perfil profesional.
+Un usuario solo puede tener un perfil profesional activo registrado.
+Un perfil profesional inactivo no aparece en búsqueda pública.
+La búsqueda pública solo muestra usuarios activos y no eliminados.
+La búsqueda pública solo muestra usuarios con rol Contratista.
+El dashboard del contratista indica si el perfil profesional existe y si está activo.
+
+Pruebas realizadas:
+
+Cliente intentando crear perfil profesional → 403 Forbidden.
+Contratista creando perfil profesional → 200 OK.
+Contratista consultando su perfil profesional → 200 OK.
+Contratista intentando crear perfil duplicado → 400 Bad Request.
+Contratista actualizando perfil profesional → 200 OK.
+GET /api/contractors sin filtros → 200 OK.
+GET /api/contractors con filtro por especialidad → 200 OK.
+GET /api/contractors con filtro por ciudad → 200 OK.
+GET /api/contractors/{userId} → 200 OK.
+Perfil profesional inactivo deja de aparecer en búsqueda.
+Perfil profesional reactivado vuelve a aparecer en búsqueda.
+Dashboard de contratista muestra HasProfessionalProfile, ProfessionalProfileId, IsProfessionalProfileActive y MainSpecialty.
+
+Resultado:
+
+OfiPro ya cuenta con perfil profesional de contratista y búsqueda básica de contratistas, cerrando el loop inicial de discovery del marketplace.
+
+Impacto:
+
+La plataforma ya no depende únicamente de que el contratista encuentre proyectos. Ahora el cliente también puede buscar contratistas activos por especialidad y ubicación.
 
 ---
 
@@ -1828,6 +1977,27 @@ Las métricas administrativas de usuarios por rol ahora respetan soft delete.
 
 ---
 
+## P024
+
+No existía descubrimiento activo de contratistas.
+
+Síntoma:
+
+El cliente podía publicar proyectos y recibir propuestas, pero no tenía forma de buscar contratistas directamente.
+
+Riesgo:
+
+La plataforma dependía demasiado de que los contratistas encontraran proyectos publicados. Esto podía reducir la actividad inicial del marketplace.
+
+Solución:
+
+Implementar ProfessionalProfile y búsqueda básica de contratistas mediante GET /api/contractors.
+
+Resultado:
+
+El cliente ya puede descubrir contratistas por especialidad, estado y ciudad.
+
+---
 
 
 # 16. RIESGOS
@@ -2388,27 +2558,31 @@ Módulos completados:
 * Bloque 8.1 - Endurecimiento de Ratings y reputación
 * Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación
 * Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web
+* Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas
 
 Próximo bloque recomendado:
 
-* Bloque 10 - ProfessionalProfile
+* Bloque 11 - Expiración automática de proyectos
 
 Razón:
 
-El perfil profesional es el último módulo crítico pendiente para discovery de contratistas. La entidad y configuración EF existen, pero falta completar repo, servicio, controller y DTOs.
+El enum ProjectStatus ya contempla Expirado, pero todavía no existe un proceso automático que marque proyectos viejos como expirados. Esto evitará que el feed del contratista se llene de proyectos fantasma.
 
 Opciones posteriores:
 
-* Expiración automática de proyectos.
+* Paginación en listados críticos.
+* Tests de integración mínimos.
+* Invitaciones directas entre usuarios.
+* Refresh tokens para experiencia móvil.
 * Carga real de archivos para evidencias.
-* FCM Token para push notifications futuras.
-* Refresh tokens para mejor UX móvil.
-* Tests automatizados.
-* App móvil real en etapa posterior.
+* FCM Token y push notifications cuando exista app móvil real.
+* Panel administrativo operativo.
+* App móvil real en etapa pre-lanzamiento.
 
 Notas estratégicas vigentes:
 
 * No desarrollar PWA.
+* No lanzar OfiPro solo con web.
 * Mantener enfoque mobile-first.
 * Preparar endpoints para consumo web responsivo y app móvil real.
 * Mantener DateTime.UtcNow para fechas internas.
@@ -2418,3 +2592,4 @@ Notas estratégicas vigentes:
   * [cliente@ofipro.com](mailto:cliente@ofipro.com) como Cliente puro.
   * [contratista@ofipro.com](mailto:contratista@ofipro.com) como Contratista puro.
   * [admin@ofipro.com](mailto:admin@ofipro.com) como usuario multirol.
+

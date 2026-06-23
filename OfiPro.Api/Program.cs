@@ -72,6 +72,8 @@ builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IProfessionalProfileRepository, ProfessionalProfileRepository>();
+builder.Services.AddScoped<IProfessionalProfileService, ProfessionalProfileService>();
 
 var jwtSettings = builder.Configuration
     .GetSection("Jwt")

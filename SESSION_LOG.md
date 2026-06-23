@@ -2289,3 +2289,209 @@ Los siguientes módulos pasan a considerarse preparación pre-lanzamiento móvil
 Diagnóstico menor de Bloque 9 corregido y documentado.
 
 # =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-23
+
+## Objetivo
+
+Implementar Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas.
+
+# =====================================
+
+## Contexto
+
+Después de completar dashboard, ratings, reputación y notificaciones internas, se decidió avanzar con ProfessionalProfile porque era el último módulo crítico pendiente para discovery de contratistas.
+
+El diagnóstico previo señalaba que la entidad ProfessionalProfile y su configuración EF ya existían, pero faltaba implementar:
+
+* DTOs.
+* Repository.
+* Service.
+* Controller.
+* Endpoints.
+* Pruebas.
+
+# =====================================
+
+## Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas
+
+Completado:
+
+* Se creó carpeta DTOs/ProfessionalProfile.
+* Se creó CreateProfessionalProfileDto.
+* Se creó UpdateProfessionalProfileDto.
+* Se creó ProfessionalProfileDto.
+* Se creó ContractorSearchDto.
+* Se creó IProfessionalProfileRepository.
+* Se implementó ProfessionalProfileRepository.
+* Se creó IProfessionalProfileService.
+* Se implementó ProfessionalProfileService.
+* Se registraron IProfessionalProfileRepository e IProfessionalProfileService en Program.cs.
+* Se creó ProfessionalProfilesController.
+* Se creó endpoint para crear perfil profesional.
+* Se creó endpoint para consultar perfil profesional propio.
+* Se creó endpoint para actualizar perfil profesional propio.
+* Se creó endpoint para búsqueda básica de contratistas.
+* Se creó endpoint para consultar perfil público de contratista por UserId.
+* Se integró el estado del perfil profesional al dashboard del contratista.
+
+Endpoints creados:
+
+* POST /api/professional-profiles
+* GET /api/professional-profiles/me
+* PUT /api/professional-profiles/me
+* GET /api/contractors
+* GET /api/contractors/{userId}
+
+Endpoint actualizado:
+
+* GET /api/dashboard/contractor/summary
+
+# =====================================
+
+## Reglas implementadas
+
+* Solo usuarios con rol Contratista pueden crear perfil profesional.
+* Solo usuarios con rol Contratista pueden consultar su perfil profesional.
+* Solo usuarios con rol Contratista pueden actualizar su perfil profesional.
+* Un usuario no puede crear más de un perfil profesional.
+* Los perfiles profesionales pueden activarse o desactivarse.
+* Los perfiles inactivos no aparecen en búsqueda pública.
+* Los usuarios eliminados lógicamente no aparecen en búsqueda pública.
+* Los usuarios inactivos no aparecen en búsqueda pública.
+* La búsqueda pública solo devuelve usuarios con rol Contratista.
+* La búsqueda permite filtros por specialty, state y city.
+* El dashboard del contratista muestra si ya existe perfil profesional.
+
+# =====================================
+
+## Pruebas realizadas
+
+Con [cliente@ofipro.com](mailto:cliente@ofipro.com):
+
+* POST /api/professional-profiles → 403 Forbidden.
+* GET /api/contractors → 200 OK.
+
+Con [contratista@ofipro.com](mailto:contratista@ofipro.com):
+
+* POST /api/professional-profiles → 200 OK.
+* GET /api/professional-profiles/me → 200 OK.
+* POST /api/professional-profiles duplicado → 400 Bad Request.
+* PUT /api/professional-profiles/me → 200 OK.
+* GET /api/contractors → 200 OK.
+* GET /api/contractors?specialty=plomería → 200 OK.
+* GET /api/contractors?city={ciudad} → 200 OK.
+* GET /api/contractors/{userId} → 200 OK.
+* GET /api/dashboard/contractor/summary → 200 OK.
+
+Prueba de perfil inactivo:
+
+* Se actualizó perfil profesional con IsActive = false.
+* GET /api/contractors dejó de mostrar al contratista.
+* Se actualizó perfil profesional con IsActive = true.
+* GET /api/contractors volvió a mostrar al contratista.
+
+Resultado:
+
+Bloque 10 quedó completado y probado correctamente.
+
+# =====================================
+
+## Decisiones importantes
+
+D056
+
+ProfessionalProfile será la base del descubrimiento de contratistas.
+
+D057
+
+La búsqueda básica de contratistas entra en V1.
+
+D058
+
+El dashboard del contratista debe mostrar el estado de su perfil profesional.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+Bloque 8 - Calificaciones y reputación V1 → Completo
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+
+Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación → Completo
+
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: 🟢 Bueno.
+
+El bloque avanzó rápido porque la entidad ProfessionalProfile y la configuración EF ya existían. El trabajo principal fue completar el stack de aplicación:
+
+* DTOs.
+* Repository.
+* Service.
+* Controller.
+* Endpoints.
+* Pruebas.
+* Integración con dashboard.
+
+No se requirió migración.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Actualizar documentación.
+* Revisar git status.
+* Hacer commit del Bloque 10.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 11 - Expiración automática de proyectos.
+
+Razón:
+
+ProjectStatus ya tiene el valor Expirado, pero todavía no existe un proceso automático que marque proyectos publicados antiguos como expirados. Esto es importante para evitar proyectos fantasma en el feed del contratista.
+
+# =====================================
