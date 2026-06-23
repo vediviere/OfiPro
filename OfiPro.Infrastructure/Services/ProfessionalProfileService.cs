@@ -13,10 +13,7 @@ public class ProfessionalProfileService : IProfessionalProfileService
     private readonly IUserRepository _userRepository;
     private readonly IRatingRepository _ratingRepository;
 
-    public ProfessionalProfileService(
-        IProfessionalProfileRepository professionalProfileRepository,
-        IUserRepository userRepository,
-        IRatingRepository ratingRepository)
+    public ProfessionalProfileService(IProfessionalProfileRepository professionalProfileRepository, IUserRepository userRepository,        IRatingRepository ratingRepository)
     {
         _professionalProfileRepository = professionalProfileRepository;
         _userRepository = userRepository;
@@ -92,17 +89,22 @@ public class ProfessionalProfileService : IProfessionalProfileService
     {
         var profiles = await _professionalProfileRepository.SearchContractorsAsync(specialty, state, city);
 
+        if (profiles.Count == 0)
+        {
+            return new List<ContractorSearchDto>();
+        }
+
+        var userIds = profiles
+            .Select(profile => profile.UserId)
+            .ToList();
+
+        var reputationStats = await _ratingRepository.GetReputationStatsByUserIdsAsync(userIds);
+
         var result = new List<ContractorSearchDto>();
 
         foreach (var profile in profiles)
         {
-            var ratings = await _ratingRepository.GetByRatedUserIdAsync(profile.UserId);
-
-            var totalRatings = ratings.Count;
-
-            var averageScore = totalRatings == 0
-                ? 0
-                : Math.Round(ratings.Average(x => x.Score), 2);
+            reputationStats.TryGetValue(profile.UserId, out var stats);
 
             result.Add(new ContractorSearchDto
             {
@@ -114,8 +116,8 @@ public class ProfessionalProfileService : IProfessionalProfileService
                 MainSpecialty = profile.MainSpecialty,
                 Description = profile.Description,
                 YearsExperience = profile.YearsExperience,
-                AverageScore = averageScore,
-                TotalRatings = totalRatings
+                AverageScore = stats.AverageScore,
+                TotalRatings = stats.TotalRatings
             });
         }
 

@@ -1520,7 +1520,7 @@ OfiPro queda mejor preparado para web responsiva y futura app móvil real con en
 
 ---
 
-HITO 10
+## HITO 10
 
 ProfessionalProfile y búsqueda básica de contratistas completado.
 
@@ -1590,6 +1590,38 @@ OfiPro ya cuenta con perfil profesional de contratista y búsqueda básica de co
 Impacto:
 
 La plataforma ya no depende únicamente de que el contratista encuentre proyectos. Ahora el cliente también puede buscar contratistas activos por especialidad y ubicación.
+
+---
+
+## HITO 10.1
+
+Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas.
+
+Incluye:
+
+* Corrección de N+1 queries en SearchContractorsAsync.
+* Creación de método agregado para estadísticas de reputación por lista de usuarios.
+* Implementación de GetReputationStatsByUserIdsAsync en RatingRepository.
+* Uso de GroupBy por RatedUserId para obtener AverageScore y TotalRatings.
+* Actualización de SearchContractorsAsync para evitar consultas de ratings dentro del foreach.
+* Verificación de snapshot de EF Core para ProfessionalProfiles.
+* Confirmación de que ProfessionalProfiles ya existía desde InitialCreate.
+* Confirmación de que no se requiere migración AddProfessionalProfiles.
+
+Pruebas realizadas:
+
+* GET /api/contractors → 200 OK.
+* GET /api/contractors?specialty=plomería → 200 OK.
+* GET /api/contractors/{userId} → 200 OK.
+* Verificación de cambios pendientes de EF Core → sin cambios pendientes.
+
+Resultado:
+
+El Bloque 10 queda endurecido a nivel de rendimiento básico y consistencia de migraciones.
+
+Impacto:
+
+La búsqueda de contratistas queda más limpia, más eficiente y sin deuda inmediata relacionada con ProfessionalProfiles.
 
 ---
 
@@ -1996,6 +2028,69 @@ Implementar ProfessionalProfile y búsqueda básica de contratistas mediante GET
 Resultado:
 
 El cliente ya puede descubrir contratistas por especialidad, estado y ciudad.
+
+---
+
+## P025
+
+SearchContractorsAsync tenía riesgo de N+1 queries.
+
+Síntoma:
+
+La búsqueda de contratistas obtenía primero los perfiles profesionales y después, dentro de un foreach, consultaba las calificaciones de cada contratista de forma individual.
+
+Riesgo:
+
+Con pocos usuarios era aceptable, pero con más resultados podía generar demasiadas consultas a base de datos.
+
+Ejemplo:
+
+* 5 contratistas → 1 query de búsqueda + 5 queries de ratings.
+* 50 contratistas → 1 query de búsqueda + 50 queries de ratings.
+
+Solución:
+
+Se agregó un método agregado en IRatingRepository para obtener estadísticas de reputación por lista de usuarios en una sola consulta:
+
+GetReputationStatsByUserIdsAsync(List<Guid> userIds)
+
+Resultado:
+
+SearchContractorsAsync ahora obtiene los perfiles profesionales y después consulta los promedios y totales de ratings en una sola operación agrupada por RatedUserId.
+
+Impacto:
+
+La búsqueda de contratistas queda mejor preparada para crecer sin multiplicar consultas innecesarias.
+
+---
+
+## P026
+
+No existe una migración separada AddProfessionalProfiles.
+
+Síntoma:
+
+La tabla ProfessionalProfiles no tiene una migración propia llamada AddProfessionalProfiles.
+
+Análisis:
+
+Esto no representa un error porque ProfessionalProfiles ya formaba parte del esquema inicial desde InitialCreate.
+
+Riesgo:
+
+Si el snapshot de EF Core estuviera desincronizado con ProfessionalProfileConfiguration, podrían aparecer cambios inesperados en migraciones futuras.
+
+Verificación:
+
+Se ejecutó la verificación de cambios pendientes del modelo de EF Core.
+
+Resultado:
+
+EF Core no detectó cambios pendientes. El snapshot está sincronizado con el modelo actual.
+
+Impacto:
+
+No se requiere migración adicional para ProfessionalProfiles.
 
 ---
 

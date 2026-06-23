@@ -2495,3 +2495,80 @@ Razón:
 ProjectStatus ya tiene el valor Expirado, pero todavía no existe un proceso automático que marque proyectos publicados antiguos como expirados. Esto es importante para evitar proyectos fantasma en el feed del contratista.
 
 # =====================================
+
+
+# =====================================
+
+## Corrección de diagnóstico Bloque 10
+
+Después de completar ProfessionalProfile y búsqueda básica de contratistas, se revisó diagnóstico técnico del bloque.
+
+Hallazgos:
+
+* SearchContractorsAsync tenía riesgo de N+1 queries al consultar ratings dentro de un foreach.
+* No existía una migración separada AddProfessionalProfiles, aunque la tabla ProfessionalProfiles ya existía desde InitialCreate.
+
+# =====================================
+
+## Corrección aplicada: N+1 queries
+
+Se agregó en IRatingRepository:
+
+GetReputationStatsByUserIdsAsync(List<Guid> userIds)
+
+Se implementó en RatingRepository usando:
+
+* Filtro por RatedUserId.
+* Filtro DeletedAt == null.
+* GroupBy por RatedUserId.
+* Average para Score.
+* Count para TotalRatings.
+
+Se actualizó SearchContractorsAsync en ProfessionalProfileService para:
+
+* Obtener primero los perfiles profesionales.
+* Obtener la lista de UserIds.
+* Consultar estadísticas de reputación en una sola operación.
+* Construir los ContractorSearchDto sin consultar base de datos dentro del foreach.
+
+Resultado:
+
+La búsqueda de contratistas pasó de una posible consulta por contratista a una consulta agrupada para reputación.
+
+# =====================================
+
+## Verificación de migraciones ProfessionalProfiles
+
+Se verificó si EF Core detectaba cambios pendientes en el modelo.
+
+Resultado:
+
+EF Core no detectó cambios pendientes.
+
+Conclusión:
+
+No se requiere migración AddProfessionalProfiles porque ProfessionalProfiles ya formaba parte del esquema inicial desde InitialCreate y el snapshot está sincronizado.
+
+# =====================================
+
+## Pruebas posteriores
+
+Se probaron nuevamente:
+
+* GET /api/contractors.
+* GET /api/contractors?specialty=plomería.
+* GET /api/contractors/{userId}.
+
+Resultado:
+
+Todas las pruebas fueron correctas.
+
+# =====================================
+
+## Estado del diagnóstico
+
+P025 - N+1 queries en SearchContractorsAsync → Corregido.
+
+P026 - Verificación de snapshot ProfessionalProfiles → Correcto, sin migración pendiente.
+
+# =====================================

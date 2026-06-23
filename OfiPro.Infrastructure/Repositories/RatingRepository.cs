@@ -52,6 +52,26 @@ public class RatingRepository : IRatingRepository
             .ToListAsync();
     }
 
+    public async Task<Dictionary<Guid, (double AverageScore, int TotalRatings)>> GetReputationStatsByUserIdsAsync(List<Guid> userIds)
+    {
+        var stats = await _context.Ratings
+            .Where(x =>
+                userIds.Contains(x.RatedUserId) &&
+                x.DeletedAt == null)
+            .GroupBy(x => x.RatedUserId)
+            .Select(x => new
+            {
+                UserId = x.Key,
+                AverageScore = x.Average(r => r.Score),
+                TotalRatings = x.Count()
+            })
+            .ToListAsync();
+
+        return stats.ToDictionary(
+            x => x.UserId,
+            x => (Math.Round(x.AverageScore, 2), x.TotalRatings));
+    }
+
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
