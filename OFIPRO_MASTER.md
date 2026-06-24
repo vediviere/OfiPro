@@ -1,10 +1,10 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 1.5
+Versión: 1.6
 
 Fecha de creación: 2026-06-08
 
-Última actualización: 2026-06-23
+Última actualización: 2026-06-24
 
 Estado: En desarrollo
 
@@ -324,6 +324,7 @@ NotificationType
 * ContractCancelled
 * EvidenceUploaded
 * ContractPendingConfirmation
+* RatingReceived
 
 ---
 
@@ -1394,7 +1395,7 @@ Impacto:
 
 OfiPro ya permite que el cliente encuentre contratistas por especialidad y ubicación usando consultas simples con EF Core, sin necesidad de ElasticSearch en V1.
 
-D058
+## D058
 
 El dashboard del contratista debe mostrar el estado de su perfil profesional.
 
@@ -1417,6 +1418,32 @@ El flujo mobile-first queda mejor preparado porque el home del contratista puede
 
 ---
 
+## D059
+
+Los proyectos publicados antiguos deben expirar automáticamente.
+
+Resultado:
+
+Se implementa un proceso automático que marca como Expirado los proyectos publicados que superan el límite de antigüedad configurado.
+
+Configuración agregada:
+
+ProjectExpiration
+ProjectExpiration
+
+Razón:
+
+Evitar que proyectos viejos sigan apareciendo como oportunidades disponibles para contratistas.
+
+Impacto:
+
+El feed general de proyectos queda más limpio y evita mostrar proyectos fantasma. Esto mejora la experiencia del contratista, especialmente en una futura app móvil donde el usuario esperará oportunidades vigentes y accionables.
+
+Regla:
+
+Solo los proyectos con estado Publicado pueden expirar automáticamente. Los proyectos eliminados lógicamente no se procesan.
+
+---
 
 
 ## HITO 8.2
@@ -1624,6 +1651,57 @@ Impacto:
 La búsqueda de contratistas queda más limpia, más eficiente y sin deuda inmediata relacionada con ProfessionalProfiles.
 
 ---
+
+## HITO 11
+
+Expiración automática de proyectos completada.
+
+Incluye:
+
+Validación de existencia previa de ProjectStatus.Expirado.
+Confirmación de que Project.CreatedAt ya existía.
+Confirmación de que no se requería migración.
+Creación de método ExpirePublishedProjectsAsync en IProjectRepository.
+Implementación de expiración masiva en ProjectRepository.
+Creación de ProjectExpirationBackgroundService.
+Registro del HostedService en Program.cs.
+Configuración de ProjectExpiration en appsettings.json.
+Ajuste del feed general de proyectos para devolver solo proyectos publicados activos.
+
+Configuración agregada:
+
+ProjectExpiration
+ProjectExpiration
+
+Reglas implementadas:
+
+Solo proyectos con estado Publicado pueden expirar automáticamente.
+Los proyectos eliminados lógicamente no se procesan.
+Los proyectos expirados no aparecen en el feed general.
+La expiración se ejecuta al iniciar la API.
+La expiración se ejecuta periódicamente según configuración.
+No se requiere migración porque los campos necesarios ya existían.
+
+Pruebas realizadas:
+
+Se localizó un proyecto publicado desde SQL Server.
+Se forzó su CreatedAt a una fecha antigua.
+Se reinició la API.
+El BackgroundService ejecutó la expiración.
+El proyecto cambió de Status = 1 a Status = 7.
+Se inició sesión con contratista@ofipro.com.
+GET /api/projects dejó de mostrar el proyecto expirado.
+
+Resultado:
+
+OfiPro ya cuenta con expiración automática de proyectos publicados antiguos.
+
+Impacto:
+
+El feed de proyectos queda más confiable para contratistas y mejor preparado para una experiencia mobile-first.
+
+---
+
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -2091,6 +2169,38 @@ EF Core no detectó cambios pendientes. El snapshot está sincronizado con el mo
 Impacto:
 
 No se requiere migración adicional para ProfessionalProfiles.
+
+---
+
+## P027
+
+Los proyectos publicados antiguos podían permanecer visibles indefinidamente.
+
+Síntoma:
+
+ProjectStatus ya tenía el valor Expirado, pero no existía un proceso automático que cambiara proyectos antiguos de Publicado a Expirado.
+
+Riesgo:
+
+El feed del contratista podía llenarse de proyectos fantasma, es decir, proyectos que seguían visibles aunque ya no fueran oportunidades realmente vigentes.
+
+Solución:
+
+Se implementó ProjectExpirationBackgroundService para ejecutar la expiración de proyectos publicados antiguos.
+
+También se agregó en IProjectRepository el método:
+
+ExpirePublishedProjectsAsync(DateTime expirationLimitUtc)
+
+Y se implementó en ProjectRepository usando actualización masiva.
+
+Resultado:
+
+Los proyectos publicados con antigüedad mayor al límite configurado cambian automáticamente a ProjectStatus.Expirado.
+
+Impacto:
+
+GET /api/projects deja de mostrar proyectos expirados, reduciendo ruido en el feed y preparando mejor el backend para web responsiva y app móvil real.
 
 ---
 
@@ -2654,24 +2764,34 @@ Módulos completados:
 * Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación
 * Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web
 * Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas
+* Bloque 11 - Expiración automática de proyectos
 
 Próximo bloque recomendado:
 
-* Bloque 11 - Expiración automática de proyectos
+* Bloque 12 - Paginación y ordenamiento básico en listados críticos
 
 Razón:
 
-El enum ProjectStatus ya contempla Expirado, pero todavía no existe un proceso automático que marque proyectos viejos como expirados. Esto evitará que el feed del contratista se llene de proyectos fantasma.
+Antes de conectar web responsiva y futura app móvil real, conviene estabilizar los endpoints que devuelven listas para evitar respuestas demasiado grandes, mejorar rendimiento y dejar contratos de API más claros.
+
+Listados críticos sugeridos:
+
+* GET /api/projects
+* GET /api/contractors
+* GET /api/notifications
+* GET /api/contracts/mine
+* GET /api/proposals/my-proposals
+* GET /api/projects/my-projects
 
 Opciones posteriores:
 
-* Paginación en listados críticos.
+* Invitaciones directas a contratistas.
 * Tests de integración mínimos.
-* Invitaciones directas entre usuarios.
 * Refresh tokens para experiencia móvil.
 * Carga real de archivos para evidencias.
 * FCM Token y push notifications cuando exista app móvil real.
 * Panel administrativo operativo.
+* Web responsiva.
 * App móvil real en etapa pre-lanzamiento.
 
 Notas estratégicas vigentes:

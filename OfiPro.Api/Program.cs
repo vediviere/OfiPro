@@ -6,6 +6,7 @@ using OfiPro.Application.Common.Settings;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
 using OfiPro.Infrastructure.Persistence;
+using OfiPro.Api.BackgroundServices;
 using OfiPro.Infrastructure.Repositories;
 using OfiPro.Infrastructure.Services;
 using System.Text;
@@ -74,6 +75,7 @@ builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IProfessionalProfileRepository, ProfessionalProfileRepository>();
 builder.Services.AddScoped<IProfessionalProfileService, ProfessionalProfileService>();
+builder.Services.AddHostedService<ProjectExpirationBackgroundService>();
 
 var jwtSettings = builder.Configuration
     .GetSection("Jwt")

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Domain.Entities;
+using OfiPro.Domain.Enums;
 using OfiPro.Infrastructure.Persistence;
 
 namespace OfiPro.Infrastructure.Repositories;
@@ -35,7 +36,7 @@ public class ProjectRepository : IProjectRepository
                 .ThenInclude(x => x.Category)
             .Include(x => x.Requirements)
                 .ThenInclude(x => x.Subcategory)
-            .Where(x => x.DeletedAt == null)
+            .Where(x => x.DeletedAt == null && x.Status == ProjectStatus.Publicado)
             .ToListAsync();
     }
 
@@ -51,6 +52,17 @@ public class ProjectRepository : IProjectRepository
                 x.CreatedByUserId == userId &&
                 x.DeletedAt == null)
             .ToListAsync();
+    }
+
+    public async Task<int> ExpirePublishedProjectsAsync(DateTime expirationLimitUtc)
+    {
+        return await _context.Projects
+            .Where(x =>
+                x.DeletedAt == null &&
+                x.Status == ProjectStatus.Publicado &&
+                x.CreatedAt <= expirationLimitUtc)
+            .ExecuteUpdateAsync(setters =>
+                setters.SetProperty(x => x.Status, ProjectStatus.Expirado));
     }
 
     public async Task AddAsync(Project project)

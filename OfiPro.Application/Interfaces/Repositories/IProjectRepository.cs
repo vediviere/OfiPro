@@ -10,4 +10,5 @@ public interface IProjectRepository
     Task AddAsync(Project project);
     Task SaveChangesAsync();
     Task UpdateRequirementsAsync(Project project, List<ProjectRequirement> requirements);
+    Task<int> ExpirePublishedProjectsAsync(DateTime expirationLimitUtc);
 }

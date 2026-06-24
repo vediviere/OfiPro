@@ -2572,3 +2572,164 @@ P025 - N+1 queries en SearchContractorsAsync → Corregido.
 P026 - Verificación de snapshot ProfessionalProfiles → Correcto, sin migración pendiente.
 
 # =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-24
+
+## Objetivo
+
+Implementar, probar y cerrar Bloque 11 - Expiración automática de proyectos.
+
+# =====================================
+
+## Contexto
+
+Después de completar ProfessionalProfile, búsqueda básica de contratistas y la corrección de diagnóstico del Bloque 10, el siguiente problema detectado fue que ProjectStatus ya tenía el valor Expirado, pero no existía un proceso automático que marcara proyectos antiguos como expirados.
+
+Esto podía provocar que el feed del contratista mostrara proyectos viejos o fantasma.
+
+# =====================================
+
+## Bloque 11 - Expiración automática de proyectos
+
+Completado:
+
+* Se confirmó que ProjectStatus.Expirado ya existía.
+* Se confirmó que Project.CreatedAt ya existía.
+* Se confirmó que no era necesaria una migración.
+* Se agregó ExpirePublishedProjectsAsync en IProjectRepository.
+* Se implementó ExpirePublishedProjectsAsync en ProjectRepository.
+* Se usó actualización masiva para expirar proyectos publicados antiguos.
+* Se creó ProjectExpirationBackgroundService.
+* Se registró ProjectExpirationBackgroundService como HostedService en Program.cs.
+* Se agregó configuración ProjectExpiration en appsettings.json.
+* Se ajustó GET /api/projects para devolver solo proyectos publicados activos.
+
+Configuración agregada:
+
+* ProjectExpiration:ExpirationDays
+* ProjectExpiration:CheckIntervalHours
+
+# =====================================
+
+## Reglas implementadas
+
+* Solo los proyectos con estado Publicado pueden expirar automáticamente.
+* Los proyectos eliminados lógicamente no se procesan.
+* Los proyectos expirados no aparecen en el feed general.
+* La expiración corre automáticamente al iniciar la API.
+* La expiración corre periódicamente según la configuración.
+* No se requiere migración para este bloque.
+
+# =====================================
+
+## Pruebas realizadas
+
+Desde SQL Server:
+
+* Se localizó un proyecto publicado.
+* Se verificó que tenía Status = 1.
+* Se forzó su CreatedAt a una fecha antigua.
+* Se reinició la API.
+* Se volvió a consultar el proyecto en SQL Server.
+* Se confirmó que cambió de Status = 1 a Status = 7.
+
+Desde Swagger:
+
+* Se inició sesión con [contratista@ofipro.com](mailto:contratista@ofipro.com).
+* Se probó GET /api/projects.
+* Se confirmó que el proyecto expirado ya no aparecía en el feed general.
+
+Resultado:
+
+Bloque 11 quedó completado y probado correctamente.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+Bloque 8 - Calificaciones y reputación V1 → Completo
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+
+Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación → Completo
+
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+
+Bloque 10.1 - Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas → Completo
+
+Bloque 11 - Expiración automática de proyectos → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: 🟢 Bueno.
+
+El bloque fue pequeño y avanzó rápido porque no requirió migración ni cambios en entidades. Se aprovechó que ProjectStatus.Expirado y Project.CreatedAt ya existían.
+
+El cambio fue importante porque corrige un problema real del marketplace: evitar que los contratistas vean proyectos antiguos como si todavía fueran oportunidades disponibles.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Actualizar documentación.
+* Revisar git status.
+* Hacer commit del Bloque 11.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 12 - Paginación y ordenamiento básico en listados críticos.
+
+Razón:
+
+Antes de conectar web responsiva y futura app móvil real, conviene estabilizar los endpoints que devuelven listas para evitar respuestas demasiado grandes, mejorar rendimiento y dejar contratos de API más claros.
+
+Listados sugeridos:
+
+* GET /api/projects
+* GET /api/contractors
+* GET /api/notifications
+* GET /api/contracts/mine
+* GET /api/proposals/my-proposals
+* GET /api/projects/my-projects
+
+# =====================================
+
