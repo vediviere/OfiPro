@@ -48,6 +48,7 @@ public class ProfessionalProfilesController : ControllerBase
         return Ok(profile);
     }
 
+    [AllowAnonymous]
     [HttpGet("contractors")]
     public async Task<IActionResult> SearchContractors([FromQuery] ContractorSearchQueryDto query)
     {
@@ -56,6 +57,7 @@ public class ProfessionalProfilesController : ControllerBase
         return Ok(contractors);
     }
 
+    [AllowAnonymous]
     [HttpGet("contractors/{userId:guid}")]
     public async Task<IActionResult> GetPublicContractorProfile(Guid userId)
     {

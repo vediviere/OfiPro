@@ -2932,4 +2932,75 @@ Pruebas iniciales sugeridas:
 * GET /api/contractors paginado.
 * GET /api/notifications paginado.
 
+
 # =====================================
+
+## Corrección de diagnóstico post-Bloque 11
+
+Después de completar Bloque 11 - Expiración automática de proyectos, se revisó diagnóstico técnico y estratégico del bloque.
+
+Hallazgos:
+
+* GET /api/contractors requería token aunque representa búsqueda pública.
+* GET /api/contractors/{userId} requería token aunque representa perfil público.
+* La expiración automática de proyectos ocurría silenciosamente.
+* El dueño del proyecto no recibía aviso cuando su publicación expiraba.
+
+# =====================================
+
+## Correcciones aplicadas
+
+### Acceso público a contratistas
+
+Se agregó AllowAnonymous a:
+
+* GET /api/contractors
+* GET /api/contractors/{userId}
+
+Resultado:
+
+Los perfiles públicos de contratistas pueden consultarse sin iniciar sesión.
+
+Razón:
+
+Un perfil público puede compartirse por WhatsApp, redes sociales o enlace directo. Pedir token en ese flujo genera fricción y rompe el discovery del marketplace.
+
+### Notificación por proyecto expirado
+
+Se agregó NotificationType.ProjectExpired.
+
+Se actualizó ProjectExpirationBackgroundService para:
+
+* Consultar proyectos que van a expirar.
+* Expirar proyectos publicados antiguos.
+* Generar notificación interna al dueño del proyecto expirado.
+
+Resultado:
+
+Cuando un proyecto expira automáticamente, el cliente recibe una notificación interna.
+
+# =====================================
+
+## Pruebas realizadas
+
+Sin token:
+
+* GET /api/contractors → 200 OK.
+* GET /api/contractors/{userId} → 200 OK.
+
+Con SQL Server y Swagger:
+
+* Se forzó un proyecto publicado antiguo.
+* Se reinició la API.
+* El proyecto cambió a Status = 7.
+* Se inició sesión con cliente@ofipro.com.
+* GET /api/notifications?pageNumber=1&pageSize=5&sortBy=createdAt&sortDirection=desc → 200 OK.
+* Se validó notificación ProjectExpired asociada al proyecto expirado.
+
+Resultado:
+
+Corrección de diagnóstico post-Bloque 11 completada y probada correctamente.
+
+# =====================================
+
+

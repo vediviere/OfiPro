@@ -115,6 +115,17 @@ public class ProjectRepository : IProjectRepository
                 setters.SetProperty(x => x.Status, ProjectStatus.Expirado));
     }
 
+    public async Task<List<Project>> GetPublishedProjectsToExpireAsync(DateTime expirationLimitUtc)
+    {
+        return await _context.Projects
+            .AsNoTracking()
+            .Where(x =>
+                x.DeletedAt == null &&
+                x.Status == ProjectStatus.Publicado &&
+                x.CreatedAt <= expirationLimitUtc)
+            .ToListAsync();
+    }
+
     public async Task AddAsync(Project project)
     {
         await _context.Projects.AddAsync(project);

@@ -325,6 +325,7 @@ NotificationType
 * EvidenceUploaded
 * ContractPendingConfirmation
 * RatingReceived
+* ProjectExpired
 
 ---
 
@@ -1484,6 +1485,54 @@ Los listados críticos no deben crecer sin paginación. Nuevos endpoints de list
 
 ---
 
+## D061
+
+Los perfiles públicos de contratistas deben poder consultarse sin autenticación.
+
+Resultado:
+
+Los endpoints públicos de contratistas permiten consulta sin token:
+
+* GET /api/contractors
+* GET /api/contractors/{userId}
+
+Razón:
+
+El perfil público de un contratista puede compartirse por canales externos como WhatsApp, redes sociales o enlaces directos. Si el usuario que recibe el enlace no ha iniciado sesión, no debe recibir 401 Unauthorized.
+
+Impacto:
+
+La búsqueda y visualización pública de contratistas queda alineada con el objetivo de discovery del marketplace.
+
+Regla:
+
+Solo los endpoints públicos de búsqueda y perfil de contratista permiten acceso anónimo. La creación, consulta propia y actualización de perfil profesional siguen protegidas con JWT.
+
+---
+
+## D062
+
+La expiración automática de proyectos debe notificar al dueño del proyecto.
+
+Resultado:
+
+Cuando un proyecto publicado expira automáticamente, el sistema genera una notificación interna para el usuario que creó el proyecto.
+
+Tipo de notificación agregado:
+
+* ProjectExpired
+
+Razón:
+
+Si un proyecto desaparece del feed por expiración y el cliente no recibe aviso, puede interpretar el comportamiento como error del sistema.
+
+Impacto:
+
+El cliente mantiene visibilidad sobre el estado de sus publicaciones y la experiencia queda mejor preparada para web responsiva y app móvil real.
+
+---
+
+
 ## HITO 8.2
 
 Correcciones de diagnóstico de Ratings y reputación completadas.
@@ -1745,61 +1794,74 @@ El feed de proyectos queda más confiable para contratistas y mejor preparado pa
 Paginación y ordenamiento básico en listados críticos completado.
 Incluye:
 
-•	Creación de DTOs comunes de paginación.
-•	Creación de PaginationQueryDto.
-•	Creación de PaginatedResponseDto.
-•	Organización de DTOs comunes dentro de carpeta Pagination.
-•	Paginación en GET /api/projects.
-•	Paginación en GET /api/contractors.
-•	Paginación en GET /api/notifications.
-•	Paginación en GET /api/contracts/mine.
-•	Paginación en GET /api/proposals/my-proposals.
-•	Paginación en GET /api/projects/my-projects.
-•	Ordenamiento básico por campos permitidos en proyectos.
-•	Ordenamiento básico por campos permitidos en contratistas.
-•	Ordenamiento básico por campos permitidos en notificaciones.
-•	Ordenamiento básico por campos permitidos en contratos.
-•	Ordenamiento básico por campos permitidos en propuestas.
-•	Conteo total de registros para metadata de paginación.
+* Creación de DTOs comunes de paginación.
+* Creación de PaginationQueryDto.
+* Creación de PaginatedResponseDto.
+* Organización de DTOs comunes dentro de carpeta Pagination.
+* Paginación en GET /api/projects.
+* Paginación en GET /api/contractors.
+* Paginación en GET /api/notifications.
+* Paginación en GET /api/contracts/mine.
+* Paginación en GET /api/proposals/my-proposals.
+* Paginación en GET /api/projects/my-projects.
+* Ordenamiento básico por campos permitidos en proyectos.
+* Ordenamiento básico por campos permitidos en contratistas.
+* Ordenamiento básico por campos permitidos en notificaciones.
+* Ordenamiento básico por campos permitidos en contratos.
+* Ordenamiento básico por campos permitidos en propuestas.
+* Conteo total de registros para metadata de paginación.
+* Corrección de diagnóstico post-Bloque 11.
+* Acceso anónimo a endpoints públicos de contratistas.
+* Notificación interna cuando un proyecto expira automáticamente.
 
 Endpoints actualizados:
-•	GET /api/projects
-•	GET /api/contractors
-•	GET /api/notifications
-•	GET /api/contracts/mine
-•	GET /api/proposals/my-proposals
-•	GET /api/projects/my-projects
+
+* GET /api/projects
+* GET /api/contractors
+* GET /api/notifications
+* GET /api/contracts/mine
+* GET /api/proposals/my-proposals
+* GET /api/projects/my-projects
+* GET /api/contractors sin token → 200 OK.
+* GET /api/contractors/{userId} sin token → 200 OK.
+* Proyecto expirado automáticamente genera notificación ProjectExpired → 200 OK.
+* Cliente consulta notificaciones y recibe aviso de proyecto expirado → 200 OK.
+
+
 Estructura de respuesta implementada:
 
-•	Items
-•	PageNumber
-•	PageSize
-•	TotalItems
-•	TotalPages
-•	HasPreviousPage
-•	HasNextPage
+* Items
+* PageNumber
+* PageSize
+* TotalItems
+* TotalPages
+* HasPreviousPage
+* HasNextPage
 
 Reglas implementadas:
-•	PageNumber inicia en 1.
-•	PageSize debe estar dentro del rango permitido.
-•	SortBy se controla por campos permitidos.
-•	SortDirection permite ordenar ascendente o descendente.
-•	Los endpoints conservan sus reglas de seguridad existentes.
-•	Los endpoints conservan filtros de soft delete y estados activos donde aplica.
+
+* PageNumber inicia en 1.
+* PageSize debe estar dentro del rango permitido.
+* SortBy se controla por campos permitidos.
+* SortDirection permite ordenar ascendente o descendente.
+* Los endpoints conservan sus reglas de seguridad existentes.
+* Los endpoints conservan filtros de soft delete y estados activos donde aplica.
 
 Pruebas realizadas:
-•	GET /api/projects paginado → 200 OK.
-•	GET /api/projects con ordenamiento → 200 OK.
-•	GET /api/contractors paginado → 200 OK.
-•	GET /api/contractors con filtro y ordenamiento → 200 OK.
-•	GET /api/notifications paginado → 200 OK.
-•	GET /api/notifications con ordenamiento por IsRead → 200 OK.
-•	GET /api/contracts/mine paginado como cliente → 200 OK.
-•	GET /api/contracts/mine paginado como contratista → 200 OK.
-•	GET /api/proposals/my-proposals paginado → 200 OK.
-•	GET /api/proposals/my-proposals con ordenamiento por Status → 200 OK.
-•	GET /api/projects/my-projects paginado → 200 OK.
-•	GET /api/projects/my-projects con ordenamiento por Title → 200 OK.
+
+* GET /api/projects paginado → 200 OK.
+* GET /api/projects con ordenamiento → 200 OK.
+* GET /api/contractors paginado → 200 OK.
+* GET /api/contractors con filtro y ordenamiento → 200 OK.
+* GET /api/notifications paginado → 200 OK.
+* GET /api/notifications con ordenamiento por IsRead → 200 OK.
+* GET /api/contracts/mine paginado como cliente → 200 OK.
+* GET /api/contracts/mine paginado como contratista → 200 OK.
+* GET /api/proposals/my-proposals paginado → 200 OK.
+* GET /api/proposals/my-proposals con ordenamiento por Status → 200 OK.
+* GET /api/projects/my-projects paginado → 200 OK.
+* GET /api/projects/my-projects con ordenamiento por Title → 200 OK.
+
 Resultado:
 Bloque 12 completado y probado correctamente.
 Impacto:
@@ -2309,7 +2371,7 @@ GET /api/projects deja de mostrar proyectos expirados, reduciendo ruido en el fe
 
 ---
 
-P028
+## P028
 
 Los listados críticos podían crecer sin control.
 
@@ -2344,6 +2406,50 @@ Los endpoints críticos ahora devuelven respuestas paginadas y metadata útil pa
 Impacto:
 
 El backend queda mejor preparado para consumo real desde frontend y futura app móvil.
+
+---
+
+## P029
+
+Los perfiles públicos de contratistas requerían autenticación.
+
+Síntoma:
+
+GET /api/contractors y GET /api/contractors/{userId} heredaban autorización del controlador y respondían 401 Unauthorized si el usuario no enviaba token.
+
+Riesgo:
+
+Un perfil de contratista compartido por WhatsApp, redes sociales o enlace directo no podía abrirse públicamente, generando fricción en el flujo de discovery.
+
+Solución:
+
+Agregar AllowAnonymous a los endpoints públicos de búsqueda y consulta de contratistas.
+
+Resultado:
+
+Los perfiles públicos de contratistas pueden consultarse sin iniciar sesión.
+
+---
+
+## P030
+
+La expiración automática de proyectos no notificaba al dueño del proyecto.
+
+Síntoma:
+
+El BackgroundService marcaba proyectos antiguos como Expirado, pero el usuario que creó el proyecto no recibía ningún aviso.
+
+Riesgo:
+
+El cliente podía pensar que su proyecto desapareció por error o bug.
+
+Solución:
+
+Agregar NotificationType.ProjectExpired y generar una notificación interna al dueño del proyecto cuando la expiración automática ocurre.
+
+Resultado:
+
+El cliente recibe una notificación cuando su proyecto expira automáticamente.
 
 ---
 
