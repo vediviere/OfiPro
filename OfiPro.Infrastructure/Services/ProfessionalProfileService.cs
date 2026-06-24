@@ -1,4 +1,5 @@
 ﻿using OfiPro.Application.Common.Exceptions;
+using OfiPro.Application.DTOs.Common;
 using OfiPro.Application.DTOs.ProfessionalProfile;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
@@ -13,7 +14,7 @@ public class ProfessionalProfileService : IProfessionalProfileService
     private readonly IUserRepository _userRepository;
     private readonly IRatingRepository _ratingRepository;
 
-    public ProfessionalProfileService(IProfessionalProfileRepository professionalProfileRepository, IUserRepository userRepository,        IRatingRepository ratingRepository)
+    public ProfessionalProfileService(IProfessionalProfileRepository professionalProfileRepository, IUserRepository userRepository, IRatingRepository ratingRepository)
     {
         _professionalProfileRepository = professionalProfileRepository;
         _userRepository = userRepository;
@@ -85,13 +86,26 @@ public class ProfessionalProfileService : IProfessionalProfileService
         return MapToDto(profile);
     }
 
-    public async Task<List<ContractorSearchDto>> SearchContractorsAsync(string? specialty, string? state, string? city)
+    public async Task<PaginatedResponseDto<ContractorSearchDto>> SearchContractorsAsync(ContractorSearchQueryDto request)
     {
-        var profiles = await _professionalProfileRepository.SearchContractorsAsync(specialty, state, city);
+        var profiles = await _professionalProfileRepository.SearchContractorsAsync(
+                request.Specialty,
+                request.State,
+                request.City,
+                request.PageNumber,
+                request.PageSize,
+                request.SortBy,
+                request.SortDirection);
+
+        var totalItems = await _professionalProfileRepository.CountContractorsAsync(request.Specialty, request.State, request.City);
 
         if (profiles.Count == 0)
         {
-            return new List<ContractorSearchDto>();
+            return new PaginatedResponseDto<ContractorSearchDto>(
+                new List<ContractorSearchDto>(),
+                request.PageNumber,
+                request.PageSize,
+                totalItems);
         }
 
         var userIds = profiles
@@ -121,7 +135,7 @@ public class ProfessionalProfileService : IProfessionalProfileService
             });
         }
 
-        return result;
+        return new PaginatedResponseDto<ContractorSearchDto>(result, request.PageNumber, request.PageSize, totalItems);
     }
 
     public async Task<ContractorSearchDto> GetPublicContractorProfileAsync(Guid userId)

@@ -1,4 +1,6 @@
-﻿using OfiPro.Application.Common.Exceptions;
+﻿using OfiPro.Application.Common;
+using OfiPro.Application.Common.Exceptions;
+using OfiPro.Application.DTOs.Common;
 using OfiPro.Application.DTOs.Notification;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
@@ -11,9 +13,7 @@ public class NotificationService : INotificationService
     private readonly INotificationRepository _notificationRepository;
     private readonly IUserRepository _userRepository;
 
-    public NotificationService(
-        INotificationRepository notificationRepository,
-        IUserRepository userRepository)
+    public NotificationService(INotificationRepository notificationRepository, IUserRepository userRepository)
     {
         _notificationRepository = notificationRepository;
         _userRepository = userRepository;
@@ -62,13 +62,26 @@ public class NotificationService : INotificationService
         await _notificationRepository.SaveChangesAsync();
     }
 
-    public async Task<List<NotificationDto>> GetMyNotificationsAsync(Guid userId)
+    public async Task<PaginatedResponseDto<NotificationDto>> GetMyNotificationsAsync(Guid userId, PaginationQueryDto request)
     {
-        var notifications = await _notificationRepository.GetByUserIdAsync(userId);
+        var notifications = await _notificationRepository.GetByUserIdAsync(
+            userId,
+            request.PageNumber,
+            request.PageSize,
+            request.SortBy,
+            request.SortDirection);
 
-        return notifications
+        var totalItems = await _notificationRepository.CountByUserIdAsync(userId);
+
+        var notificationDtos = notifications
             .Select(MapToDto)
             .ToList();
+
+        return new PaginatedResponseDto<NotificationDto>(
+            notificationDtos,
+            request.PageNumber,
+            request.PageSize,
+            totalItems);
     }
 
     public async Task<List<NotificationDto>> GetMyUnreadNotificationsAsync(Guid userId)

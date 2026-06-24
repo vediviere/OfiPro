@@ -28,30 +28,80 @@ public class ProjectRepository : IProjectRepository
                 x.DeletedAt == null);
     }
 
-    public async Task<List<Project>> GetAllAsync()
+    public async Task<List<Project>> GetAllAsync(int pageNumber, int pageSize, string sortBy, string sortDirection)
     {
-        return await _context.Projects
+        var query = _context.Projects
             .Include(x => x.CreatedByUser)
             .Include(x => x.Requirements)
-                .ThenInclude(x => x.Category)
+            .ThenInclude(x => x.Category)
             .Include(x => x.Requirements)
-                .ThenInclude(x => x.Subcategory)
-            .Where(x => x.DeletedAt == null && x.Status == ProjectStatus.Publicado)
+            .ThenInclude(x => x.Subcategory)
+            .Where(x =>
+                x.DeletedAt == null &&
+                x.Status == ProjectStatus.Publicado);
+
+        query = ApplyProjectSorting(query, sortBy, sortDirection);
+
+        return await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
     }
 
-    public async Task<List<Project>> GetByUserIdAsync(Guid userId)
+    public async Task<int> CountAvailableAsync()
     {
         return await _context.Projects
+            .CountAsync(x =>
+                x.DeletedAt == null &&
+                x.Status == ProjectStatus.Publicado);
+    }
+
+    private static IQueryable<Project> ApplyProjectSorting(IQueryable<Project> query, string sortBy, string sortDirection)
+    {
+        var descending = string.Equals(sortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+
+        return sortBy.Trim().ToLowerInvariant() switch
+        {
+            "title" => descending
+                ? query.OrderByDescending(x => x.Title)
+                : query.OrderBy(x => x.Title),
+
+            "city" => descending
+                ? query.OrderByDescending(x => x.City)
+                : query.OrderBy(x => x.City),
+
+            _ => descending
+                ? query.OrderByDescending(x => x.CreatedAt)
+                : query.OrderBy(x => x.CreatedAt)
+        };
+    }
+
+    public async Task<List<Project>> GetByUserIdAsync(Guid userId, int pageNumber, int pageSize, string sortBy, string sortDirection)
+    {
+        var query = _context.Projects
             .Include(x => x.CreatedByUser)
             .Include(x => x.Requirements)
-                .ThenInclude(x => x.Category)
+            .ThenInclude(x => x.Category)
             .Include(x => x.Requirements)
-                .ThenInclude(x => x.Subcategory)
+            .ThenInclude(x => x.Subcategory)
             .Where(x =>
-                x.CreatedByUserId == userId &&
-                x.DeletedAt == null)
+                x.DeletedAt == null &&
+                x.CreatedByUserId == userId);
+
+        query = ApplyProjectSorting(query, sortBy, sortDirection);
+
+        return await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+    }
+
+    public async Task<int> CountByUserIdAsync(Guid userId)
+    {
+        return await _context.Projects
+            .CountAsync(x =>
+                x.DeletedAt == null &&
+                x.CreatedByUserId == userId);
     }
 
     public async Task<int> ExpirePublishedProjectsAsync(DateTime expirationLimitUtc)

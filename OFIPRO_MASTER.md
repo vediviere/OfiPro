@@ -1,6 +1,6 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 1.6
+Versión: 1.7
 
 Fecha de creación: 2026-06-08
 
@@ -1445,6 +1445,44 @@ Solo los proyectos con estado Publicado pueden expirar automáticamente. Los pro
 
 ---
 
+## D060
+
+Los listados críticos deben devolver respuestas paginadas.
+
+Resultado:
+
+Se implementa paginación y ordenamiento básico en endpoints que devuelven listas relevantes para web responsiva y futura app móvil real.
+
+Endpoints actualizados:
+
+* GET /api/projects
+* GET /api/contractors
+* GET /api/notifications
+* GET /api/contracts/mine
+* GET /api/proposals/my-proposals
+* GET /api/projects/my-projects
+
+Razón:
+
+Evitar que los clientes consuman listas completas sin control, reducir carga innecesaria en API y base de datos, y preparar mejor la experiencia para pantallas móviles.
+
+Impacto:
+
+Los endpoints paginados devuelven una estructura consistente con:
+
+Items
+PageNumber
+PageSize
+TotalItems
+TotalPages
+HasPreviousPage
+HasNextPage
+
+Regla:
+
+Los listados críticos no deben crecer sin paginación. Nuevos endpoints de lista deberán considerar paginación desde el diseño.
+
+---
 
 ## HITO 8.2
 
@@ -1699,6 +1737,73 @@ OfiPro ya cuenta con expiración automática de proyectos publicados antiguos.
 Impacto:
 
 El feed de proyectos queda más confiable para contratistas y mejor preparado para una experiencia mobile-first.
+
+---
+
+## HITO 12
+
+Paginación y ordenamiento básico en listados críticos completado.
+Incluye:
+
+•	Creación de DTOs comunes de paginación.
+•	Creación de PaginationQueryDto.
+•	Creación de PaginatedResponseDto.
+•	Organización de DTOs comunes dentro de carpeta Pagination.
+•	Paginación en GET /api/projects.
+•	Paginación en GET /api/contractors.
+•	Paginación en GET /api/notifications.
+•	Paginación en GET /api/contracts/mine.
+•	Paginación en GET /api/proposals/my-proposals.
+•	Paginación en GET /api/projects/my-projects.
+•	Ordenamiento básico por campos permitidos en proyectos.
+•	Ordenamiento básico por campos permitidos en contratistas.
+•	Ordenamiento básico por campos permitidos en notificaciones.
+•	Ordenamiento básico por campos permitidos en contratos.
+•	Ordenamiento básico por campos permitidos en propuestas.
+•	Conteo total de registros para metadata de paginación.
+
+Endpoints actualizados:
+•	GET /api/projects
+•	GET /api/contractors
+•	GET /api/notifications
+•	GET /api/contracts/mine
+•	GET /api/proposals/my-proposals
+•	GET /api/projects/my-projects
+Estructura de respuesta implementada:
+
+•	Items
+•	PageNumber
+•	PageSize
+•	TotalItems
+•	TotalPages
+•	HasPreviousPage
+•	HasNextPage
+
+Reglas implementadas:
+•	PageNumber inicia en 1.
+•	PageSize debe estar dentro del rango permitido.
+•	SortBy se controla por campos permitidos.
+•	SortDirection permite ordenar ascendente o descendente.
+•	Los endpoints conservan sus reglas de seguridad existentes.
+•	Los endpoints conservan filtros de soft delete y estados activos donde aplica.
+
+Pruebas realizadas:
+•	GET /api/projects paginado → 200 OK.
+•	GET /api/projects con ordenamiento → 200 OK.
+•	GET /api/contractors paginado → 200 OK.
+•	GET /api/contractors con filtro y ordenamiento → 200 OK.
+•	GET /api/notifications paginado → 200 OK.
+•	GET /api/notifications con ordenamiento por IsRead → 200 OK.
+•	GET /api/contracts/mine paginado como cliente → 200 OK.
+•	GET /api/contracts/mine paginado como contratista → 200 OK.
+•	GET /api/proposals/my-proposals paginado → 200 OK.
+•	GET /api/proposals/my-proposals con ordenamiento por Status → 200 OK.
+•	GET /api/projects/my-projects paginado → 200 OK.
+•	GET /api/projects/my-projects con ordenamiento por Title → 200 OK.
+Resultado:
+Bloque 12 completado y probado correctamente.
+Impacto:
+OfiPro queda mejor preparado para web responsiva y futura app móvil real, evitando respuestas grandes y permitiendo construir pantallas con carga progresiva.
 
 ---
 
@@ -2201,6 +2306,44 @@ Los proyectos publicados con antigüedad mayor al límite configurado cambian au
 Impacto:
 
 GET /api/projects deja de mostrar proyectos expirados, reduciendo ruido en el feed y preparando mejor el backend para web responsiva y app móvil real.
+
+---
+
+P028
+
+Los listados críticos podían crecer sin control.
+
+Síntoma:
+
+Varios endpoints devolvían listas completas sin paginación.
+
+Endpoints afectados:
+
+* GET /api/projects
+* GET /api/contractors
+* GET /api/notifications
+* GET /api/contracts/mine
+* GET /api/proposals/my-proposals
+* GET /api/projects/my-projects
+
+Riesgo:
+
+Con más usuarios, proyectos, propuestas, contratos y notificaciones, las respuestas podían volverse pesadas para web responsiva, app móvil y base de datos.
+
+Solución:
+
+Se implementó paginación y ordenamiento básico mediante DTOs comunes de paginación:
+
+PaginationQueryDto
+PaginatedResponseDto<T>
+
+Resultado:
+
+Los endpoints críticos ahora devuelven respuestas paginadas y metadata útil para construir interfaces web y móviles.
+
+Impacto:
+
+El backend queda mejor preparado para consumo real desde frontend y futura app móvil.
 
 ---
 
@@ -2765,23 +2908,26 @@ Módulos completados:
 * Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web
 * Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas
 * Bloque 11 - Expiración automática de proyectos
+* Bloque 12 - Paginación y ordenamiento básico en listados críticos
 
 Próximo bloque recomendado:
 
-* Bloque 12 - Paginación y ordenamiento básico en listados críticos
+* Bloque 13 - Pruebas automatizadas mínimas de API
 
 Razón:
 
-Antes de conectar web responsiva y futura app móvil real, conviene estabilizar los endpoints que devuelven listas para evitar respuestas demasiado grandes, mejorar rendimiento y dejar contratos de API más claros.
+El backend ya tiene varios flujos críticos funcionando. Antes de seguir agregando funcionalidad, conviene crear una red mínima de pruebas automatizadas para detectar errores cuando se modifiquen contratos de API, seguridad, autenticación, paginación o reglas de negocio.
 
-Listados críticos sugeridos:
+Pruebas iniciales sugeridas:
 
-* GET /api/projects
-* GET /api/contractors
-* GET /api/notifications
-* GET /api/contracts/mine
-* GET /api/proposals/my-proposals
-* GET /api/projects/my-projects
+* Login correcto.
+* Login inválido.
+* Endpoint protegido sin token.
+* Endpoint protegido con rol incorrecto.
+* GET /api/projects paginado.
+* GET /api/contractors paginado.
+* GET /api/notifications paginado.
+* Flujo mínimo de proyecto/propuesta/contrato si el alcance del bloque lo permite.
 
 Opciones posteriores:
 

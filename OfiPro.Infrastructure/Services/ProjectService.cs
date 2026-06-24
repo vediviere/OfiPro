@@ -4,6 +4,7 @@ using OfiPro.Domain.Enums;
 using OfiPro.Application.Common.Exceptions;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
+using OfiPro.Application.DTOs.Common;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -64,22 +65,45 @@ public class ProjectService : IProjectService
         return MapToDto(project);
     }
 
-    public async Task<List<ProjectDto>> GetAllAsync()
+    public async Task<PaginatedResponseDto<ProjectDto>> GetAllAsync(PaginationQueryDto request)
     {
-        var projects = await _projectRepository.GetAllAsync();
+        var projects = await _projectRepository.GetAllAsync(
+            request.PageNumber,
+            request.PageSize,
+            request.SortBy,
+            request.SortDirection);
 
-        return projects
-            .Select(MapToDto)
-            .ToList();
+        var totalItems = await _projectRepository.CountAvailableAsync();
+
+        var projectDtos = projects.Select(MapToDto).ToList();
+
+        return new PaginatedResponseDto<ProjectDto>(
+            projectDtos,
+            request.PageNumber,
+            request.PageSize,
+            totalItems);
     }
 
-    public async Task<List<ProjectDto>> GetMyProjectsAsync(Guid userId)
+    public async Task<PaginatedResponseDto<ProjectDto>> GetMyProjectsAsync(Guid userId, PaginationQueryDto request)
     {
-        var projects = await _projectRepository.GetByUserIdAsync(userId);
+        var projects = await _projectRepository.GetByUserIdAsync(
+            userId,
+            request.PageNumber,
+            request.PageSize,
+            request.SortBy,
+            request.SortDirection);
 
-        return projects
+        var totalItems = await _projectRepository.CountByUserIdAsync(userId);
+
+        var projectDtos = projects
             .Select(MapToDto)
             .ToList();
+
+        return new PaginatedResponseDto<ProjectDto>(
+            projectDtos,
+            request.PageNumber,
+            request.PageSize,
+            totalItems);
     }
 
     public async Task<ProjectDto> UpdateAsync(Guid userId, Guid projectId, UpdateProjectDto request)

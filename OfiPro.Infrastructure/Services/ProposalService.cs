@@ -1,10 +1,11 @@
 ﻿using OfiPro.Application.Common.Exceptions;
+using OfiPro.Application.DTOs.Common;
+using OfiPro.Application.DTOs.Notification;
 using OfiPro.Application.DTOs.Proposal;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
-using OfiPro.Application.DTOs.Notification;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -129,12 +130,26 @@ public class ProposalService : IProposalService
         return MapToDto(updatedProposal);
     }
 
-    public async Task<List<ProposalDto>> GetMyProposalsAsync(Guid contractorUserId)
+    public async Task<PaginatedResponseDto<ProposalDto>> GetMyProposalsAsync(Guid contractorUserId, PaginationQueryDto request)
     {
-        var proposals =
-            await _proposalRepository.GetByContractorAsync(contractorUserId);
+        var proposals = await _proposalRepository.GetByContractorAsync(
+            contractorUserId,
+            request.PageNumber,
+            request.PageSize,
+            request.SortBy,
+            request.SortDirection);
 
-        return proposals.Select(MapToDto).ToList();
+        var totalItems = await _proposalRepository.CountByContractorAsync(contractorUserId);
+
+        var proposalDtos = proposals
+            .Select(MapToDto)
+            .ToList();
+
+        return new PaginatedResponseDto<ProposalDto>(
+            proposalDtos,
+            request.PageNumber,
+            request.PageSize,
+            totalItems);
     }
 
     public async Task<ProposalDto> GetByIdAsync(Guid proposalId)

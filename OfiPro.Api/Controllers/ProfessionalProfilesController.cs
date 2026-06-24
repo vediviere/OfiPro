@@ -49,9 +49,9 @@ public class ProfessionalProfilesController : ControllerBase
     }
 
     [HttpGet("contractors")]
-    public async Task<IActionResult> SearchContractors([FromQuery] string? specialty, [FromQuery] string? state, [FromQuery] string? city)
+    public async Task<IActionResult> SearchContractors([FromQuery] ContractorSearchQueryDto query)
     {
-        var contractors = await _professionalProfileService.SearchContractorsAsync(specialty, state, city);
+        var contractors = await _professionalProfileService.SearchContractorsAsync(query);
 
         return Ok(contractors);
     }

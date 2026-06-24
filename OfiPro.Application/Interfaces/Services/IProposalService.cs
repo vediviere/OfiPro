@@ -1,4 +1,5 @@
-﻿using OfiPro.Application.DTOs.Proposal;
+﻿using OfiPro.Application.DTOs.Common;
+using OfiPro.Application.DTOs.Proposal;
 
 namespace OfiPro.Application.Interfaces.Services;
 
@@ -8,7 +9,7 @@ public interface IProposalService
 
     Task<ProposalDto> UpdateAsync(Guid contractorUserId, Guid proposalId, UpdateProposalDto request);
 
-    Task<List<ProposalDto>> GetMyProposalsAsync(Guid contractorUserId);
+    Task<PaginatedResponseDto<ProposalDto>> GetMyProposalsAsync(Guid contractorUserId, PaginationQueryDto request);
 
     Task<ProposalDto> GetByIdAsync(Guid proposalId);
 

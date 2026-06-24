@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OfiPro.Application.DTOs.Common;
 using OfiPro.Application.Interfaces.Services;
 using System.Security.Claims;
 
@@ -18,11 +19,11 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetMyNotifications()
+    public async Task<IActionResult> GetMyNotifications([FromQuery] PaginationQueryDto query)
     {
         var userId = GetUserId();
 
-        var notifications = await _notificationService.GetMyNotificationsAsync(userId);
+        var notifications = await _notificationService.GetMyNotificationsAsync(userId, query);
 
         return Ok(notifications);
     }

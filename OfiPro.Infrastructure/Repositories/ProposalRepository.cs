@@ -23,14 +23,49 @@ public class ProposalRepository : IProposalRepository
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<List<Proposal>> GetByContractorAsync(Guid contractorUserId)
+    public async Task<List<Proposal>> GetByContractorAsync(Guid contractorUserId, int pageNumber, int pageSize, string sortBy, string sortDirection)
     {
-        return await _context.Proposals
+        var query = _context.Proposals
             .Include(x => x.ContractorUser)
             .Include(x => x.ProjectRequirement)
-                .ThenInclude(x => x.Project)
-            .Where(x => x.ContractorUserId == contractorUserId)
+            .ThenInclude(x => x.Project)
+            .Where(x => x.ContractorUserId == contractorUserId);
+
+        query = ApplyProposalSorting(query, sortBy, sortDirection);
+
+        return await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+    }
+
+    public async Task<int> CountByContractorAsync(Guid contractorUserId)
+    {
+        return await _context.Proposals
+            .CountAsync(x => x.ContractorUserId == contractorUserId);
+    }
+
+    private static IQueryable<Proposal> ApplyProposalSorting(IQueryable<Proposal> query, string sortBy, string sortDirection)
+    {
+        var descending = string.Equals(
+            sortDirection,
+            "desc",
+            StringComparison.OrdinalIgnoreCase);
+
+        return sortBy.Trim().ToLowerInvariant() switch
+        {
+            "status" => descending
+                ? query.OrderByDescending(x => x.Status)
+                : query.OrderBy(x => x.Status),
+
+            "price" => descending
+                ? query.OrderByDescending(x => x.Price)
+                : query.OrderBy(x => x.Price),
+
+            _ => descending
+                ? query.OrderByDescending(x => x.CreatedAt)
+                : query.OrderBy(x => x.CreatedAt)
+        };
     }
 
     public async Task<List<Proposal>> GetByProjectRequirementAsync(Guid projectRequirementId)

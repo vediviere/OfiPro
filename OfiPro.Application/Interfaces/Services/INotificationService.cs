@@ -1,11 +1,12 @@
-﻿using OfiPro.Application.DTOs.Notification;
+﻿using OfiPro.Application.DTOs.Common;
+using OfiPro.Application.DTOs.Notification;
 
 namespace OfiPro.Application.Interfaces.Services;
 
 public interface INotificationService
 {
     Task CreateAsync(CreateNotificationDto request);
-    Task<List<NotificationDto>> GetMyNotificationsAsync(Guid userId);
+    Task<PaginatedResponseDto<NotificationDto>> GetMyNotificationsAsync(Guid userId, PaginationQueryDto request);
     Task<List<NotificationDto>> GetMyUnreadNotificationsAsync(Guid userId);
     Task<int> GetMyUnreadCountAsync(Guid userId);
     Task MarkAsReadAsync(Guid userId, Guid notificationId);

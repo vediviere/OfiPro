@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using OfiPro.Application.DTOs.Project;
 using OfiPro.Application.Interfaces.Services;
 using System.Security.Claims;
+using OfiPro.Application.DTOs.Common;
 
 namespace OfiPro.Api.Controllers;
 
@@ -29,19 +30,19 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] PaginationQueryDto query)
     {
-        var projects = await _projectService.GetAllAsync();
+        var projects = await _projectService.GetAllAsync(query);
 
         return Ok(projects);
     }
 
     [HttpGet("my-projects")]
-    public async Task<IActionResult> GetMyProjects()
+    public async Task<IActionResult> GetMyProjects([FromQuery] PaginationQueryDto query)
     {
         var userId = GetUserId();
 
-        var projects = await _projectService.GetMyProjectsAsync(userId);
+        var projects = await _projectService.GetMyProjectsAsync(userId, query);
 
         return Ok(projects);
     }

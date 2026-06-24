@@ -2733,3 +2733,203 @@ Listados sugeridos:
 
 # =====================================
 
+# =====================================
+
+# SESIÓN 2026-06-24
+
+## Objetivo
+
+Implementar, probar y cerrar Bloque 12 - Paginación y ordenamiento básico en listados críticos.
+
+# =====================================
+
+## Contexto
+
+Después de completar la expiración automática de proyectos, se decidió avanzar con paginación porque varios endpoints críticos devolvían listas completas.
+
+Esto podía generar problemas cuando aumentaran los proyectos, contratistas, propuestas, contratos y notificaciones.
+
+El objetivo fue preparar mejor la API para web responsiva y futura app móvil real.
+
+# =====================================
+
+## Bloque 12 - Paginación y ordenamiento básico en listados críticos
+
+Completado:
+
+* Se creó PaginationQueryDto.
+* Se creó PaginatedResponseDto<T>.
+* Se organizaron los DTOs comunes dentro de carpeta Pagination.
+* Se agregó paginación a GET /api/projects.
+* Se agregó paginación a GET /api/contractors.
+* Se agregó paginación a GET /api/notifications.
+* Se agregó paginación a GET /api/contracts/mine.
+* Se agregó paginación a GET /api/proposals/my-proposals.
+* Se agregó paginación a GET /api/projects/my-projects.
+* Se agregó conteo total para metadata de paginación.
+* Se agregó ordenamiento básico por campos permitidos.
+* Se mantuvieron filtros existentes de soft delete, estados activos y seguridad por usuario.
+
+# =====================================
+
+## Endpoints actualizados
+
+* GET /api/projects
+* GET /api/contractors
+* GET /api/notifications
+* GET /api/contracts/mine
+* GET /api/proposals/my-proposals
+* GET /api/projects/my-projects
+
+# =====================================
+
+## Estructura de respuesta
+
+Los endpoints paginados devuelven:
+
+* Items
+* PageNumber
+* PageSize
+* TotalItems
+* TotalPages
+* HasPreviousPage
+* HasNextPage
+
+# =====================================
+
+## Reglas implementadas
+
+* PageNumber inicia en 1.
+* PageSize tiene límite validado.
+* SortBy se resuelve mediante campos permitidos.
+* SortDirection permite ascendente o descendente.
+* No se usa SQL crudo para ordenar.
+* Los filtros se mantienen en LINQ con EF Core.
+* Los endpoints conservan sus reglas previas de autorización y visibilidad.
+
+# =====================================
+
+## Pruebas realizadas
+
+Con [cliente@ofipro.com](mailto:cliente@ofipro.com):
+
+* GET /api/projects?pageNumber=1&pageSize=5 → 200 OK.
+* GET /api/projects/my-projects?pageNumber=1&pageSize=5 → 200 OK.
+* GET /api/contractors?pageNumber=1&pageSize=5 → 200 OK.
+* GET /api/contractors con filtro y ordenamiento → 200 OK.
+* GET /api/notifications?pageNumber=1&pageSize=5 → 200 OK.
+* GET /api/notifications con ordenamiento por IsRead → 200 OK.
+* GET /api/contracts/mine?pageNumber=1&pageSize=5 → 200 OK.
+
+Con [contratista@ofipro.com](mailto:contratista@ofipro.com):
+
+* GET /api/contracts/mine?pageNumber=1&pageSize=5 → 200 OK.
+* GET /api/proposals/my-proposals?pageNumber=1&pageSize=5 → 200 OK.
+* GET /api/proposals/my-proposals con ordenamiento por Status → 200 OK.
+
+Resultado:
+
+Bloque 12 quedó completado y probado correctamente.
+
+# =====================================
+
+## Observación de seguridad
+
+OfiPro no usa motor NoSQL actualmente. La base de datos es SQL Server y las consultas se realizan principalmente mediante LINQ con EF Core.
+
+La paginación y el ordenamiento se implementaron evitando SQL crudo y usando campos permitidos para SortBy.
+
+Esto reduce el riesgo de inyección SQL en estos listados.
+
+Si más adelante se agregan consultas con SQL crudo, stored procedures, MongoDB, Cosmos DB u otro motor NoSQL, se deberá abrir una revisión de seguridad específica para inyecciones y consultas dinámicas.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+Bloque 8 - Calificaciones y reputación V1 → Completo
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+
+Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación → Completo
+
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+
+Bloque 10.1 - Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas → Completo
+
+Bloque 11 - Expiración automática de proyectos → Completo
+
+Bloque 12 - Paginación y ordenamiento básico en listados críticos → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: 🟢 Bueno.
+
+El bloque fue amplio porque tocó varios endpoints, repositorios, servicios y controladores, pero avanzó bien porque se aplicó el mismo patrón en todos los listados.
+
+No requirió migración ni cambios de dominio.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Actualizar documentación.
+* Revisar git status.
+* Hacer commit del Bloque 12.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 13 - Pruebas automatizadas mínimas de API.
+
+Razón:
+
+El backend ya tiene muchos flujos críticos funcionando. Antes de seguir agregando funcionalidades grandes, conviene crear una base mínima de pruebas automatizadas para proteger autenticación, autorización, paginación y reglas principales.
+
+Pruebas iniciales sugeridas:
+
+* Login correcto.
+* Login inválido.
+* Endpoint protegido sin token.
+* Endpoint protegido con rol incorrecto.
+* GET /api/projects paginado.
+* GET /api/contractors paginado.
+* GET /api/notifications paginado.
+
+# =====================================

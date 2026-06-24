@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OfiPro.Application.DTOs.Common;
 using OfiPro.Application.DTOs.Proposal;
 using OfiPro.Application.Interfaces.Services;
 using System.Security.Claims;
@@ -39,11 +40,11 @@ public class ProposalsController : ControllerBase
     }
 
     [HttpGet("my-proposals")]
-    public async Task<IActionResult> GetMyProposals()
+    public async Task<IActionResult> GetMyProposals([FromQuery] PaginationQueryDto query)
     {
         var userId = GetUserId();
 
-        var proposals = await _proposalService.GetMyProposalsAsync(userId);
+        var proposals = await _proposalService.GetMyProposalsAsync(userId, query);
 
         return Ok(proposals);
     }

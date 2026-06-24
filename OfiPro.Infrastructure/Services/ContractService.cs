@@ -1,8 +1,9 @@
 ﻿using OfiPro.Application.Common.Exceptions;
+using OfiPro.Application.DTOs.Common;
 using OfiPro.Application.DTOs.Contract;
+using OfiPro.Application.DTOs.Notification;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
-using OfiPro.Application.DTOs.Notification;
 using OfiPro.Domain.Entities;
 using OfiPro.Domain.Enums;
 
@@ -19,11 +20,26 @@ public class ContractService : IContractService
         _notificationService = notificationService;
     }
 
-    public async Task<List<ContractDto>> GetMyContractsAsync(Guid userId)
+    public async Task<PaginatedResponseDto<ContractDto>> GetMyContractsAsync(Guid userId, PaginationQueryDto request)
     {
-        var contracts = await _contractRepository.GetByUserIdAsync(userId);
+        var contracts = await _contractRepository.GetByUserIdAsync(
+            userId,
+            request.PageNumber,
+            request.PageSize,
+            request.SortBy,
+            request.SortDirection);
 
-        return contracts.Select(MapToDto).ToList();
+        var totalItems = await _contractRepository.CountByUserIdAsync(userId);
+
+        var contractDtos = contracts
+            .Select(MapToDto)
+            .ToList();
+
+        return new PaginatedResponseDto<ContractDto>(
+            contractDtos,
+            request.PageNumber,
+            request.PageSize,
+            totalItems);
     }
 
     public async Task<ContractDto?> GetByIdAsync(Guid contractId, Guid userId)

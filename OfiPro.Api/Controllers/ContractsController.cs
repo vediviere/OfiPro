@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OfiPro.Application.DTOs.Common;
 using OfiPro.Application.DTOs.Contract;
 using OfiPro.Application.Interfaces.Services;
 using System.Security.Claims;
@@ -19,11 +20,11 @@ public class ContractsController : ControllerBase
     }
 
     [HttpGet("mine")]
-    public async Task<IActionResult> GetMyContracts()
+    public async Task<IActionResult> GetMyContracts([FromQuery] PaginationQueryDto query)
     {
         var userId = GetUserId();
 
-        var contracts = await _contractService.GetMyContractsAsync(userId);
+        var contracts = await _contractService.GetMyContractsAsync(userId, query);
 
         return Ok(contracts);
     }
