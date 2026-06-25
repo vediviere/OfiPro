@@ -3040,3 +3040,39 @@ Conclusión:
 No se implementa todavía, pero se documenta en OFIPRO_MASTER.md como backlog prioritario relacionado con discovery, web pública y crecimiento orgánico.
 
 # =====================================
+
+# =====================================
+
+## Idea estratégica registrada - Historial del trabajo realizado
+
+Se propuso registrar como backlog prioritario la idea de historial o bitácora por proyecto/contratación.
+
+La idea consiste en que el contratista pueda consultar, incluso después de meses o años, qué se hizo específicamente en un proyecto terminado.
+
+Elementos posibles del historial:
+
+* Proyecto relacionado.
+* Requerimiento trabajado.
+* Contratación.
+* Fechas relevantes.
+* Precio acordado.
+* Tiempo estimado.
+* Evidencias registradas.
+* Cambios de estado.
+* Notas o descripción del cierre.
+* Calificación recibida.
+* Comentarios del cliente.
+
+Razón:
+
+Un contratista puede realizar muchos trabajos de la misma categoría y olvidar detalles específicos de cada uno. El historial permite conservar memoria del trabajo realizado.
+
+Conclusión:
+
+No se implementa todavía, pero se documenta en OFIPRO_MASTER.md como backlog prioritario relacionado con historial profesional, trazabilidad y futuro portafolio verificable.
+
+Regla inicial:
+
+El historial completo será privado por defecto y solo estará disponible para las partes involucradas. Cualquier vista pública deberá diseñarse posteriormente con controles de privacidad.
+
+# =====================================

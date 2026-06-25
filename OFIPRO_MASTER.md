@@ -1572,6 +1572,44 @@ Relación con decisiones previas:
 
 ---
 
+## D064
+
+Los proyectos contratados deberán conservar un historial del trabajo realizado.
+
+Resultado:
+
+Se define como backlog prioritario la creación de un historial o bitácora por proyecto/contratación.
+
+La idea consiste en que el contratista pueda consultar, incluso tiempo después, qué se hizo específicamente en cada trabajo realizado.
+
+El historial podrá incluir:
+
+* Proyecto relacionado.
+* Requerimiento trabajado.
+* Contratación.
+* Estado del trabajo.
+* Fechas relevantes.
+* Precio acordado.
+* Tiempo estimado.
+* Evidencias registradas.
+* Cambios de estado.
+* Notas o descripción del cierre.
+* Calificación recibida.
+* Comentarios del cliente.
+
+Razón:
+
+Un contratista puede realizar muchos trabajos similares durante meses o años. Sin un historial claro, puede olvidar detalles específicos de cada proyecto.
+
+Impacto:
+
+OfiPro puede convertirse no solo en plataforma de contratación, sino también en memoria profesional del contratista y base para un futuro portafolio verificable.
+
+Regla:
+
+El historial completo del proyecto será privado por defecto y solo estará disponible para las partes involucradas. Cualquier vista pública tipo portafolio deberá diseñarse posteriormente con controles de privacidad.
+
+---
 
 ## HITO 8.2
 
@@ -2537,6 +2575,9 @@ Objetivos pequeños.
 * URL pública única por contratista
 * Vista pública optimizada para WhatsApp/Facebook/móvil
 * Botón compartir perfil
+* Historial privado por proyecto/contratación
+* Bitácora del trabajo realizado
+* Portafolio verificable basado en trabajos finalizados
 
 ---
 
@@ -3092,6 +3133,9 @@ Opciones posteriores:
 * Perfil público compartible de contratista.
 * URL pública única por contratista.
 * Vista pública web optimizada para compartir en WhatsApp, Facebook y móvil.
+* Historial privado por proyecto/contratación.
+* Bitácora del trabajo realizado para contratistas.
+* Portafolio verificable basado en trabajos finalizados.
 
 Notas estratégicas vigentes:
 
