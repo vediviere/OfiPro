@@ -3003,4 +3003,40 @@ Corrección de diagnóstico post-Bloque 11 completada y probada correctamente.
 
 # =====================================
 
+# =====================================
 
+## Idea estratégica registrada - Perfil público compartible
+
+Se propuso registrar como backlog prioritario la idea de perfil público compartible para contratistas.
+
+La idea consiste en que cada contratista pueda tener una URL pública única para compartir su perfil fuera de OfiPro.
+
+Posibles canales de uso:
+
+* WhatsApp.
+* WhatsApp Business.
+* Facebook.
+* Instagram.
+* X.
+* Redes sociales.
+* Mensajes directos.
+* Sección de sitio web en perfiles externos.
+
+Elementos propuestos:
+
+* URL pública única.
+* Vista web sin necesidad de instalar app.
+* Botón para compartir.
+* Vista optimizada para WhatsApp.
+* Vista optimizada para Facebook.
+* Vista optimizada para móvil.
+
+Razón:
+
+El contratista puede usar su perfil público como herramienta de promoción profesional, mientras OfiPro gana visibilidad y tráfico orgánico.
+
+Conclusión:
+
+No se implementa todavía, pero se documenta en OFIPRO_MASTER.md como backlog prioritario relacionado con discovery, web pública y crecimiento orgánico.
+
+# =====================================

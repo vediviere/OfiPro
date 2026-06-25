@@ -1532,6 +1532,46 @@ El cliente mantiene visibilidad sobre el estado de sus publicaciones y la experi
 
 ---
 
+## D063
+
+Los contratistas deberán tener un perfil público compartible.
+
+Resultado:
+
+Se define como backlog prioritario la creación de perfiles públicos compartibles para contratistas.
+
+La idea incluye:
+
+* URL pública única.
+* Vista web sin necesidad de instalar app.
+* Vista optimizada para móvil.
+* Botón para compartir perfil.
+* Compatibilidad con enlaces compartidos por WhatsApp.
+* Compatibilidad con enlaces compartidos por Facebook.
+* Posibilidad de usar el enlace en perfiles externos como Facebook, Instagram, WhatsApp Business, X u otros canales.
+
+Razón:
+
+El contratista necesita promocionarse fuera de OfiPro y OfiPro necesita crecer de forma orgánica.
+
+Si el contratista puede compartir su perfil público, la plataforma se convierte también en una herramienta de promoción profesional.
+
+Impacto:
+
+Cada contratista puede funcionar como canal de adquisición de usuarios, compartiendo su propio perfil con clientes potenciales.
+
+Regla:
+
+Esta funcionalidad no se considera implementada todavía. Queda registrada como backlog prioritario para diseño de web pública, discovery y crecimiento orgánico.
+
+Relación con decisiones previas:
+
+* ProfessionalProfile será la base del descubrimiento de contratistas.
+* La búsqueda básica de contratistas entra en V1.
+* Los perfiles públicos de contratistas deben poder consultarse sin autenticación.
+
+---
+
 
 ## HITO 8.2
 
@@ -2493,6 +2533,10 @@ Objetivos pequeños.
 * Verificaciones
 * Contratos digitales
 * Facturación
+* Perfil público compartible de contratista
+* URL pública única por contratista
+* Vista pública optimizada para WhatsApp/Facebook/móvil
+* Botón compartir perfil
 
 ---
 
@@ -3045,6 +3089,9 @@ Opciones posteriores:
 * Panel administrativo operativo.
 * Web responsiva.
 * App móvil real en etapa pre-lanzamiento.
+* Perfil público compartible de contratista.
+* URL pública única por contratista.
+* Vista pública web optimizada para compartir en WhatsApp, Facebook y móvil.
 
 Notas estratégicas vigentes:
 
