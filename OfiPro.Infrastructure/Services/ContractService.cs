@@ -1,5 +1,5 @@
 ﻿using OfiPro.Application.Common.Exceptions;
-using OfiPro.Application.DTOs.Common;
+using OfiPro.Application.DTOs.Common.Pagination;
 using OfiPro.Application.DTOs.Contract;
 using OfiPro.Application.DTOs.Notification;
 using OfiPro.Application.Interfaces.Repositories;

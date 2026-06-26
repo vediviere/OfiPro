@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OfiPro.Application.DTOs.Common;
+using OfiPro.Application.DTOs.Common.Pagination;
 using OfiPro.Application.Interfaces.Services;
 using System.Security.Claims;
 

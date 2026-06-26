@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace OfiPro.Application.DTOs.Common;
+namespace OfiPro.Application.DTOs.Common.Pagination;
 
 public class PaginationQueryDto
 {

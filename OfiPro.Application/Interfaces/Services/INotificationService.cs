@@ -1,4 +1,4 @@
-﻿using OfiPro.Application.DTOs.Common;
+﻿using OfiPro.Application.DTOs.Common.Pagination;
 using OfiPro.Application.DTOs.Notification;
 
 namespace OfiPro.Application.Interfaces.Services;

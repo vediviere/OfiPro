@@ -1,4 +1,4 @@
-﻿using OfiPro.Application.DTOs.Common;
+﻿using OfiPro.Application.DTOs.Common.Pagination;
 
 namespace OfiPro.Application.DTOs.ProfessionalProfile;
 

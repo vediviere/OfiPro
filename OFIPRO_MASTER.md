@@ -1,10 +1,10 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 1.7
+Versión: 1.8
 
 Fecha de creación: 2026-06-08
 
-Última actualización: 2026-06-24
+Última actualización: 2026-06-25
 
 Estado: En desarrollo
 
@@ -1611,6 +1611,34 @@ El historial completo del proyecto será privado por defecto y solo estará disp
 
 ---
 
+## D065
+
+El backend debe contar con pruebas automatizadas mínimas antes de seguir agregando módulos grandes.
+
+Resultado:
+
+Se crea un proyecto de pruebas automatizadas para la API:
+
+* OfiPro.Api.Tests
+
+Se implementan pruebas de integración básicas usando WebApplicationFactory.
+
+Razón:
+
+El backend ya cuenta con múltiples flujos críticos. Continuar agregando funcionalidades sin pruebas automatizadas aumenta el riesgo de romper autenticación, autorización, paginación, endpoints públicos o reglas de negocio sin detectarlo a tiempo.
+
+Impacto:
+
+OfiPro empieza a contar con una red mínima de seguridad técnica para validar endpoints importantes antes de continuar con nuevos bloques.
+
+Regla:
+
+Las pruebas automatizadas no reemplazan las pruebas manuales en Swagger, pero sí deben cubrir progresivamente los flujos principales del backend.
+
+---
+
+
+
 ## HITO 8.2
 
 Correcciones de diagnóstico de Ratings y reputación completadas.
@@ -1946,6 +1974,53 @@ Impacto:
 OfiPro queda mejor preparado para web responsiva y futura app móvil real, evitando respuestas grandes y permitiendo construir pantallas con carga progresiva.
 
 ---
+
+## HITO 13
+
+Pruebas automatizadas mínimas de API completadas.
+
+Incluye:
+
+* Creación del proyecto OfiPro.Api.Tests.
+* Integración del proyecto de pruebas a la solución.
+* Instalación de Microsoft.AspNetCore.Mvc.Testing.
+* Configuración de Program como partial class para pruebas de integración.
+* Creación de pruebas con WebApplicationFactory.
+* Creación de helper TestAuthHelper para registrar e iniciar sesión con usuarios temporales.
+* Prueba de endpoint público sin token.
+* Prueba de endpoint protegido sin token.
+* Prueba de login inválido.
+* Prueba de registro y login válido.
+* Prueba de endpoint protegido con token.
+* Prueba de autorización por rol incorrecto.
+* Prueba de proyectos paginados.
+* Prueba de contratistas públicos con filtros.
+* Prueba de notificaciones paginadas con token.
+* Prueba de dashboard modes con token.
+
+Pruebas automatizadas creadas:
+
+* GET /api/contractors sin token → 200 OK.
+* GET /api/contractors con filtros sin token → 200 OK.
+* GET /api/notifications sin token → 401 Unauthorized.
+* POST /api/auth/login con credenciales inválidas → 400 Bad Request.
+* POST /api/auth/register + POST /api/auth/login con usuario temporal → 200 OK.
+* GET /api/users/profile con token válido → 200 OK.
+* GET /api/dashboard/contractor/summary con usuario Cliente → 403 Forbidden.
+* GET /api/projects paginado con token → 200 OK.
+* GET /api/notifications paginado con token → 200 OK.
+* GET /api/dashboard/modes con token → 200 OK.
+
+Resultado:
+
+Bloque 13 completado y probado correctamente con dotnet test.
+
+Impacto:
+
+OfiPro ya cuenta con una base mínima de pruebas automatizadas para proteger autenticación, autorización, endpoints públicos y respuestas paginadas.
+
+
+----
 
 
 # 15. PROBLEMAS DETECTADOS
@@ -2531,6 +2606,32 @@ El cliente recibe una notificación cuando su proyecto expira automáticamente.
 
 ---
 
+## P031
+
+El backend no tenía pruebas automatizadas.
+
+Síntoma:
+
+La validación de endpoints dependía completamente de pruebas manuales en Swagger y consultas en SQL Server.
+
+Riesgo:
+
+Al modificar servicios, controladores, autenticación, paginación o reglas de autorización, podía romperse funcionalidad existente sin detectarlo rápidamente.
+
+Solución:
+
+Se creó el proyecto OfiPro.Api.Tests y se implementaron pruebas automatizadas mínimas de API.
+
+Resultado:
+
+El backend ya puede ejecutar dotnet test para validar una base mínima de endpoints públicos, protegidos, autenticación, autorización y paginación.
+
+Impacto:
+
+El proyecto queda mejor preparado para seguir creciendo con menor riesgo de regresiones.
+
+---
+
 
 # 16. RIESGOS
 
@@ -3100,14 +3201,17 @@ Módulos completados:
 * Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas
 * Bloque 11 - Expiración automática de proyectos
 * Bloque 12 - Paginación y ordenamiento básico en listados críticos
+* Bloque 13 - Pruebas automatizadas mínimas de API
 
 Próximo bloque recomendado:
 
-* Bloque 13 - Pruebas automatizadas mínimas de API
+* Bloque 14 - Invitaciones directas a contratistas
 
 Razón:
 
-El backend ya tiene varios flujos críticos funcionando. Antes de seguir agregando funcionalidad, conviene crear una red mínima de pruebas automatizadas para detectar errores cuando se modifiquen contratos de API, seguridad, autenticación, paginación o reglas de negocio.
+OfiPro ya permite buscar contratistas y consultar perfiles públicos. El siguiente paso lógico es permitir que un cliente invite directamente a un contratista a revisar o cotizar un proyecto.
+
+Esto conecta la búsqueda de contratistas con una acción real dentro del marketplace.
 
 Pruebas iniciales sugeridas:
 
@@ -3122,20 +3226,15 @@ Pruebas iniciales sugeridas:
 
 Opciones posteriores:
 
-* Invitaciones directas a contratistas.
-* Tests de integración mínimos.
 * Refresh tokens para experiencia móvil.
 * Carga real de archivos para evidencias.
+* Perfil público compartible de contratista.
+* URL pública única por contratista.
+* Historial privado por proyecto/contratación.
 * FCM Token y push notifications cuando exista app móvil real.
 * Panel administrativo operativo.
 * Web responsiva.
 * App móvil real en etapa pre-lanzamiento.
-* Perfil público compartible de contratista.
-* URL pública única por contratista.
-* Vista pública web optimizada para compartir en WhatsApp, Facebook y móvil.
-* Historial privado por proyecto/contratación.
-* Bitácora del trabajo realizado para contratistas.
-* Portafolio verificable basado en trabajos finalizados.
 
 Notas estratégicas vigentes:
 

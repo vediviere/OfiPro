@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using OfiPro.Application.DTOs.Project;
 using OfiPro.Application.Interfaces.Services;
 using System.Security.Claims;
-using OfiPro.Application.DTOs.Common;
+using OfiPro.Application.DTOs.Common.Pagination;
 
 namespace OfiPro.Api.Controllers;
 

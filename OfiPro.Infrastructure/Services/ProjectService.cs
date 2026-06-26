@@ -4,7 +4,7 @@ using OfiPro.Domain.Enums;
 using OfiPro.Application.Common.Exceptions;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
-using OfiPro.Application.DTOs.Common;
+using OfiPro.Application.DTOs.Common.Pagination;
 
 namespace OfiPro.Infrastructure.Services;
 

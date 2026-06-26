@@ -1,5 +1,5 @@
 ﻿using OfiPro.Application.DTOs.Project;
-using OfiPro.Application.DTOs.Common;
+using OfiPro.Application.DTOs.Common.Pagination;
 
 namespace OfiPro.Application.Interfaces.Services;
 

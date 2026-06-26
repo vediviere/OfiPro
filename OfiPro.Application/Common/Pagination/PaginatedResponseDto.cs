@@ -1,4 +1,4 @@
-﻿namespace OfiPro.Application.DTOs.Common;
+﻿namespace OfiPro.Application.DTOs.Common.Pagination;
 
 public class PaginatedResponseDto<T>
 {

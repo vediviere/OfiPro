@@ -3076,3 +3076,170 @@ Regla inicial:
 El historial completo será privado por defecto y solo estará disponible para las partes involucradas. Cualquier vista pública deberá diseñarse posteriormente con controles de privacidad.
 
 # =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-25
+
+## Objetivo
+
+Implementar, probar y cerrar Bloque 13 - Pruebas automatizadas mínimas de API.
+
+# =====================================
+
+## Contexto
+
+Después de completar paginación y ordenamiento básico en listados críticos, se decidió crear una base mínima de pruebas automatizadas antes de continuar agregando módulos grandes.
+
+El backend ya cuenta con varios flujos importantes, por lo que depender únicamente de Swagger y SQL Server para validar cambios representaba un riesgo de regresiones.
+
+# =====================================
+
+## Bloque 13 - Pruebas automatizadas mínimas de API
+
+Completado:
+
+* Se creó el proyecto OfiPro.Api.Tests.
+* Se agregó referencia al proyecto OfiPro.Api.
+* Se agregó el proyecto de pruebas a la solución.
+* Se instaló Microsoft.AspNetCore.Mvc.Testing.
+* Se agregó public partial class Program para permitir pruebas con WebApplicationFactory.
+* Se eliminó la prueba default UnitTest1.
+* Se crearon pruebas para endpoints públicos.
+* Se crearon pruebas para endpoints protegidos.
+* Se crearon pruebas para login correcto e incorrecto.
+* Se creó helper TestAuthHelper para evitar repetir registro/login.
+* Se crearon pruebas con token válido.
+* Se crearon pruebas de autorización por rol.
+* Se crearon pruebas de respuestas paginadas.
+
+# =====================================
+
+## Archivos creados
+
+* OfiPro.Api.Tests/ContractorsPublicEndpointsTests.cs
+* OfiPro.Api.Tests/ProtectedEndpointsTests.cs
+* OfiPro.Api.Tests/AuthLoginTests.cs
+* OfiPro.Api.Tests/AuthenticatedEndpointsTests.cs
+* OfiPro.Api.Tests/RoleAuthorizationTests.cs
+* OfiPro.Api.Tests/PaginatedProjectsTests.cs
+* OfiPro.Api.Tests/Helpers/TestAuthHelper.cs
+* OfiPro.Api.Tests/NotificationsAuthenticatedTests.cs
+* OfiPro.Api.Tests/DashboardAuthenticatedTests.cs
+
+# =====================================
+
+## Pruebas automatizadas implementadas
+
+* GET /api/contractors sin token → 200 OK.
+* GET /api/contractors con filtros sin token → 200 OK.
+* GET /api/notifications sin token → 401 Unauthorized.
+* POST /api/auth/login con credenciales inválidas → 400 Bad Request.
+* POST /api/auth/register + POST /api/auth/login con usuario temporal → 200 OK.
+* GET /api/users/profile con token válido → 200 OK.
+* GET /api/dashboard/contractor/summary con usuario Cliente → 403 Forbidden.
+* GET /api/projects paginado con token → 200 OK.
+* GET /api/notifications paginado con token → 200 OK.
+* GET /api/dashboard/modes con token → 200 OK.
+
+Resultado de dotnet test:
+
+* Total: 10 pruebas.
+* Correctas: 10.
+* Errores: 0.
+* Omitidas: 0.
+
+# =====================================
+
+## Decisiones técnicas
+
+* Las pruebas no usan contraseñas reales de usuarios de prueba.
+* Las pruebas crean usuarios temporales cuando necesitan login válido.
+* No se guardan credenciales reales en código ni documentación.
+* Las pruebas iniciales se enfocan en endpoints críticos y no en cubrir todo el sistema.
+* Se usa WebApplicationFactory para pruebas de integración contra la API.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+Bloque 8 - Calificaciones y reputación V1 → Completo
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+
+Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación → Completo
+
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+
+Bloque 10.1 - Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas → Completo
+
+Bloque 11 - Expiración automática de proyectos → Completo
+
+Bloque 12 - Paginación y ordenamiento básico en listados críticos → Completo
+
+Bloque 13 - Pruebas automatizadas mínimas de API → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: 🟢 Bueno.
+
+El bloque avanzó rápido porque se empezó con pruebas pequeñas y de alto valor. Se evitó intentar cubrir todo el sistema en una sola etapa.
+
+La creación del helper de autenticación redujo repetición y deja mejor preparada la suite para próximas pruebas.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Actualizar documentación.
+* Revisar git status.
+* Hacer commit del Bloque 13.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 14 - Invitaciones directas a contratistas.
+
+Razón:
+
+OfiPro ya permite buscar contratistas y consultar sus perfiles públicos. El siguiente paso lógico es permitir que un cliente invite directamente a un contratista a revisar o cotizar un proyecto.
+
+Esto conecta el discovery de contratistas con una acción real dentro del marketplace.
+
+# =====================================
