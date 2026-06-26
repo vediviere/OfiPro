@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OfiPro.Domain.Enums;
 
 namespace OfiPro.Domain.Entities;
 
@@ -13,8 +9,11 @@ public class Invitation
     public Project Project { get; set; } = null!;
     public Guid InvitedByUserId { get; set; }
     public User InvitedByUser { get; set; } = null!;
-    public string InvitedName { get; set; } = string.Empty;
-    public string InvitedPhone { get; set; } = string.Empty;
-    public string Status { get; set; } = "Pendiente";
+    public Guid InvitedContractorUserId { get; set; }
+    public User InvitedContractorUser { get; set; } = null!;
+    public string Message { get; set; } = string.Empty;
+    public InvitationStatus Status { get; set; } = InvitationStatus.Pendiente;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? RespondedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
 }

@@ -1,10 +1,10 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 1.8
+Versión: 1.9
 
 Fecha de creación: 2026-06-08
 
-Última actualización: 2026-06-25
+Última actualización: 2026-06-26
 
 Estado: En desarrollo
 
@@ -326,6 +326,16 @@ NotificationType
 * ContractPendingConfirmation
 * RatingReceived
 * ProjectExpired
+* ProjectInvitationReceived
+* ProjectInvitationAccepted
+* ProjectInvitationRejected
+
+InvitationStatus
+
+* Pendiente
+* Aceptada
+* Rechazada
+* Cancelada
 
 ---
 
@@ -1637,6 +1647,88 @@ Las pruebas automatizadas no reemplazan las pruebas manuales en Swagger, pero s�
 
 ---
 
+## D066
+
+Los clientes podrán invitar directamente a contratistas a revisar un proyecto.
+
+Resultado:
+
+Se implementa el módulo de invitaciones directas a contratistas.
+
+Flujo principal:
+
+* Cliente busca contratistas.
+* Cliente consulta perfil público del contratista.
+* Cliente invita al contratista a revisar un proyecto publicado.
+* Contratista recibe notificación interna.
+* Contratista consulta invitaciones recibidas.
+* Contratista acepta o rechaza la invitación.
+* Cliente recibe notificación de la respuesta.
+
+Razón:
+
+OfiPro no debe depender únicamente de que el contratista encuentre proyectos publicados. El cliente también debe poder tomar acción desde el discovery de contratistas.
+
+Impacto:
+
+La búsqueda de contratistas queda conectada con una acción real dentro del marketplace.
+
+Regla:
+
+Solo el dueño del proyecto puede invitar contratistas a su proyecto.
+
+---
+
+## D067
+
+Las invitaciones directas deben tener estado propio.
+
+Resultado:
+
+Se crea el enum InvitationStatus.
+
+Estados definidos:
+
+* Pendiente
+* Aceptada
+* Rechazada
+* Cancelada
+
+Razón:
+
+Una invitación no debe ser solo un aviso. Debe tener ciclo de vida para saber si el contratista aún no respondió, aceptó, rechazó o si fue cancelada.
+
+Impacto:
+
+El backend queda preparado para mostrar bandejas de invitaciones enviadas y recibidas, así como futuras acciones sobre invitaciones.
+
+---
+
+## D068
+
+Las respuestas de invitaciones deben generar notificaciones internas.
+
+Resultado:
+
+Cuando un contratista recibe una invitación, se genera una notificación interna.
+
+Cuando el contratista acepta o rechaza la invitación, el cliente recibe una notificación interna.
+
+Tipos de notificación agregados:
+
+* ProjectInvitationReceived
+* ProjectInvitationAccepted
+* ProjectInvitationRejected
+
+Razón:
+
+El flujo de invitaciones debe sentirse activo para ambas partes. Si el cliente invita a un contratista y el contratista responde, el cliente debe enterarse sin revisar manualmente.
+
+Impacto:
+
+El flujo queda mejor preparado para web responsiva y futura app móvil real con notificaciones.
+
+---
 
 
 ## HITO 8.2
@@ -2019,8 +2111,82 @@ Impacto:
 
 OfiPro ya cuenta con una base mínima de pruebas automatizadas para proteger autenticación, autorización, endpoints públicos y respuestas paginadas.
 
-
 ----
+
+## HITO 14
+
+Invitaciones directas a contratistas completado.
+
+Incluye:
+
+* Creación de InvitationStatus.
+* Refactor de entidad Invitation para invitaciones entre cliente y contratista registrado.
+* Actualización de InvitationConfiguration.
+* Creación de CreateInvitationDto.
+* Creación de InvitationDto.
+* Creación de IInvitationRepository.
+* Implementación de InvitationRepository.
+* Creación de IInvitationService.
+* Implementación de InvitationService.
+* Creación de InvitationsController.
+* Registro de dependencias en Program.cs.
+* Migración RefactorInvitationsForContractorInvites.
+* Notificación al contratista cuando recibe una invitación.
+* Notificación al cliente cuando el contratista acepta una invitación.
+* Notificación al cliente cuando el contratista rechaza una invitación.
+* Endpoints paginados para invitaciones enviadas y recibidas.
+
+Endpoints creados:
+
+* POST /api/projects/{projectId}/invitations
+* GET /api/invitations/sent
+* GET /api/invitations/received
+* PATCH /api/invitations/{invitationId}/accept
+* PATCH /api/invitations/{invitationId}/reject
+
+Reglas implementadas:
+
+* Solo el dueño del proyecto puede invitar contratistas.
+* Solo se pueden enviar invitaciones para proyectos publicados.
+* Un usuario no puede invitarse a su propio proyecto.
+* Solo se puede invitar a usuarios activos con rol Contratista.
+* Solo se puede invitar a contratistas con perfil profesional activo.
+* No puede existir más de una invitación pendiente para el mismo contratista en el mismo proyecto.
+* Solo el contratista invitado puede aceptar o rechazar la invitación.
+* Solo se pueden responder invitaciones pendientes.
+* Las invitaciones enviadas y recibidas se consultan de forma paginada.
+* Las invitaciones generan notificaciones internas.
+
+Tipos de notificación agregados:
+
+* ProjectInvitationReceived
+* ProjectInvitationAccepted
+* ProjectInvitationRejected
+
+Pruebas realizadas:
+
+* Cliente crea invitación a contratista → 200 OK.
+* Cliente consulta invitaciones enviadas → 200 OK.
+* Contratista consulta invitaciones recibidas → 200 OK.
+* Contratista acepta invitación → 200 OK.
+* Cliente recibe notificación de invitación aceptada → 200 OK.
+* Contratista rechaza invitación → 200 OK.
+* Cliente recibe notificación de invitación rechazada → 200 OK.
+* Usuario no dueño intentando invitar → 403 Forbidden.
+* Invitación duplicada pendiente → 400 Bad Request.
+* Cliente intentando aceptar invitación ajena → 403 Forbidden.
+* Rechazar invitación ya aceptada → 400 Bad Request.
+* Cliente consultando invitaciones recibidas → 200 OK.
+
+Resultado:
+
+Bloque 14 completado y probado correctamente.
+
+Impacto:
+
+OfiPro conecta la búsqueda de contratistas con una acción real del marketplace: invitar a un profesional específico a revisar o cotizar un proyecto.
+
+---
 
 
 # 15. PROBLEMAS DETECTADOS
@@ -2632,6 +2798,50 @@ El proyecto queda mejor preparado para seguir creciendo con menor riesgo de regr
 
 ---
 
+## P032
+
+La búsqueda de contratistas no tenía una acción directa asociada.
+
+Síntoma:
+
+El cliente podía buscar contratistas y consultar perfiles públicos, pero no podía invitar directamente a un contratista a revisar un proyecto.
+
+Riesgo:
+
+El discovery de contratistas quedaba incompleto porque no conectaba con una acción real dentro del marketplace.
+
+Solución:
+
+Implementar invitaciones directas de cliente a contratista mediante el módulo Invitations.
+
+Resultado:
+
+El cliente puede invitar a un contratista específico a revisar un proyecto publicado.
+
+---
+
+## P033
+
+Las invitaciones no notificaban la respuesta del contratista.
+
+Síntoma:
+
+El contratista recibía una invitación, pero al aceptar o rechazar, el cliente no recibía aviso.
+
+Riesgo:
+
+El cliente podía quedarse esperando respuesta sin saber si el contratista aceptó o rechazó la invitación.
+
+Solución:
+
+Agregar notificaciones internas cuando una invitación es aceptada o rechazada.
+
+Resultado:
+
+El cliente recibe notificación cuando el contratista responde.
+
+---
+
 
 # 16. RIESGOS
 
@@ -3202,16 +3412,15 @@ Módulos completados:
 * Bloque 11 - Expiración automática de proyectos
 * Bloque 12 - Paginación y ordenamiento básico en listados críticos
 * Bloque 13 - Pruebas automatizadas mínimas de API
+* Bloque 14 - Invitaciones directas a contratistas
 
 Próximo bloque recomendado:
 
-* Bloque 14 - Invitaciones directas a contratistas
+* Bloque 15 - Refresh tokens para experiencia móvil
 
 Razón:
 
-OfiPro ya permite buscar contratistas y consultar perfiles públicos. El siguiente paso lógico es permitir que un cliente invite directamente a un contratista a revisar o cotizar un proyecto.
-
-Esto conecta la búsqueda de contratistas con una acción real dentro del marketplace.
+Después de cerrar invitaciones, el backend ya tiene flujo sólido de marketplace. El siguiente paso técnico importante para web responsiva y futura app móvil real es mejorar la persistencia de sesión, evitando que el usuario tenga que iniciar sesión constantemente.
 
 Pruebas iniciales sugeridas:
 
@@ -3226,7 +3435,6 @@ Pruebas iniciales sugeridas:
 
 Opciones posteriores:
 
-* Refresh tokens para experiencia móvil.
 * Carga real de archivos para evidencias.
 * Perfil público compartible de contratista.
 * URL pública única por contratista.

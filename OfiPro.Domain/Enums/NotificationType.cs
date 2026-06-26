@@ -17,5 +17,8 @@ public enum NotificationType
 
     ContractPendingConfirmation = 10,
     RatingReceived = 11,
-    ProjectExpired = 12
+    ProjectExpired = 12,
+    ProjectInvitationReceived = 13,
+    ProjectInvitationAccepted = 14,
+    ProjectInvitationRejected = 15
 }

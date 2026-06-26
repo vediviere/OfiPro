@@ -1,12 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OfiPro.Domain.Entities;
+using OfiPro.Domain.Enums;
 
 namespace OfiPro.Infrastructure.Persistence.Configurations;
 
@@ -26,16 +21,24 @@ public class InvitationConfiguration : IEntityTypeConfiguration<Invitation>
             .HasForeignKey(x => x.InvitedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(x => x.InvitedName)
-            .IsRequired()
-            .HasMaxLength(150);
+        builder.HasOne(x => x.InvitedContractorUser)
+            .WithMany()
+            .HasForeignKey(x => x.InvitedContractorUserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(x => x.InvitedPhone)
-            .IsRequired()
-            .HasMaxLength(20);
+        builder.Property(x => x.Message)
+            .HasMaxLength(500);
 
         builder.Property(x => x.Status)
+            .HasConversion<string>()
             .IsRequired()
             .HasMaxLength(50);
+
+        builder.HasIndex(x => new
+        {
+            x.ProjectId,
+            x.InvitedContractorUserId,
+            x.Status
+        });
     }
 }

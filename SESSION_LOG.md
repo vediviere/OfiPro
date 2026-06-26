@@ -3243,3 +3243,190 @@ OfiPro ya permite buscar contratistas y consultar sus perfiles públicos. El sig
 Esto conecta el discovery de contratistas con una acción real dentro del marketplace.
 
 # =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-26
+
+## Objetivo
+
+Implementar, probar y cerrar Bloque 14 - Invitaciones directas a contratistas.
+
+# =====================================
+
+## Contexto
+
+Después de completar pruebas automatizadas mínimas de API, se decidió avanzar con invitaciones directas porque OfiPro ya permitía buscar contratistas y consultar perfiles públicos.
+
+El problema pendiente era que el discovery de contratistas todavía no conectaba con una acción directa dentro del marketplace.
+
+# =====================================
+
+## Bloque 14 - Invitaciones directas a contratistas
+
+Completado:
+
+* Se creó InvitationStatus.
+* Se refactorizó la entidad Invitation.
+* Se actualizó InvitationConfiguration.
+* Se agregó ProjectInvitationReceived a NotificationType.
+* Se creó CreateInvitationDto.
+* Se creó InvitationDto.
+* Se creó IInvitationRepository.
+* Se implementó InvitationRepository.
+* Se creó IInvitationService.
+* Se implementó InvitationService.
+* Se creó InvitationsController.
+* Se registraron IInvitationRepository e IInvitationService en Program.cs.
+* Se generó migración RefactorInvitationsForContractorInvites.
+* Se actualizó la base de datos.
+* Se agregó notificación al contratista cuando recibe invitación.
+* Se agregó ProjectInvitationAccepted a NotificationType.
+* Se agregó ProjectInvitationRejected a NotificationType.
+* Se agregó notificación al cliente cuando el contratista acepta invitación.
+* Se agregó notificación al cliente cuando el contratista rechaza invitación.
+
+# =====================================
+
+## Endpoints creados
+
+* POST /api/projects/{projectId}/invitations
+* GET /api/invitations/sent
+* GET /api/invitations/received
+* PATCH /api/invitations/{invitationId}/accept
+* PATCH /api/invitations/{invitationId}/reject
+
+# =====================================
+
+## Reglas implementadas
+
+* Solo el dueño del proyecto puede invitar contratistas.
+* Solo se pueden enviar invitaciones para proyectos publicados.
+* Un usuario no puede invitarse a su propio proyecto.
+* Solo se puede invitar a usuarios activos con rol Contratista.
+* Solo se puede invitar a contratistas con perfil profesional activo.
+* No puede existir más de una invitación pendiente para el mismo contratista en el mismo proyecto.
+* Solo el contratista invitado puede aceptar o rechazar la invitación.
+* Solo se pueden responder invitaciones pendientes.
+* Las invitaciones enviadas y recibidas se consultan de forma paginada.
+* Las invitaciones generan notificaciones internas.
+
+# =====================================
+
+## Pruebas realizadas
+
+Pruebas positivas:
+
+* Cliente crea invitación a contratista → 200 OK.
+* Cliente consulta invitaciones enviadas → 200 OK.
+* Contratista consulta invitaciones recibidas → 200 OK.
+* Contratista acepta invitación → 200 OK.
+* Cliente recibe notificación ProjectInvitationAccepted → 200 OK.
+* Contratista rechaza invitación → 200 OK.
+* Cliente recibe notificación ProjectInvitationRejected → 200 OK.
+
+Pruebas negativas:
+
+* Usuario no dueño intentando invitar contratista a proyecto ajeno → 403 Forbidden.
+* Invitación duplicada pendiente al mismo contratista para el mismo proyecto → 400 Bad Request.
+* Cliente intentando aceptar invitación destinada al contratista → 403 Forbidden.
+* Contratista intentando rechazar una invitación ya aceptada → 400 Bad Request.
+* Cliente consultando invitaciones recibidas → 200 OK.
+
+Resultado:
+
+Bloque 14 quedó completado y probado correctamente.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+Bloque 8 - Calificaciones y reputación V1 → Completo
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+
+Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación → Completo
+
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+
+Bloque 10.1 - Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas → Completo
+
+Bloque 11 - Expiración automática de proyectos → Completo
+
+Bloque 12 - Paginación y ordenamiento básico en listados críticos → Completo
+
+Bloque 13 - Pruebas automatizadas mínimas de API → Completo
+
+Bloque 14 - Invitaciones directas a contratistas → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: 🟢 Bueno.
+
+El bloque avanzó bien porque se aprovechó la entidad Invitation ya existente y se integró con patrones ya usados en el sistema:
+
+* DTOs.
+* Repository.
+* Service.
+* Controller.
+* Notificaciones internas.
+* Paginación.
+* Validaciones de autorización.
+* Pruebas con Swagger y SQL Server.
+
+Aunque requirió migración, el cambio fue controlado y quedó alineado con el flujo de discovery de contratistas.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Actualizar documentación.
+* Revisar git status.
+* Hacer commit del Bloque 14.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 15 - Refresh tokens para experiencia móvil.
+
+Razón:
+
+El backend ya tiene flujo sólido de marketplace. Para web responsiva y futura app móvil real, el siguiente punto importante es mejorar la persistencia de sesión y evitar que el usuario tenga que iniciar sesión constantemente.
+
+# =====================================
