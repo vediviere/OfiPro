@@ -6,9 +6,7 @@ namespace OfiPro.Api.Tests.Helpers;
 
 public static class TestAuthHelper
 {
-    public static async Task<(string Email, string Token)> RegisterAndLoginClientAsync(
-        HttpClient client,
-        string emailPrefix)
+    public static async Task<(string Email, string Token, string RefreshToken)> RegisterAndLoginClientAsync(HttpClient client, string emailPrefix)
     {
         var email = $"{emailPrefix}-{Guid.NewGuid()}@ofipro.com";
         var password = "TestPassword123!";
@@ -24,14 +22,11 @@ public static class TestAuthHelper
             city = "Puebla"
         };
 
-        var registerResponse = await client.PostAsJsonAsync(
-            "/api/auth/register",
-            registerRequest);
+        var registerResponse = await client.PostAsJsonAsync("/api/auth/register", registerRequest);
 
         if (registerResponse.StatusCode != HttpStatusCode.OK)
         {
-            throw new InvalidOperationException(
-                $"Register failed with status code {registerResponse.StatusCode}");
+            throw new InvalidOperationException($"Register failed with status code {registerResponse.StatusCode}");
         }
 
         var loginRequest = new
@@ -40,14 +35,11 @@ public static class TestAuthHelper
             password
         };
 
-        var loginResponse = await client.PostAsJsonAsync(
-            "/api/auth/login",
-            loginRequest);
+        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", loginRequest);
 
         if (loginResponse.StatusCode != HttpStatusCode.OK)
         {
-            throw new InvalidOperationException(
-                $"Login failed with status code {loginResponse.StatusCode}");
+            throw new InvalidOperationException($"Login failed with status code {loginResponse.StatusCode}");
         }
 
         var loginContent = await loginResponse.Content.ReadAsStringAsync();
@@ -63,6 +55,15 @@ public static class TestAuthHelper
             throw new InvalidOperationException("Login response did not contain a valid token.");
         }
 
-        return (email, token);
+        var refreshToken = loginJson.RootElement
+            .GetProperty("refreshToken")
+            .GetString();
+
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            throw new InvalidOperationException("Login response did not contain a valid refresh token.");
+        }
+
+        return (email, token, refreshToken);
     }
 }

@@ -36,4 +36,5 @@ public class ApplicationDbContext : DbContext
     public DbSet<Invitation> Invitations => Set<Invitation>();
     public DbSet<Contract> Contracts => Set<Contract>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 }

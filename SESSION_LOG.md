@@ -3430,3 +3430,205 @@ Razón:
 El backend ya tiene flujo sólido de marketplace. Para web responsiva y futura app móvil real, el siguiente punto importante es mejorar la persistencia de sesión y evitar que el usuario tenga que iniciar sesión constantemente.
 
 # =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-26
+
+## Objetivo
+
+Implementar, probar y cerrar Bloque 15 - Refresh tokens para experiencia móvil.
+
+# =====================================
+
+## Contexto
+
+Después de completar invitaciones directas a contratistas, el backend ya tenía un flujo sólido de marketplace.
+
+El siguiente problema técnico importante era que la autenticación dependía únicamente del JWT. Para web responsiva y futura app móvil real, esto no era suficiente porque el usuario tendría que iniciar sesión nuevamente al expirar el access token.
+
+# =====================================
+
+## Bloque 15 - Refresh tokens para experiencia móvil
+
+Completado:
+
+* Se creó la entidad RefreshToken.
+* Se creó RefreshTokenConfiguration.
+* Se registró RefreshTokens en ApplicationDbContext.
+* Se agregó RefreshTokenExpiresInDays a JwtSettings.
+* Se agregó RefreshTokenExpiresInDays en appsettings.json.
+* Se actualizó AuthResponseDto.
+* Se creó RefreshTokenRequestDto.
+* Se creó IRefreshTokenRepository.
+* Se implementó RefreshTokenRepository.
+* Se actualizó IAuthService.
+* Se actualizó AuthService.
+* Se implementó generación segura de refresh tokens.
+* Se implementó almacenamiento hasheado de refresh tokens.
+* Se implementó rotación de refresh tokens.
+* Se implementó revocación de refresh tokens.
+* Se agregaron endpoints de refresh y revoke.
+* Se registró IRefreshTokenRepository en Program.cs.
+* Se generó migración AddRefreshTokens.
+* Se actualizó la base de datos.
+* Se agregaron pruebas automatizadas para refresh tokens.
+
+# =====================================
+
+## Endpoints agregados
+
+* POST /api/auth/refresh-token
+* POST /api/auth/revoke-refresh-token
+
+# =====================================
+
+## Reglas implementadas
+
+* El login devuelve access token y refresh token.
+* El register devuelve access token y refresh token.
+* El refresh token tiene expiración propia.
+* El refresh token no se guarda en texto plano.
+* El refresh token se guarda como hash SHA256.
+* Al refrescar sesión, el refresh token anterior se revoca.
+* Al refrescar sesión, se genera un nuevo refresh token.
+* Un refresh token revocado no puede reutilizarse.
+* Un refresh token inválido devuelve 400 Bad Request.
+* Un refresh token expirado devuelve 400 Bad Request.
+* Un refresh token de usuario inactivo o eliminado devuelve 403 Forbidden.
+* La revocación permite invalidar manualmente un refresh token activo.
+
+# =====================================
+
+## Pruebas manuales realizadas
+
+* Login devuelve refreshToken y refreshTokenExpiresAt → 200 OK.
+* Refresh token válido genera nuevo token y nuevo refresh token → 200 OK.
+* Reutilizar refresh token anterior → 400 Bad Request.
+* Revocar refresh token actual → 200 OK.
+* Usar refresh token revocado → 400 Bad Request.
+
+Resultado:
+
+Todas las pruebas manuales se cumplieron correctamente.
+
+# =====================================
+
+## Pruebas automatizadas agregadas
+
+Se actualizó:
+
+* OfiPro.Api.Tests/Helpers/TestAuthHelper.cs
+
+Se creó:
+
+* OfiPro.Api.Tests/RefreshTokenTests.cs
+
+Pruebas agregadas:
+
+* RefreshToken_WithValidRefreshToken_ReturnsOkAndNewTokens.
+* RefreshToken_WithReusedRefreshToken_ReturnsBadRequest.
+* RevokeRefreshToken_WithValidRefreshToken_PreventsFutureRefresh.
+* RefreshToken_WithInvalidRefreshToken_ReturnsBadRequest.
+
+Resultado de dotnet test:
+
+* Total: 14 pruebas.
+* Correctas: 14.
+* Errores: 0.
+* Omitidas: 0.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+Bloque 8 - Calificaciones y reputación V1 → Completo
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+
+Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación → Completo
+
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+
+Bloque 10.1 - Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas → Completo
+
+Bloque 11 - Expiración automática de proyectos → Completo
+
+Bloque 12 - Paginación y ordenamiento básico en listados críticos → Completo
+
+Bloque 13 - Pruebas automatizadas mínimas de API → Completo
+
+Bloque 14 - Invitaciones directas a contratistas → Completo
+
+Bloque 15 - Refresh tokens para experiencia móvil → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: 🟢 Bueno.
+
+El bloque fue importante porque toca autenticación y seguridad de sesión. Se avanzó bien porque se implementó de forma controlada:
+
+* entidad separada,
+* repositorio separado,
+* hash de token,
+* rotación,
+* revocación,
+* pruebas manuales,
+* pruebas automatizadas.
+
+La observación importante de la sesión fue aclarar mejor cuándo una instrucción es prueba manual y cuándo requiere código. A partir de este punto, las pruebas manuales deben indicarse explícitamente como pruebas sin agregar código.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Actualizar documentación.
+* Revisar git status.
+* Hacer commit del Bloque 15.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 16 - Carga real de archivos para evidencias.
+
+Razón:
+
+Actualmente las evidencias funcionan por URL. Para un producto real, especialmente en trabajos de campo, será necesario permitir subir imágenes o archivos reales desde web/app móvil.
+
+# =====================================

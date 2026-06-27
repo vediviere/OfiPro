@@ -78,6 +78,7 @@ builder.Services.AddScoped<IProfessionalProfileService, ProfessionalProfileServi
 builder.Services.AddHostedService<ProjectExpirationBackgroundService>();
 builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<IInvitationService, InvitationService>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 var jwtSettings = builder.Configuration
     .GetSection("Jwt")

@@ -1,6 +1,6 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 1.9
+Versión: 2.0
 
 Fecha de creación: 2026-06-08
 
@@ -336,6 +336,27 @@ InvitationStatus
 * Aceptada
 * Rechazada
 * Cancelada
+
+
+JwtSettings actualizado:
+
+* ExpiresInMinutes
+* RefreshTokenExpiresInDays
+
+Nueva entidad:
+
+* RefreshToken
+
+Campos principales:
+
+* Id
+* UserId
+* TokenHash
+* CreatedAt
+* ExpiresAt
+* RevokedAt
+* ReplacedByTokenHash
+* DeletedAt
 
 ---
 
@@ -1730,6 +1751,80 @@ El flujo queda mejor preparado para web responsiva y futura app móvil real con 
 
 ---
 
+## D069
+
+OfiPro debe usar refresh tokens para mejorar la experiencia móvil y web.
+
+Resultado:
+
+Se implementa refresh token como mecanismo complementario al JWT.
+
+El login ahora devuelve:
+
+* token
+* expiresAt
+* refreshToken
+* refreshTokenExpiresAt
+
+Razón:
+
+En una app móvil real, no es conveniente que el usuario tenga que iniciar sesión constantemente cada vez que expire el access token.
+
+Impacto:
+
+El backend queda mejor preparado para web responsiva y futura app móvil real.
+
+Regla:
+
+El access token sigue siendo el token principal para autorizar requests. El refresh token solo se usa para solicitar nuevos tokens.
+
+---
+
+## D070
+
+Los refresh tokens no deben guardarse en texto plano.
+
+Resultado:
+
+Los refresh tokens se generan como valores aleatorios seguros y se almacenan en base de datos usando hash SHA256.
+
+Razón:
+
+Si la base de datos se expone, no deben quedar refresh tokens reutilizables en texto plano.
+
+Impacto:
+
+Se reduce el riesgo de robo directo de sesiones persistentes.
+
+Regla:
+
+El backend solo devuelve el refresh token en el momento del login o refresh. En base de datos se almacena únicamente TokenHash.
+
+---
+
+## D071
+
+Los refresh tokens deben rotarse al usarse.
+
+Resultado:
+
+Cada vez que se usa un refresh token válido:
+
+* Se genera un nuevo access token.
+* Se genera un nuevo refresh token.
+* El refresh token anterior se marca como revocado.
+* El refresh token anterior guarda referencia hash del nuevo token mediante ReplacedByTokenHash.
+
+Razón:
+
+La rotación evita que un refresh token antiguo pueda reutilizarse varias veces.
+
+Impacto:
+
+Mejora la seguridad de sesión y prepara el backend para manejo móvil más serio.
+
+---
+
 
 ## HITO 8.2
 
@@ -2185,6 +2280,80 @@ Bloque 14 completado y probado correctamente.
 Impacto:
 
 OfiPro conecta la búsqueda de contratistas con una acción real del marketplace: invitar a un profesional específico a revisar o cotizar un proyecto.
+
+---
+
+## HITO 15
+
+Refresh tokens para experiencia móvil completado.
+
+Incluye:
+
+* Creación de entidad RefreshToken.
+* Creación de RefreshTokenConfiguration.
+* Registro de RefreshTokens en ApplicationDbContext.
+* Actualización de JwtSettings.
+* Configuración RefreshTokenExpiresInDays en appsettings.json.
+* Actualización de AuthResponseDto.
+* Creación de RefreshTokenRequestDto.
+* Creación de IRefreshTokenRepository.
+* Implementación de RefreshTokenRepository.
+* Actualización de IAuthService.
+* Actualización de AuthService.
+* Generación segura de refresh tokens.
+* Hash SHA256 para almacenar refresh tokens.
+* Rotación de refresh tokens.
+* Revocación de refresh tokens.
+* Creación de endpoint POST /api/auth/refresh-token.
+* Creación de endpoint POST /api/auth/revoke-refresh-token.
+* Registro de IRefreshTokenRepository en Program.cs.
+* Migración AddRefreshTokens.
+* Pruebas manuales en Swagger.
+* Pruebas automatizadas de refresh tokens.
+
+Endpoints agregados:
+
+* POST /api/auth/refresh-token
+* POST /api/auth/revoke-refresh-token
+
+Reglas implementadas:
+
+* Login devuelve access token y refresh token.
+* Register devuelve access token y refresh token.
+* Refresh token válido genera nuevo access token y nuevo refresh token.
+* Refresh token usado queda revocado.
+* Refresh token revocado no puede volver a usarse.
+* Refresh token inválido devuelve 400 Bad Request.
+* Refresh token expirado devuelve 400 Bad Request.
+* Refresh token de usuario inactivo o eliminado devuelve 403 Forbidden.
+* Revocar refresh token válido devuelve 200 OK.
+* Usar refresh token revocado después de logout/revocación devuelve 400 Bad Request.
+
+Pruebas manuales realizadas:
+
+* Login devuelve refreshToken y refreshTokenExpiresAt → 200 OK.
+* Refresh token válido genera nuevo token y nuevo refresh token → 200 OK.
+* Reutilizar refresh token anterior → 400 Bad Request.
+* Revocar refresh token actual → 200 OK.
+* Usar refresh token revocado → 400 Bad Request.
+
+Pruebas automatizadas agregadas:
+
+* RefreshToken_WithValidRefreshToken_ReturnsOkAndNewTokens.
+* RefreshToken_WithReusedRefreshToken_ReturnsBadRequest.
+* RevokeRefreshToken_WithValidRefreshToken_PreventsFutureRefresh.
+* RefreshToken_WithInvalidRefreshToken_ReturnsBadRequest.
+
+Resultado de pruebas automatizadas:
+
+* Total: 14 pruebas.
+* Correctas: 14.
+* Errores: 0.
+
+Impacto:
+
+OfiPro queda mejor preparado para una experiencia real en web responsiva y app móvil, evitando depender únicamente de JWT de corta duración.
+
 
 ---
 
@@ -2842,6 +3011,28 @@ El cliente recibe notificación cuando el contratista responde.
 
 ---
 
+## P034
+
+La autenticación dependía únicamente del JWT.
+
+Síntoma:
+
+El login devolvía solo access token y fecha de expiración.
+
+Riesgo:
+
+Cuando el JWT expirara, web/app móvil tendrían que forzar al usuario a iniciar sesión de nuevo.
+
+Solución:
+
+Implementar refresh tokens con expiración propia, almacenamiento hasheado, rotación y revocación.
+
+Resultado:
+
+El usuario puede renovar sesión sin volver a capturar credenciales, mientras el refresh token siga vigente.
+
+---
+
 
 # 16. RIESGOS
 
@@ -3413,14 +3604,17 @@ Módulos completados:
 * Bloque 12 - Paginación y ordenamiento básico en listados críticos
 * Bloque 13 - Pruebas automatizadas mínimas de API
 * Bloque 14 - Invitaciones directas a contratistas
+* Bloque 15 - Refresh tokens para experiencia móvil
 
 Próximo bloque recomendado:
 
-* Bloque 15 - Refresh tokens para experiencia móvil
+* Bloque 16 - Carga real de archivos para evidencias
 
 Razón:
 
-Después de cerrar invitaciones, el backend ya tiene flujo sólido de marketplace. El siguiente paso técnico importante para web responsiva y futura app móvil real es mejorar la persistencia de sesión, evitando que el usuario tenga que iniciar sesión constantemente.
+El backend ya tiene autenticación, marketplace, propuestas, contrataciones, evidencias por URL, notificaciones, ratings, búsqueda, invitaciones, paginación y refresh tokens.
+
+El siguiente punto fuerte para acercarse a un producto real es dejar de manejar evidencias solo como URL y permitir carga real de archivos/imágenes.
 
 Pruebas iniciales sugeridas:
 
@@ -3435,7 +3629,6 @@ Pruebas iniciales sugeridas:
 
 Opciones posteriores:
 
-* Carga real de archivos para evidencias.
 * Perfil público compartible de contratista.
 * URL pública única por contratista.
 * Historial privado por proyecto/contratación.

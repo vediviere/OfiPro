@@ -30,4 +30,20 @@ public class AuthController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken(RefreshTokenRequestDto request)
+    {
+        var response = await _authService.RefreshTokenAsync(request);
+
+        return Ok(response);
+    }
+
+    [HttpPost("revoke-refresh-token")]
+    public async Task<IActionResult> RevokeRefreshToken(RefreshTokenRequestDto request)
+    {
+        await _authService.RevokeRefreshTokenAsync(request);
+
+        return Ok(new { message = "Refresh token revocado." });
+    }
 }
