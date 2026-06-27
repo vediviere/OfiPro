@@ -6,11 +6,11 @@ using OfiPro.Api.Tests.Helpers;
 
 namespace OfiPro.Api.Tests;
 
-public class NotificationsAuthenticatedTests : IClassFixture<WebApplicationFactory<Program>>
+public class NotificationsAuthenticatedTests : IClassFixture<OfiProWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public NotificationsAuthenticatedTests(WebApplicationFactory<Program> factory)
+    public NotificationsAuthenticatedTests(OfiProWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }

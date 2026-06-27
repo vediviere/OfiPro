@@ -1,5 +1,6 @@
 ﻿using OfiPro.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using OfiPro.Application.Common.Validation;
 
 namespace OfiPro.Application.DTOs.Evidence;
 
@@ -13,6 +14,7 @@ public class CreateEvidenceDto : IValidatableObject
     public string Title { get; set; } = string.Empty;
 
     [StringLength(1000)]
+    [NoHtml]
     public string Description { get; set; } = string.Empty;
 
     [Required]

@@ -6,11 +6,11 @@ using OfiPro.Api.Tests.Helpers;
 
 namespace OfiPro.Api.Tests;
 
-public class DashboardAuthenticatedTests : IClassFixture<WebApplicationFactory<Program>>
+public class DashboardAuthenticatedTests : IClassFixture<OfiProWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public DashboardAuthenticatedTests(WebApplicationFactory<Program> factory)
+    public DashboardAuthenticatedTests(OfiProWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }

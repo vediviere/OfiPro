@@ -3808,3 +3808,210 @@ Recomendación:
 Antes de construir frontend, conviene hacer una revisión breve de preparación para frontend para detectar endpoints incómodos, respuestas difíciles de consumir, inconsistencias de DTOs y flujos que puedan afectar la experiencia web/móvil.
 
 # =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-27
+
+## Objetivo
+
+Implementar, probar y cerrar Bloque 16 - Seguridad V1 / Hardening básico.
+
+# =====================================
+
+## Contexto
+
+Después de completar refresh tokens, invitaciones, pruebas automatizadas y correcciones de diagnóstico, se realizó una revisión de seguridad.
+
+El diagnóstico detectó huecos importantes antes de avanzar a frontend:
+
+* falta de rate limiting en Auth,
+* CORS no explícito,
+* falta de headers HTTP de seguridad,
+* falta de logging interno para errores 500,
+* validación débil de contraseña,
+* campos de texto libre aceptando HTML básico.
+
+Se decidió cambiar el siguiente bloque a seguridad antes de continuar con frontend o carga real de archivos.
+
+# =====================================
+
+## Bloque 16.1 - Seguridad base inmediata
+
+Completado:
+
+* Se agregó configuración Cors:AllowedOrigins.
+* Se configuró política OfiProCors.
+* Se agregó rate limiting con Microsoft.AspNetCore.RateLimiting.
+* Se aplicó EnableRateLimiting("AuthPolicy") en AuthController.
+* Se agregaron headers HTTP de seguridad en Program.cs.
+* Se actualizó ExceptionMiddleware para registrar errores 500 con ILogger.
+* Se endureció RegisterRequestDto con contraseña fuerte.
+
+Reglas implementadas:
+
+* AuthController tiene rate limiting.
+* En Development el límite se mantiene alto para pruebas locales.
+* En ambientes no Development el límite baja a 5 requests por minuto.
+* CORS solo permite orígenes definidos.
+* La API devuelve headers básicos de seguridad.
+* Errores inesperados se registran internamente.
+* Registro rechaza contraseñas débiles.
+
+# =====================================
+
+## Bloque 16.2 - Validación anti-HTML básica
+
+Completado:
+
+* Se creó NoHtmlAttribute.
+* Se aplicó NoHtmlAttribute en DTOs principales de entrada.
+* Se protegieron campos de texto libre como Message, Comment, Description, Title, Name, LastName, State, City, MainSpecialty, ScopeDescription, Includes, DoesNotInclude y AvailableMaterials.
+
+Regla implementada:
+
+Los campos de texto libre no deben aceptar contenido con HTML básico, etiquetas o caracteres como < y >.
+
+# =====================================
+
+## Bloque 16.3 - Pruebas automatizadas de seguridad
+
+Completado:
+
+Se creó:
+
+* OfiPro.Api.Tests/SecurityValidationTests.cs
+
+Pruebas agregadas:
+
+* Register_WithWeakPassword_ReturnsBadRequest.
+* Register_WithHtmlInName_ReturnsBadRequest.
+
+Resultado:
+
+La suite subió de 14 a 16 pruebas automatizadas.
+
+# =====================================
+
+## Pruebas realizadas
+
+Pruebas automáticas:
+
+* dotnet test → 16 pruebas correctas.
+* Errores: 0.
+* Omitidas: 0.
+
+Pruebas manuales en Swagger:
+
+* Swagger abre correctamente.
+* Login normal → 200 OK.
+* Registro con contraseña débil → 400 Bad Request.
+* Registro con contraseña fuerte → 200 OK.
+* Registro con HTML en name → 400 Bad Request.
+* Crear invitación con HTML en message → 400 Bad Request.
+* Crear rating con HTML en comment → 400 Bad Request.
+* Flujo normal con texto limpio → correcto.
+
+# =====================================
+
+## Observación técnica
+
+Durante la implementación, el rate limiting afectó temporalmente las pruebas automatizadas al devolver 429 Too Many Requests.
+
+Solución aplicada:
+
+* En Development se usa un límite alto para no bloquear pruebas locales.
+* En ambientes no Development se mantiene el límite bajo para proteger Auth.
+
+También se presentó temporalmente un problema de conexión a SQL Server, pero se confirmó que no era causado por el cambio de seguridad.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+Bloque 8 - Calificaciones y reputación V1 → Completo
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+
+Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación → Completo
+
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+
+Bloque 10.1 - Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas → Completo
+
+Bloque 11 - Expiración automática de proyectos → Completo
+
+Bloque 12 - Paginación y ordenamiento básico en listados críticos → Completo
+
+Bloque 13 - Pruebas automatizadas mínimas de API → Completo
+
+Bloque 14 - Invitaciones directas a contratistas → Completo
+
+Bloque 15 - Refresh tokens para experiencia móvil → Completo
+
+Bloque 15.3 - Correcciones diagnóstico post-refresh tokens → Completo
+
+Bloque 16 - Seguridad V1 / Hardening básico → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: 🟢 Bueno.
+
+El bloque fue muy valioso porque corrigió huecos de seguridad antes de avanzar a frontend. Hubo ajustes técnicos durante la implementación, especialmente por rate limiting y pruebas automatizadas, pero se resolvieron correctamente.
+
+La suite de pruebas quedó funcionando con 16 pruebas correctas.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Actualizar documentación.
+* Revisar git status.
+* Hacer commit.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo paso recomendado
+
+Bloque 17 - Revisión de preparación para frontend.
+
+Razón:
+
+Antes de construir la web responsiva mínima, conviene revisar que los endpoints, DTOs, respuestas y flujos estén listos para ser consumidos de forma limpia por Angular/web.
+
+# =====================================

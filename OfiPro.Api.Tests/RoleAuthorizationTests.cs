@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace OfiPro.Api.Tests;
 
-public class RoleAuthorizationTests : IClassFixture<WebApplicationFactory<Program>>
+public class RoleAuthorizationTests : IClassFixture<OfiProWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public RoleAuthorizationTests(WebApplicationFactory<Program> factory)
+    public RoleAuthorizationTests(OfiProWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }

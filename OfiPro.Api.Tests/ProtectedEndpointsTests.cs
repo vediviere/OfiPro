@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace OfiPro.Api.Tests;
 
-public class ProtectedEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
+public class ProtectedEndpointsTests : IClassFixture<OfiProWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public ProtectedEndpointsTests(WebApplicationFactory<Program> factory)
+    public ProtectedEndpointsTests(OfiProWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }

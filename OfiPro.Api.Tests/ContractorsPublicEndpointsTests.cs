@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace OfiPro.Api.Tests;
 
-public class ContractorsPublicEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
+public class ContractorsPublicEndpointsTests : IClassFixture<OfiProWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public ContractorsPublicEndpointsTests(WebApplicationFactory<Program> factory)
+    public ContractorsPublicEndpointsTests(OfiProWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }

@@ -1,10 +1,10 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 2.0
+Versión: 2.1
 
 Fecha de creación: 2026-06-08
 
-Última actualización: 2026-06-26
+Última actualización: 2026-06-27
 
 Estado: En desarrollo
 
@@ -1885,10 +1885,201 @@ Se mantiene así por simplicidad. Puede endurecerse después si se requiere revo
 
 ---
 
+## D075
+
+OfiPro debe contar con hardening básico de seguridad antes de avanzar a frontend.
+
+Resultado:
+
+Se implementa Bloque 16 - Seguridad V1 / Hardening básico.
+
+Incluye:
+
+* CORS explícito.
+* Rate limiting en endpoints de autenticación.
+* Headers HTTP de seguridad.
+* Logging interno en ExceptionMiddleware.
+* Validación fuerte de contraseña.
+* Validación anti-HTML básica en campos de texto libre.
+* Pruebas automatizadas mínimas de seguridad.
+
+Razón:
+
+El backend ya cuenta con autenticación, roles, refresh tokens, invitaciones, notificaciones, ratings y pruebas automatizadas. Antes de construir frontend o seguir agregando módulos grandes, era necesario reducir huecos básicos de seguridad.
+
+Impacto:
+
+OfiPro queda mejor preparado para una futura web responsiva y app móvil real.
+
+---
+
+## D076
+
+Los endpoints de autenticación deben tener rate limiting.
+
+Resultado:
+
+Se agrega rate limiting a AuthController mediante la política AuthPolicy.
+
+Aplica a:
+
+* POST /api/auth/register
+* POST /api/auth/login
+* POST /api/auth/refresh-token
+* POST /api/auth/revoke-refresh-token
+
+Regla:
+
+En ambientes no Development, se limita a 5 requests por minuto por IP.
+
+En Development se permite un límite alto para no bloquear pruebas automatizadas ni pruebas locales.
+
+Razón:
+
+Sin rate limiting, un atacante podría intentar múltiples combinaciones de contraseña contra el endpoint de login.
+
+Impacto:
+
+Se reduce el riesgo de ataques de fuerza bruta sobre autenticación.
+
+---
+
+## D077
+
+La API debe declarar CORS explícitamente.
+
+Resultado:
+
+Se agrega política OfiProCors con orígenes permitidos desde configuración.
+
+Orígenes considerados:
+
+* http://localhost:4200
+* https://ofipro.com
+* https://app.ofipro.com
+
+Razón:
+
+Antes de construir el frontend, la API debe evitar aceptar cualquier origen de forma implícita o descontrolada.
+
+Impacto:
+
+El backend queda preparado para consumir la API desde Angular/web responsiva sin abrir CORS innecesariamente.
+
+---
+
+## D078
+
+La API debe devolver headers HTTP básicos de seguridad.
+
+Resultado:
+
+Se agregan headers de seguridad desde Program.cs:
+
+* X-Content-Type-Options
+* X-Frame-Options
+* Referrer-Policy
+* Permissions-Policy
+* Content-Security-Policy en ambientes no Development
+
+Razón:
+
+Estos headers reducen riesgos comunes como MIME sniffing, clickjacking, exposición innecesaria de referrer y permisos no requeridos del navegador.
+
+Impacto:
+
+Se mejora la postura de seguridad HTTP de la API con bajo esfuerzo.
+
+---
+
+## D079
+
+Los errores 500 deben registrarse internamente.
+
+Resultado:
+
+Se actualiza ExceptionMiddleware para inyectar ILogger y registrar excepciones no controladas.
+
+Regla:
+
+Las excepciones internas se registran con método HTTP y path.
+
+El cliente sigue recibiendo una respuesta genérica para errores 500.
+
+Razón:
+
+En producción no basta con responder al cliente. El sistema debe registrar internamente errores inesperados para poder diagnosticarlos.
+
+Impacto:
+
+OfiPro queda mejor preparado para monitoreo y soporte técnico.
+
+---
+
+## D080
+
+El registro debe exigir contraseñas más fuertes.
+
+Resultado:
+
+RegisterRequestDto ahora valida contraseña con:
+
+* mínimo 8 caracteres,
+* al menos una mayúscula,
+* al menos una minúscula,
+* al menos un número,
+* al menos un carácter especial.
+
+Razón:
+
+La longitud mínima por sí sola permite contraseñas débiles como 12345678.
+
+Impacto:
+
+Se reduce el riesgo de cuentas creadas con contraseñas triviales.
+
+---
+
+## D081
+
+Los campos de texto libre no deben aceptar HTML básico.
+
+Resultado:
+
+Se crea NoHtmlAttribute y se aplica en DTOs principales de entrada.
+
+Aplica a campos como:
+
+* Name
+* LastName
+* State
+* City
+* Title
+* Description
+* Message
+* Comment
+* ScopeDescription
+* Includes
+* DoesNotInclude
+* WarrantyDescription
+* MainSpecialty
+* AvailableMaterials
+
+Razón:
+
+Aunque el frontend debe escapar correctamente el contenido, el backend no debe confiar únicamente en el frontend para evitar contenido HTML o scripts en campos de texto plano.
+
+Impacto:
+
+Se reduce el riesgo de XSS almacenado si en el futuro algún cliente renderiza contenido incorrectamente.
+
+
+---
+
 
 # 15. PROBLEMAS DETECTADOS
 
-## P001
+## P01
 
 Un proyecto puede requerir varios oficios.
 
@@ -1898,7 +2089,7 @@ ProjectRequirement.
 
 ---
 
-## P002
+## P02
 
 Los usuarios pueden cerrar acuerdos fuera de plataforma.
 
@@ -1908,7 +2099,7 @@ Construir reputación como incentivo principal.
 
 ---
 
-## P003
+## P03
 
 Un contratista puede necesitar contratar otro contratista.
 
@@ -1918,7 +2109,7 @@ Todos son Users.
 
 ---
 
-## P004
+## P04
 
 EF Core 10 incompatible con .NET 8.
 
@@ -1928,7 +2119,7 @@ Migrar a EF Core 8.0.27.
 
 ---
 
-## P005
+## P05
 
 HasColumnType no reconocido.
 
@@ -1942,7 +2133,7 @@ Agregar paquetes faltantes.
 
 ---
 
-## P006
+## P06
 
 Add-Migration ejecutado desde Developer PowerShell.
 
@@ -1952,7 +2143,7 @@ Usar la Consola del Administrador de paquetes.
 
 ---
 
-## P007
+## P07
 
 RatingConfiguration e InvitationConfiguration utilizaban propiedades inexistentes.
 
@@ -1962,7 +2153,7 @@ Validar nombres contra las entidades reales antes de generar configuraciones.
 
 ---
 
-## P008
+## P08
 
 Git inicializado fuera de la raíz del proyecto.
 
@@ -1974,7 +2165,7 @@ Reinicializar Git en la carpeta correcta.
 
 ---
 
-## P009
+## P09
 
 Proposal mantenía una relación obsoleta con Project.
 
@@ -2598,6 +2789,138 @@ Se agregó CancelAsync en InvitationService y endpoint PATCH /api/invitations/{i
 Resultado:
 
 El cliente puede cancelar invitaciones pendientes y el contratista recibe notificación interna.
+
+---
+
+## P037
+
+Los endpoints de Auth no tenían rate limiting.
+
+Síntoma:
+
+POST /api/auth/login podía recibir múltiples intentos consecutivos sin límite explícito.
+
+Riesgo:
+
+Ataques de fuerza bruta contra contraseñas.
+
+Solución:
+
+Agregar rate limiting con Microsoft.AspNetCore.RateLimiting.
+
+Resultado:
+
+AuthController queda protegido con la política AuthPolicy.
+
+---
+
+## P038
+
+La API no tenía CORS explícito.
+
+Síntoma:
+
+No existía una política clara de orígenes permitidos para el futuro frontend.
+
+Riesgo:
+
+Configuraciones abiertas o improvisadas al conectar Angular/web.
+
+Solución:
+
+Agregar política OfiProCors usando configuración Cors:AllowedOrigins.
+
+Resultado:
+
+La API queda preparada para permitir solo orígenes definidos.
+
+---
+
+## P039
+
+La API no devolvía headers HTTP básicos de seguridad.
+
+Síntoma:
+
+No se configuraban headers como X-Content-Type-Options, X-Frame-Options o Referrer-Policy.
+
+Riesgo:
+
+Mayor exposición a problemas comunes del navegador.
+
+Solución:
+
+Agregar middleware de headers de seguridad en Program.cs.
+
+Resultado:
+
+La API devuelve headers básicos de protección.
+
+---
+
+## P040
+
+ExceptionMiddleware no registraba errores 500 internamente.
+
+Síntoma:
+
+El cliente recibía respuesta controlada, pero el backend no dejaba registro interno de errores no controlados.
+
+Riesgo:
+
+Dificultad para diagnosticar fallos en producción.
+
+Solución:
+
+Inyectar ILogger en ExceptionMiddleware y registrar errores internos.
+
+Resultado:
+
+Los errores inesperados se registran con método y path.
+
+---
+
+## P041
+
+RegisterRequestDto permitía contraseñas débiles.
+
+Síntoma:
+
+La validación por longitud mínima podía aceptar contraseñas como 12345678.
+
+Riesgo:
+
+Cuentas con contraseñas fáciles de adivinar.
+
+Solución:
+
+Agregar RegularExpression para exigir mayúscula, minúscula, número y carácter especial.
+
+Resultado:
+
+El registro rechaza contraseñas débiles.
+
+---
+
+## P042
+
+Los campos de texto libre aceptaban HTML básico.
+
+Síntoma:
+
+Campos como Message, Comment, Description o Name podían recibir etiquetas HTML o scripts.
+
+Riesgo:
+
+Posible XSS almacenado si algún cliente renderiza contenido de forma insegura.
+
+Solución:
+
+Crear NoHtmlAttribute y aplicarlo en DTOs principales de entrada.
+
+Resultado:
+
+El backend rechaza contenido con etiquetas HTML básicas.
 
 ---
 
@@ -3719,6 +4042,55 @@ El backend queda más consistente antes de decidir el siguiente bloque grande.
 
 ---
 
+## HITO 16
+
+Seguridad V1 / Hardening básico completado.
+
+Incluye:
+
+* Configuración explícita de CORS.
+* Rate limiting en AuthController.
+* Headers HTTP básicos de seguridad.
+* Logging interno de errores 500 en ExceptionMiddleware.
+* Validación fuerte de contraseña.
+* Creación de NoHtmlAttribute.
+* Aplicación de NoHtmlAttribute en DTOs principales.
+* Pruebas manuales en Swagger.
+* Pruebas automatizadas de seguridad.
+
+Archivos principales modificados o creados:
+
+* OfiPro.Api/appsettings.json.
+* OfiPro.Api/Program.cs.
+* OfiPro.Api/Controllers/AuthController.cs.
+* OfiPro.Api/Middleware/ExceptionMiddleware.cs.
+* OfiPro.Application/DTOs/Auth/RegisterRequestDto.cs.
+* OfiPro.Application/Common/Validation/NoHtmlAttribute.cs.
+* DTOs principales de Project, Proposal, Evidence, Rating, Invitation y ProfessionalProfile.
+* OfiPro.Api.Tests/SecurityValidationTests.cs.
+
+Pruebas realizadas:
+
+* dotnet test → 16 pruebas correctas.
+* Swagger abre correctamente.
+* Login normal → 200 OK.
+* Registro con contraseña débil → 400 Bad Request.
+* Registro con contraseña fuerte → 200 OK.
+* Registro con HTML en name → 400 Bad Request.
+* Invitación con HTML en message → 400 Bad Request.
+* Rating con HTML en comment → 400 Bad Request.
+* Flujo normal con texto limpio → correcto.
+
+Resultado:
+
+Bloque 16 completado y probado correctamente.
+
+Impacto:
+
+OfiPro queda con una base de seguridad más sólida antes de avanzar a frontend, carga de archivos o nuevos módulos grandes.
+
+---
+
 
 ## ESTADO ACTUAL ACTUALIZADO
 
@@ -3749,16 +4121,15 @@ Módulos completados:
 * Bloque 13 - Pruebas automatizadas mínimas de API
 * Bloque 14 - Invitaciones directas a contratistas
 * Bloque 15 - Refresh tokens para experiencia móvil
+* Bloque 16 - Seguridad V1 / Hardening básico
 
 Próximo bloque recomendado:
 
-* Bloque 16 - Carga real de archivos para evidencias
+* Bloque 17 - Revisión de preparación para frontend
 
 Razón:
 
-El backend ya tiene autenticación, marketplace, propuestas, contrataciones, evidencias por URL, notificaciones, ratings, búsqueda, invitaciones, paginación y refresh tokens.
-
-El siguiente punto fuerte para acercarse a un producto real es dejar de manejar evidencias solo como URL y permitir carga real de archivos/imágenes.
+Después del hardening básico, conviene revisar que los endpoints, DTOs, respuestas, nombres de campos, errores y flujos estén cómodos para ser consumidos por una web responsiva.
 
 Pruebas iniciales sugeridas:
 
@@ -3773,12 +4144,13 @@ Pruebas iniciales sugeridas:
 
 Opciones posteriores:
 
+* Web responsiva mínima.
+* Carga real de archivos para evidencias.
 * Perfil público compartible de contratista.
 * URL pública única por contratista.
 * Historial privado por proyecto/contratación.
 * FCM Token y push notifications cuando exista app móvil real.
 * Panel administrativo operativo.
-* Web responsiva.
 * App móvil real en etapa pre-lanzamiento.
 
 Notas estratégicas vigentes:

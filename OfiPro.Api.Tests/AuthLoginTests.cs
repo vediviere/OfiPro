@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace OfiPro.Api.Tests;
 
-public class AuthLoginTests : IClassFixture<WebApplicationFactory<Program>>
+public class AuthLoginTests : IClassFixture<OfiProWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public AuthLoginTests(WebApplicationFactory<Program> factory)
+    public AuthLoginTests(OfiProWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }

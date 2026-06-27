@@ -1,16 +1,18 @@
-﻿using OfiPro.Application.Common.Exceptions;
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
+using OfiPro.Application.Common.Exceptions;
 
-namespace OfiPro.Api.Middlewares;
+namespace OfiPro.Api.Middleware;
 
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionMiddleware> _logger;
 
-    public ExceptionMiddleware(RequestDelegate next)
+    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -25,25 +27,38 @@ public class ExceptionMiddleware
         }
     }
 
-    private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         var statusCode = exception switch
         {
-            NotFoundException => HttpStatusCode.NotFound,
-            ForbiddenException => HttpStatusCode.Forbidden,
             BadRequestException => HttpStatusCode.BadRequest,
+            ForbiddenException => HttpStatusCode.Forbidden,
+            NotFoundException => HttpStatusCode.NotFound,
+            UnauthorizedAccessException => HttpStatusCode.Unauthorized,
             _ => HttpStatusCode.InternalServerError
         };
 
-        var response = new
+        if (statusCode == HttpStatusCode.InternalServerError)
         {
-            statusCode = (int)statusCode,
-            message = exception.Message
-        };
+            _logger.LogError(
+                exception,
+                "Unhandled exception. Method: {Method}. Path: {Path}",
+                context.Request.Method,
+                context.Request.Path);
+        }
 
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+        var response = new
+        {
+            message = statusCode == HttpStatusCode.InternalServerError
+                ? "Ocurrió un error inesperado."
+                : exception.Message
+        };
+
+        var json = JsonSerializer.Serialize(response);
+
+        await context.Response.WriteAsync(json);
     }
 }

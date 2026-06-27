@@ -6,11 +6,11 @@ using OfiPro.Api.Tests.Helpers;
 
 namespace OfiPro.Api.Tests;
 
-public class RefreshTokenTests : IClassFixture<WebApplicationFactory<Program>>
+public class RefreshTokenTests : IClassFixture<OfiProWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public RefreshTokenTests(WebApplicationFactory<Program> factory)
+    public RefreshTokenTests(OfiProWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }

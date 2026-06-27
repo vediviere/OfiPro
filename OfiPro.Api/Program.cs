@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using OfiPro.Api.Middlewares;
+using OfiPro.Api.Middleware;
 using OfiPro.Application.Common.Settings;
 using OfiPro.Application.Interfaces.Repositories;
 using OfiPro.Application.Interfaces.Services;
 using OfiPro.Infrastructure.Persistence;
 using OfiPro.Api.BackgroundServices;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using OfiPro.Infrastructure.Repositories;
 using OfiPro.Infrastructure.Services;
 using System.Text;
@@ -79,6 +81,43 @@ builder.Services.AddHostedService<ProjectExpirationBackgroundService>();
 builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<IInvitationService, InvitationService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddControllers();
+
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? Array.Empty<string>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("OfiProCors", policy =>
+    {
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+var authRateLimitPermitLimit = builder.Environment.IsDevelopment()
+    ? 1000
+    : 5;
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("AuthPolicy", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = authRateLimitPermitLimit,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+            }));
+});
+
 
 var jwtSettings = builder.Configuration
     .GetSection("Jwt")
@@ -110,8 +149,24 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.TryAdd("X-Frame-Options", "DENY");
+    context.Response.Headers.TryAdd("Referrer-Policy", "no-referrer");
+    context.Response.Headers.TryAdd("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 
-// Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        context.Response.Headers.TryAdd(
+            "Content-Security-Policy",
+            "default-src 'none'; frame-ancestors 'none';");
+    }
+
+    await next();
+});
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -130,6 +185,10 @@ using (var scope = app.Services.CreateScope())
 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
+app.UseCors("OfiProCors");
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

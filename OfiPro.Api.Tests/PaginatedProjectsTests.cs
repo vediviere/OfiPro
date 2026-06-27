@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace OfiPro.Api.Tests;
 
-public class PaginatedProjectsTests : IClassFixture<WebApplicationFactory<Program>>
+public class PaginatedProjectsTests : IClassFixture<OfiProWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public PaginatedProjectsTests(WebApplicationFactory<Program> factory)
+    public PaginatedProjectsTests(OfiProWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }

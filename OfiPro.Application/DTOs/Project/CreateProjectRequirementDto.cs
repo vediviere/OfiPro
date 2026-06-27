@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using OfiPro.Application.Common.Validation;
 
 namespace OfiPro.Application.DTOs.Project;
 
@@ -12,5 +13,6 @@ public class CreateProjectRequirementDto
 
     [Required]
     [StringLength(800, MinimumLength = 10)]
+    [NoHtml]
     public string Description { get; set; } = string.Empty;
 }

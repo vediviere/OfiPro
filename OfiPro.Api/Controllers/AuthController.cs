@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OfiPro.Application.DTOs.Auth;
 using OfiPro.Application.Interfaces.Services;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace OfiPro.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
+[EnableRateLimiting("AuthPolicy")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
