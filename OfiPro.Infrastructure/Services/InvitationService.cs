@@ -261,6 +261,7 @@ public class InvitationService : IInvitationService
             InvitedContractorUserName = $"{invitation.InvitedContractorUser.Name} {invitation.InvitedContractorUser.LastName}".Trim(),
             Message = invitation.Message,
             Status = invitation.Status,
+            StatusName = invitation.Status.ToString(),
             CreatedAt = invitation.CreatedAt,
             RespondedAt = invitation.RespondedAt
         };

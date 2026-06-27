@@ -1,6 +1,6 @@
 # OFIPRO MASTER DOCUMENT
 
-Versión: 2.1
+Versión: 2.2
 
 Fecha de creación: 2026-06-08
 
@@ -2076,6 +2076,102 @@ Se reduce el riesgo de XSS almacenado si en el futuro algún cliente renderiza c
 
 ---
 
+## D082
+
+Antes de iniciar frontend, OfiPro debe tener una revisión de preparación para consumo web.
+
+Resultado:
+
+Se implementa Bloque 17 - Revisión de preparación para frontend.
+
+Incluye:
+
+* Limpieza mínima de Program.cs.
+* Revisión de endpoints públicos.
+* Revisión de endpoints por rol.
+* Mapa API → pantallas frontend.
+* Ajustes de respuesta para facilitar consumo desde Angular/web.
+* Agregado de StatusName y TypeName en DTOs principales.
+
+Razón:
+
+El backend ya cuenta con suficiente funcionalidad para comenzar una web responsiva, pero antes era necesario revisar si las respuestas, rutas y flujos estaban cómodos para frontend.
+
+Impacto:
+
+OfiPro queda mejor preparado para iniciar una web responsiva mínima sin arrastrar inconsistencias innecesarias.
+
+---
+
+## D083
+
+Los endpoints públicos de ratings y reputación deben funcionar sin token.
+
+Resultado:
+
+Se agrega AllowAnonymous a los endpoints públicos de ratings y reputación.
+
+Endpoints ajustados:
+
+* GET /api/users/{userId}/ratings/public
+* GET /api/users/{userId}/reputation/public
+
+Razón:
+
+Si el perfil del contratista será público o compartible, su reputación y ratings públicos también deben poder consultarse sin autenticación.
+
+Impacto:
+
+El perfil público del contratista queda mejor preparado para web pública y futura URL compartible.
+
+---
+
+## D084
+
+Las respuestas con enums importantes deben incluir nombre legible para frontend.
+
+Resultado:
+
+Se agregan campos auxiliares:
+
+* StatusName
+* UrgencyName
+* TypeName
+
+Aplicado en:
+
+* ProjectDto
+* ProposalDto
+* ContractDto
+* InvitationDto
+* NotificationDto
+
+Razón:
+
+El frontend no debe depender únicamente de valores numéricos como status: 1, status: 2 o status: 4 para mostrar estados al usuario.
+
+Impacto:
+
+Angular/web podrá mostrar estados de forma más simple, sin duplicar tantas traducciones de enums desde el cliente.
+
+Ejemplo:
+
+Antes:
+
+{
+"status": 4
+}
+
+Después:
+
+{
+"status": 4,
+"statusName": "Cancelada"
+}
+
+
+---
+
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -2921,6 +3017,51 @@ Crear NoHtmlAttribute y aplicarlo en DTOs principales de entrada.
 Resultado:
 
 El backend rechaza contenido con etiquetas HTML básicas.
+
+---
+
+## P043
+
+Los endpoints públicos de ratings y reputación tenían nombre público pero seguían protegidos por Authorize.
+
+Síntoma:
+
+RatingsController tenía Authorize a nivel controller y los métodos públicos no tenían AllowAnonymous.
+
+Riesgo:
+
+El frontend público no podía mostrar reputación ni ratings de contratistas sin iniciar sesión.
+
+Solución:
+
+Agregar AllowAnonymous a los endpoints públicos.
+
+Resultado:
+
+La reputación y ratings públicos pueden consultarse sin token.
+
+---
+
+## P044
+
+Los estados llegaban al frontend solo como números.
+
+Síntoma:
+
+DTOs como InvitationDto, ProposalDto, ContractDto y ProjectDto devolvían status numérico.
+
+Riesgo:
+
+El frontend tendría que traducir manualmente cada enum, aumentando duplicación y riesgo de inconsistencias visuales.
+
+Solución:
+
+Agregar StatusName, UrgencyName y TypeName donde corresponde.
+
+Resultado:
+
+Las respuestas quedan más legibles y cómodas para Angular/web.
+
 
 ---
 
@@ -4091,6 +4232,68 @@ OfiPro queda con una base de seguridad más sólida antes de avanzar a frontend,
 
 ---
 
+## HITO 17
+
+Revisión de preparación para frontend completada.
+
+Incluye:
+
+* Verificación de repositorio actualizado.
+* Confirmación de main limpio y sincronizado con origin/main.
+* Limpieza mínima de Program.cs.
+* Eliminación de duplicados de AddControllers si existían.
+* Eliminación de duplicados de UseAuthentication y UseAuthorization si existían.
+* Ajuste de ratings públicos con AllowAnonymous.
+* Ajuste de reputation pública con AllowAnonymous.
+* Creación de mapa API → pantallas frontend.
+* Revisión de pantallas públicas.
+* Revisión de pantallas de autenticación.
+* Revisión de pantallas comunes después del login.
+* Revisión de pantallas de Cliente.
+* Revisión de pantallas de Contratista.
+* Revisión de pantallas de Admin básico.
+* Agregado de StatusName en DTOs principales.
+* Agregado de UrgencyName en ProjectDto.
+* Agregado de TypeName en NotificationDto.
+* Pruebas manuales en Swagger.
+* Pruebas automatizadas con dotnet test.
+
+Endpoints públicos confirmados:
+
+* GET /api/contractors
+* GET /api/contractors/{userId}
+* GET /api/users/{userId}/ratings/public
+* GET /api/users/{userId}/reputation/public
+
+DTOs mejorados para frontend:
+
+* ProjectDto
+* ProposalDto
+* ContractDto
+* InvitationDto
+* NotificationDto
+
+Pruebas realizadas:
+
+* dotnet test → correcto.
+* GET /api/users/{userId}/reputation/public sin token → 200 OK.
+* GET /api/users/{userId}/ratings/public sin token → 200 OK.
+* GET /api/invitations/sent muestra statusName → 200 OK.
+* GET /api/proposals/my-proposals muestra statusName → 200 OK.
+* GET /api/contracts/mine muestra statusName → 200 OK.
+* GET /api/notifications muestra typeName → 200 OK.
+
+Resultado:
+
+Bloque 17 completado y probado correctamente.
+
+Impacto:
+
+OfiPro queda listo para iniciar la etapa de web responsiva mínima con una API más clara, cómoda y preparada para consumo desde frontend.
+
+
+---
+
 
 ## ESTADO ACTUAL ACTUALIZADO
 
@@ -4122,36 +4325,44 @@ Módulos completados:
 * Bloque 14 - Invitaciones directas a contratistas
 * Bloque 15 - Refresh tokens para experiencia móvil
 * Bloque 16 - Seguridad V1 / Hardening básico
+* Bloque 17 - Revisión de preparación para frontend
 
 Próximo bloque recomendado:
 
-* Bloque 17 - Revisión de preparación para frontend
+* Bloque 18 - Web responsiva mínima
 
 Razón:
 
-Después del hardening básico, conviene revisar que los endpoints, DTOs, respuestas, nombres de campos, errores y flujos estén cómodos para ser consumidos por una web responsiva.
+El backend ya cuenta con autenticación, refresh tokens, roles, proyectos, propuestas, contratos, evidencias, notificaciones, ratings, reputación, perfiles profesionales, búsqueda de contratistas, invitaciones, paginación, seguridad base, pruebas automatizadas y ajustes de preparación para frontend.
 
-Pruebas iniciales sugeridas:
+El siguiente paso natural es construir una primera web responsiva que consuma la API y permita validar el producto con flujo real.
 
-* Login correcto.
-* Login inválido.
-* Endpoint protegido sin token.
-* Endpoint protegido con rol incorrecto.
-* GET /api/projects paginado.
-* GET /api/contractors paginado.
-* GET /api/notifications paginado.
-* Flujo mínimo de proyecto/propuesta/contrato si el alcance del bloque lo permite.
+Pantallas mínimas sugeridas para Bloque 18:
+
+* Login.
+* Registro.
+* Dashboard base por modo.
+* Buscar contratistas.
+* Perfil público de contratista.
+* Mis proyectos.
+* Crear proyecto.
+* Proyectos disponibles.
+* Mis propuestas.
+* Invitaciones enviadas/recibidas.
+* Mis contratos.
+* Notificaciones.
+* Mi perfil profesional.
 
 Opciones posteriores:
 
-* Web responsiva mínima.
 * Carga real de archivos para evidencias.
-* Perfil público compartible de contratista.
+* Perfil público compartible con slug.
 * URL pública única por contratista.
 * Historial privado por proyecto/contratación.
 * FCM Token y push notifications cuando exista app móvil real.
 * Panel administrativo operativo.
 * App móvil real en etapa pre-lanzamiento.
+
 
 Notas estratégicas vigentes:
 

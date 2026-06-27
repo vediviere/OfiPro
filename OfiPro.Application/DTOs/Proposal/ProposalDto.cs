@@ -21,5 +21,6 @@ public class ProposalDto
     public string WarrantyDescription { get; set; } = string.Empty;
     public string Comment { get; set; } = string.Empty;
     public ProposalStatus Status { get; set; }
+    public string StatusName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 }

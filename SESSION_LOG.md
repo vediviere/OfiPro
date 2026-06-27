@@ -4015,3 +4015,268 @@ Razón:
 Antes de construir la web responsiva mínima, conviene revisar que los endpoints, DTOs, respuestas y flujos estén listos para ser consumidos de forma limpia por Angular/web.
 
 # =====================================
+
+
+# =====================================
+
+# SESIÓN 2026-06-27
+
+## Objetivo
+
+Implementar, probar y cerrar Bloque 17 - Revisión de preparación para frontend.
+
+# =====================================
+
+## Contexto
+
+Después de completar Bloque 16 - Seguridad V1 / Hardening básico, se decidió no avanzar directamente a frontend sin antes revisar si la API estaba preparada para ser consumida de forma cómoda por Angular/web.
+
+El backend ya tenía módulos suficientes para iniciar una web responsiva, pero faltaba revisar rutas, respuestas, endpoints públicos, enums y mapa de pantallas mínimas.
+
+# =====================================
+
+## Bloque 17.1 - Limpieza mínima de Program.cs
+
+Completado:
+
+* Se revisó Program.cs.
+* Se verificó que AddControllers no quedara duplicado.
+* Se verificó que UseAuthentication y UseAuthorization no quedaran duplicados.
+* Se mantuvo el pipeline limpio antes de iniciar frontend.
+
+Resultado:
+
+Program.cs queda más limpio y consistente.
+
+# =====================================
+
+## Bloque 17.2 - Ratings y reputación públicos realmente públicos
+
+Completado:
+
+* Se agregó AllowAnonymous al endpoint público de ratings.
+* Se agregó AllowAnonymous al endpoint público de reputación.
+
+Endpoints ajustados:
+
+* GET /api/users/{userId}/ratings/public
+* GET /api/users/{userId}/reputation/public
+
+Pruebas realizadas:
+
+* Sin token, GET /api/users/{userId}/reputation/public → 200 OK.
+* Sin token, GET /api/users/{userId}/ratings/public → 200 OK.
+
+Resultado:
+
+Los perfiles públicos de contratistas ya pueden mostrar reputación y ratings sin iniciar sesión.
+
+# =====================================
+
+## Bloque 17.3 - Mapa API a pantallas frontend
+
+Se definió el mapa base para web responsiva mínima.
+
+Pantallas públicas:
+
+* Landing / Inicio público.
+* Buscar contratistas.
+* Perfil público de contratista.
+
+Pantallas de autenticación:
+
+* Registro.
+* Login.
+* Renovar sesión.
+* Cerrar sesión.
+
+Pantallas comunes después del login:
+
+* Selección de modo / Dashboard base.
+* Mi perfil.
+
+Pantallas de Cliente:
+
+* Dashboard Cliente.
+* Mis proyectos.
+* Crear proyecto.
+* Detalle de proyecto.
+* Buscar contratista e invitar.
+* Invitaciones enviadas.
+* Contratos del cliente.
+* Notificaciones.
+
+Pantallas de Contratista:
+
+* Dashboard Contratista.
+* Proyectos disponibles.
+* Detalle de proyecto disponible.
+* Enviar propuesta.
+* Mis propuestas.
+* Invitaciones recibidas.
+* Mis contratos.
+* Mi perfil profesional.
+
+Pantallas de Admin:
+
+* Dashboard Admin básico.
+* Gestión admin completa queda pendiente para etapa posterior.
+
+Conclusión:
+
+El backend ya está listo para iniciar una web responsiva mínima, pero convenía mejorar las respuestas con nombres legibles para enums antes de comenzar Angular.
+
+# =====================================
+
+## Bloque 17.4 - StatusName y TypeName para frontend
+
+Completado:
+
+Se agregaron campos auxiliares para frontend:
+
+* StatusName en ProjectDto.
+* UrgencyName en ProjectDto.
+* StatusName en ProposalDto.
+* StatusName en ContractDto.
+* StatusName en InvitationDto.
+* TypeName en NotificationDto.
+
+Servicios actualizados:
+
+* ProjectService.
+* ProposalService.
+* ContractService.
+* InvitationService.
+* NotificationService.
+
+Razón:
+
+El frontend no debe depender únicamente de valores numéricos para mostrar estados al usuario.
+
+Ejemplo:
+
+status: 4
+
+Ahora puede mostrarse junto con:
+
+statusName: Cancelada
+
+# =====================================
+
+## Pruebas realizadas
+
+Pruebas automáticas:
+
+* dotnet test ejecutado correctamente.
+* Suite completa sin errores.
+
+Pruebas manuales en Swagger:
+
+* GET /api/users/{userId}/reputation/public sin token → 200 OK.
+* GET /api/users/{userId}/ratings/public sin token → 200 OK.
+* GET /api/invitations/sent muestra statusName → 200 OK.
+* GET /api/proposals/my-proposals muestra statusName → 200 OK.
+* GET /api/contracts/mine muestra statusName → 200 OK.
+* GET /api/notifications muestra typeName → 200 OK.
+
+Resultado:
+
+Todas las pruebas finalizaron correctamente.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+Bloque 8 - Calificaciones y reputación V1 → Completo
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+
+Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación → Completo
+
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+
+Bloque 10.1 - Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas → Completo
+
+Bloque 11 - Expiración automática de proyectos → Completo
+
+Bloque 12 - Paginación y ordenamiento básico en listados críticos → Completo
+
+Bloque 13 - Pruebas automatizadas mínimas de API → Completo
+
+Bloque 14 - Invitaciones directas a contratistas → Completo
+
+Bloque 15 - Refresh tokens para experiencia móvil → Completo
+
+Bloque 15.3 - Correcciones diagnóstico post-refresh tokens → Completo
+
+Bloque 16 - Seguridad V1 / Hardening básico → Completo
+
+Bloque 17 - Revisión de preparación para frontend → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: 🟢 Bueno.
+
+El bloque fue ligero en código, pero muy importante estratégicamente. Sirvió como puente entre backend y frontend.
+
+Se corrigieron detalles pequeños que podían causar fricción al construir Angular:
+
+* endpoints públicos que todavía requerían token,
+* respuestas con enums solo numéricos,
+* limpieza mínima de Program.cs,
+* falta de mapa claro de pantallas.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Actualizar documentación.
+* Revisar git status.
+* Hacer commit.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo paso recomendado
+
+Bloque 18 - Web responsiva mínima.
+
+Razón:
+
+El backend ya está suficientemente preparado para comenzar a construir una primera interfaz web que permita validar el flujo real de OfiPro.
+
+# =====================================

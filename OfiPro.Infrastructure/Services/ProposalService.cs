@@ -86,10 +86,7 @@ public class ProposalService : IProposalService
         return MapToDto(createdProposal);
     }
 
-    public async Task<ProposalDto> UpdateAsync(
-        Guid contractorUserId,
-        Guid proposalId,
-        UpdateProposalDto request)
+    public async Task<ProposalDto> UpdateAsync(Guid contractorUserId, Guid proposalId, UpdateProposalDto request)
     {
         var proposal = await _proposalRepository.GetByIdAsync(proposalId);
 
@@ -298,9 +295,7 @@ public class ProposalService : IProposalService
         });
     }
 
-    public async Task WithdrawAsync(
-        Guid contractorUserId,
-        Guid proposalId)
+    public async Task WithdrawAsync(Guid contractorUserId, Guid proposalId)
     {
         var proposal = await _proposalRepository.GetByIdAsync(proposalId);
 
@@ -345,6 +340,7 @@ public class ProposalService : IProposalService
             WarrantyDescription = proposal.WarrantyDescription,
             Comment = proposal.Comment,
             Status = proposal.Status,
+            StatusName = proposal.Status.ToString(),
             CreatedAt = proposal.CreatedAt
         };
     }

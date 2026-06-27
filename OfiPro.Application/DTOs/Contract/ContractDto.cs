@@ -16,6 +16,7 @@ public class ContractDto
     public decimal AgreedPrice { get; set; }
     public string EstimatedTime { get; set; } = string.Empty;
     public ContractStatus Status { get; set; }
+    public string StatusName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? StartedAt { get; set; }
     public DateTime? FinishedAt { get; set; }

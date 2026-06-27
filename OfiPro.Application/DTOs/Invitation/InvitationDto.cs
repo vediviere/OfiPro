@@ -13,6 +13,7 @@ public class InvitationDto
     public string InvitedContractorUserName { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
     public InvitationStatus Status { get; set; }
+    public string StatusName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? RespondedAt { get; set; }
 }

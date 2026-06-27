@@ -249,6 +249,7 @@ public class ContractService : IContractService
             AgreedPrice = contract.AgreedPrice,
             EstimatedTime = contract.EstimatedTime,
             Status = contract.Status,
+            StatusName = contract.Status.ToString(),
             CreatedAt = contract.CreatedAt,
             StartedAt = contract.StartedAt,
             FinishedAt = contract.FinishedAt,

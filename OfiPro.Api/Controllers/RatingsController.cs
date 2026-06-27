@@ -54,6 +54,7 @@ public class RatingsController : ControllerBase
         return Ok(ratings);
     }
 
+    [AllowAnonymous]
     [HttpGet("users/{userId:guid}/ratings/public")]
     public async Task<IActionResult> GetPublicReceivedByUser(Guid userId)
     {
@@ -62,6 +63,7 @@ public class RatingsController : ControllerBase
         return Ok(ratings);
     }
 
+    [AllowAnonymous]
     [HttpGet("users/{userId:guid}/reputation/public")]
     public async Task<IActionResult> GetPublicUserReputation(Guid userId)
     {

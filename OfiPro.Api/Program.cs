@@ -81,7 +81,6 @@ builder.Services.AddHostedService<ProjectExpirationBackgroundService>();
 builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<IInvitationService, InvitationService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-builder.Services.AddControllers();
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
@@ -187,8 +186,6 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseCors("OfiProCors");
 app.UseRateLimiter();
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

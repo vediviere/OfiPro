@@ -225,8 +225,10 @@ public class ProjectService : IProjectService
             City = project.City,
             Zone = project.Zone,
             Urgency = project.Urgency,
+            UrgencyName = project.Urgency.ToString(),
             AvailableMaterials = project.AvailableMaterials,
             Status = project.Status,
+            StatusName = project.Status.ToString(),
             CreatedAt = project.CreatedAt,
             Requirements = project.Requirements.Select(requirement => new ProjectRequirementDto
             {

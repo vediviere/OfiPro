@@ -168,6 +168,7 @@ public class NotificationService : INotificationService
             NotificationId = notification.Id,
             UserId = notification.UserId,
             Type = notification.Type,
+            TypeName = notification.Type.ToString(),
             Title = notification.Title,
             Message = notification.Message,
             RelatedEntityType = notification.RelatedEntityType,
