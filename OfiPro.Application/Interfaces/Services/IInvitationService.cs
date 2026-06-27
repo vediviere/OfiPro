@@ -14,4 +14,6 @@ public interface IInvitationService
     Task AcceptAsync(Guid contractorUserId, Guid invitationId);
 
     Task RejectAsync(Guid contractorUserId, Guid invitationId);
+
+    Task CancelAsync(Guid userId, Guid invitationId);
 }

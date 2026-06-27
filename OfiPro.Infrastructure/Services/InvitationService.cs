@@ -191,6 +191,41 @@ public class InvitationService : IInvitationService
         });
     }
 
+    public async Task CancelAsync(Guid userId, Guid invitationId)
+    {
+        var invitation = await _invitationRepository.GetByIdAsync(invitationId);
+
+        if (invitation is null)
+        {
+            throw new NotFoundException("Invitación no encontrada.");
+        }
+
+        if (invitation.InvitedByUserId != userId)
+        {
+            throw new ForbiddenException("Solo el cliente que envió la invitación puede cancelarla.");
+        }
+
+        if (invitation.Status != InvitationStatus.Pendiente)
+        {
+            throw new BadRequestException("Solo se pueden cancelar invitaciones pendientes.");
+        }
+
+        invitation.Status = InvitationStatus.Cancelada;
+        invitation.RespondedAt = DateTime.UtcNow;
+
+        await _invitationRepository.SaveChangesAsync();
+
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            UserId = invitation.InvitedContractorUserId,
+            Type = NotificationType.ProjectInvitationCanceled,
+            Title = "Invitación cancelada",
+            Message = $"La invitación para revisar el proyecto \"{invitation.Project.Title}\" fue cancelada.",
+            RelatedEntityType = "Invitation",
+            RelatedEntityId = invitation.Id
+        });
+    }
+
     private async Task<Invitation> GetPendingInvitationForContractorAsync(Guid contractorUserId, Guid invitationId)
     {
         var invitation = await _invitationRepository.GetByIdAsync(invitationId);

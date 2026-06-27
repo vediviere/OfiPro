@@ -3632,3 +3632,179 @@ Razón:
 Actualmente las evidencias funcionan por URL. Para un producto real, especialmente en trabajos de campo, será necesario permitir subir imágenes o archivos reales desde web/app móvil.
 
 # =====================================
+
+
+# =====================================
+
+# SESIÓN 2026-06-26
+
+## Objetivo
+
+Implementar y probar Bloque 15.3 - Correcciones diagnóstico post-refresh tokens.
+
+# =====================================
+
+## Contexto
+
+Después de cerrar refresh tokens, se revisó un diagnóstico técnico con tres observaciones:
+
+* revoke-refresh-token no requiere Authorize.
+* InvitationStatus.Cancelada existía pero no se usaba.
+* El proyecto de tests estaba en net10.0 mientras la API usa net8.0.
+
+Se decidió hacer un bloque corto de correcciones antes de continuar con frontend, carga de archivos u otro bloque grande.
+
+# =====================================
+
+## Bloque 15.3 - Correcciones diagnóstico post-refresh tokens
+
+Completado:
+
+* Se cambió OfiPro.Api.Tests de net10.0 a net8.0.
+* Se ajustó Microsoft.AspNetCore.Mvc.Testing a una versión compatible con .NET 8.
+* Se agregó ProjectInvitationCanceled a NotificationType.
+* Se agregó CancelAsync a IInvitationService.
+* Se implementó CancelAsync en InvitationService.
+* Se agregó endpoint PATCH /api/invitations/{invitationId}/cancel.
+* Se agregó notificación al contratista cuando una invitación es cancelada.
+* Se documentó la decisión de mantener revoke-refresh-token sin Authorize para V1.
+
+# =====================================
+
+## Endpoint agregado
+
+* PATCH /api/invitations/{invitationId}/cancel
+
+# =====================================
+
+## Reglas implementadas
+
+* Solo el cliente que envió la invitación puede cancelarla.
+* Solo se pueden cancelar invitaciones pendientes.
+* Una invitación cancelada ya no puede ser aceptada ni rechazada.
+* Cancelar una invitación ya cancelada devuelve 400 Bad Request.
+* El contratista recibe notificación cuando una invitación es cancelada.
+
+# =====================================
+
+## Pruebas realizadas
+
+Pruebas automáticas:
+
+* dotnet test ejecutado con proyecto de pruebas en net8.0.
+
+Pruebas manuales en Swagger:
+
+* Cliente cancela invitación pendiente → 200 OK.
+* Cliente consulta invitaciones enviadas y la invitación aparece con status 4 → Cancelada.
+* Contratista intenta aceptar invitación cancelada → 400 Bad Request.
+* Cliente intenta cancelar nuevamente una invitación cancelada → 400 Bad Request.
+
+Resultado:
+
+Todas las pruebas fueron correctas.
+
+# =====================================
+
+## Observación técnica
+
+El status de InvitationStatus se serializa como número.
+
+Valores actuales:
+
+* 1 → Pendiente
+* 2 → Aceptada
+* 3 → Rechazada
+* 4 → Cancelada
+
+Para V1 se acepta la respuesta numérica. Más adelante se puede agregar StatusName al DTO si el frontend lo necesita.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+
+Bloque 2 - Auth → Completo
+
+Bloque 3 - Usuarios → Completo
+
+Bloque 4 - Proyectos → Completo
+
+Bloque 5 - Propuestas → Completo
+
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+
+Bloque 6 - Contrataciones → Completo
+
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+
+Bloque 6.10 - Orden de interfaces Application → Completo
+
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+
+Bloque 7 - Evidencias V1 → Completo
+
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+
+Bloque 7.2 - Notificaciones internas base → Completo
+
+Bloque 8 - Calificaciones y reputación V1 → Completo
+
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+
+Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación → Completo
+
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+
+Bloque 10.1 - Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas → Completo
+
+Bloque 11 - Expiración automática de proyectos → Completo
+
+Bloque 12 - Paginación y ordenamiento básico en listados críticos → Completo
+
+Bloque 13 - Pruebas automatizadas mínimas de API → Completo
+
+Bloque 14 - Invitaciones directas a contratistas → Completo
+
+Bloque 15 - Refresh tokens para experiencia móvil → Completo
+
+Bloque 15.3 - Correcciones diagnóstico post-refresh tokens → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: 🟢 Bueno.
+
+Fue un bloque pequeño, pero valioso. Corrigió compatibilidad de pruebas, cerró el flujo incompleto de invitaciones canceladas y dejó documentada una decisión de seguridad de V1.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Actualizar documentación.
+* Revisar git status.
+* Hacer commit.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo paso recomendado
+
+Decidir entre:
+
+* Bloque 16 - Revisión de preparación para frontend.
+* Bloque 16 - Web responsiva mínima.
+
+Recomendación:
+
+Antes de construir frontend, conviene hacer una revisión breve de preparación para frontend para detectar endpoints incómodos, respuestas difíciles de consumir, inconsistencias de DTOs y flujos que puedan afectar la experiencia web/móvil.
+
+# =====================================

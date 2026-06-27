@@ -69,6 +69,18 @@ public class InvitationsController : ControllerBase
         return Ok(new { message = "Invitación rechazada." });
     }
 
+    [HttpPatch("invitations/{invitationId:guid}/cancel")]
+    public async Task<IActionResult> Cancel(Guid invitationId)
+    {
+        var userId = GetUserId();
+
+        await _invitationService.CancelAsync(
+            userId,
+            invitationId);
+
+        return Ok(new { message = "Invitación cancelada." });
+    }
+
     private Guid GetUserId()
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);

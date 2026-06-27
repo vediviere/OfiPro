@@ -20,5 +20,6 @@ public enum NotificationType
     ProjectExpired = 12,
     ProjectInvitationReceived = 13,
     ProjectInvitationAccepted = 14,
-    ProjectInvitationRejected = 15
+    ProjectInvitationRejected = 15,
+    ProjectInvitationCanceled = 16
 }

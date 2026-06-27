@@ -1825,535 +1825,63 @@ Mejora la seguridad de sesión y prepara el backend para manejo móvil más seri
 
 ---
 
+## D072
 
-## HITO 8.2
-
-Correcciones de diagnóstico de Ratings y reputación completadas.
-
-Incluye:
-
-* Se agregó NotificationType.RatingReceived.
-* Se inyectó INotificationService en RatingService.
-* Se genera notificación interna cuando un usuario recibe una calificación.
-* Se probó notificación al contratista cuando el cliente lo califica.
-* Se probó notificación al cliente cuando el contratista lo califica.
-* Se refactorizó lógica duplicada de reputación.
-* Se agregó método privado para obtener usuario activo.
-* Se agregó método privado para calcular estadísticas de reputación.
-* Se agregó método privado para mapear ratings públicos.
-
-Pruebas realizadas:
-
-* Cliente califica contratista → 200 OK.
-* Contratista recibe notificación RatingReceived → 200 OK.
-* Contratista califica cliente → 200 OK.
-* Cliente recibe notificación RatingReceived → 200 OK.
-* GET /api/users/{userId}/reputation → 200 OK.
-* GET /api/users/{userId}/ratings/public → 200 OK.
-* GET /api/users/{userId}/reputation/public → 200 OK.
+El proyecto de pruebas debe apuntar al mismo framework principal que la API.
 
 Resultado:
 
-El módulo de Ratings y reputación queda corregido, notificado y con menor duplicación interna.
+Se corrigió OfiPro.Api.Tests para usar net8.0, igual que OfiPro.Api.
+
+También se ajustó Microsoft.AspNetCore.Mvc.Testing a una versión compatible con .NET 8.
+
+Razón:
+
+El proyecto de pruebas estaba apuntando a net10.0 mientras la API trabaja con net8.0. Esto podía causar problemas de compatibilidad en otras máquinas, en CI/CD o en futuras instalaciones.
+
+Impacto:
+
+La suite de pruebas queda alineada con el framework real del backend.
 
 ---
 
+## D073
 
-## HITO 9
-
-Dashboard mínimo / Resúmenes para móvil y web completado.
-
-Incluye:
-
-* Creación de DTOs de dashboard.
-* Creación de IDashboardRepository.
-* Creación de DashboardRepository.
-* Creación de IDashboardService.
-* Creación de DashboardService.
-* Creación de DashboardController.
-* Resumen de cliente.
-* Resumen de contratista.
-* Resumen de administrador.
-* Actividad reciente para cliente.
-* Actividad reciente para contratista.
-* Notificaciones recientes.
-* Contratos recientes.
-* Propuestas pendientes para cliente.
-* Proyectos disponibles para contratista.
-* Modos disponibles del usuario.
-* Contexto del usuario autenticado.
-* Validación de roles por dashboard.
-
-Endpoints creados:
-
-* GET /api/dashboard/client/summary
-* GET /api/dashboard/contractor/summary
-* GET /api/dashboard/admin/summary
-* GET /api/dashboard/modes
-* GET /api/dashboard/me
-
-Reglas implementadas:
-
-* Solo usuarios con rol Cliente pueden consultar el dashboard de cliente.
-* Solo usuarios con rol Contratista pueden consultar el dashboard de contratista.
-* Solo usuarios con rol Administrador pueden consultar el dashboard administrativo.
-* Un usuario multirol puede consultar los dashboards correspondientes a sus roles.
-* El dashboard de contratista muestra proyectos disponibles y actividad reciente.
-* El dashboard de cliente muestra propuestas pendientes y actividad reciente.
-* El dashboard administrativo muestra métricas generales del sistema.
-* El endpoint de modos informa qué vistas puede usar el usuario autenticado.
-
-Pruebas realizadas:
-
-* [cliente@ofipro.com](mailto:cliente@ofipro.com) consulta client summary → 200 OK.
-* [cliente@ofipro.com](mailto:cliente@ofipro.com) consulta contractor summary → 403 Forbidden.
-* [cliente@ofipro.com](mailto:cliente@ofipro.com) consulta admin summary → 403 Forbidden.
-* [contratista@ofipro.com](mailto:contratista@ofipro.com) consulta contractor summary → 200 OK.
-* [contratista@ofipro.com](mailto:contratista@ofipro.com) consulta client summary → 403 Forbidden.
-* [contratista@ofipro.com](mailto:contratista@ofipro.com) consulta admin summary → 403 Forbidden.
-* [admin@ofipro.com](mailto:admin@ofipro.com) consulta client summary → 200 OK.
-* [admin@ofipro.com](mailto:admin@ofipro.com) consulta contractor summary → 200 OK.
-* [admin@ofipro.com](mailto:admin@ofipro.com) consulta admin summary → 200 OK.
-* GET /api/dashboard/modes probado correctamente.
-* GET /api/dashboard/me probado correctamente.
+Las invitaciones pendientes pueden ser canceladas por el cliente que las envió.
 
 Resultado:
 
-El backend queda preparado para construir pantallas principales de cliente, contratista y administrador sin hacer múltiples llamadas separadas.
+Se implementó cancelación de invitaciones pendientes.
+
+Regla:
+
+Solo el usuario que envió la invitación puede cancelarla.
 
 Impacto:
 
-OfiPro queda mejor preparado para web responsiva y futura app móvil real con enfoque mobile-first.
+El flujo de invitaciones queda completo para el caso en que el cliente ya no quiera esperar respuesta del contratista o decida retirar la invitación.
 
 ---
 
-## HITO 10
+## D074
 
-ProfessionalProfile y búsqueda básica de contratistas completado.
-
-Incluye:
-
-Creación de DTOs de ProfessionalProfile.
-Creación de DTO de búsqueda de contratistas.
-Creación de IProfessionalProfileRepository.
-Implementación de ProfessionalProfileRepository.
-Creación de IProfessionalProfileService.
-Implementación de ProfessionalProfileService.
-Registro de dependencias en Program.cs.
-Creación de ProfessionalProfilesController.
-Creación de perfil profesional.
-Consulta de perfil profesional propio.
-Actualización de perfil profesional propio.
-Búsqueda básica de contratistas.
-Consulta pública de perfil de contratista por UserId.
-Validación de rol Contratista para administrar perfil profesional.
-Validación para evitar perfiles profesionales duplicados.
-Filtro para devolver solo perfiles activos.
-Filtro para devolver solo usuarios activos.
-Filtro para devolver solo usuarios con rol Contratista.
-Integración del estado del perfil profesional en el dashboard del contratista.
-
-Endpoints creados:
-
-POST /api/professional-profiles
-GET /api/professional-profiles/me
-PUT /api/professional-profiles/me
-GET /api/contractors
-GET /api/contractors/{userId}
-
-Endpoints actualizados:
-
-GET /api/dashboard/contractor/summary
-
-Reglas implementadas:
-
-Solo usuarios con rol Contratista pueden crear perfil profesional.
-Solo usuarios con rol Contratista pueden consultar y actualizar su perfil profesional.
-Un usuario solo puede tener un perfil profesional activo registrado.
-Un perfil profesional inactivo no aparece en búsqueda pública.
-La búsqueda pública solo muestra usuarios activos y no eliminados.
-La búsqueda pública solo muestra usuarios con rol Contratista.
-El dashboard del contratista indica si el perfil profesional existe y si está activo.
-
-Pruebas realizadas:
-
-Cliente intentando crear perfil profesional → 403 Forbidden.
-Contratista creando perfil profesional → 200 OK.
-Contratista consultando su perfil profesional → 200 OK.
-Contratista intentando crear perfil duplicado → 400 Bad Request.
-Contratista actualizando perfil profesional → 200 OK.
-GET /api/contractors sin filtros → 200 OK.
-GET /api/contractors con filtro por especialidad → 200 OK.
-GET /api/contractors con filtro por ciudad → 200 OK.
-GET /api/contractors/{userId} → 200 OK.
-Perfil profesional inactivo deja de aparecer en búsqueda.
-Perfil profesional reactivado vuelve a aparecer en búsqueda.
-Dashboard de contratista muestra HasProfessionalProfile, ProfessionalProfileId, IsProfessionalProfileActive y MainSpecialty.
+El endpoint revoke-refresh-token se mantiene sin Authorize para V1.
 
 Resultado:
 
-OfiPro ya cuenta con perfil profesional de contratista y búsqueda básica de contratistas, cerrando el loop inicial de discovery del marketplace.
+Se documenta que POST /api/auth/revoke-refresh-token puede ejecutarse usando únicamente el refresh token.
 
-Impacto:
+Razón:
 
-La plataforma ya no depende únicamente de que el contratista encuentre proyectos. Ahora el cliente también puede buscar contratistas activos por especialidad y ubicación.
+Para revocar un refresh token, el propio refresh token funciona como credencial de revocación.
 
----
+Riesgo aceptado:
 
-## HITO 10.1
+Si un tercero obtiene el refresh token, podría revocarlo. Sin embargo, si ya obtuvo el refresh token, el problema principal es la filtración del token, no solamente la revocación.
 
-Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas.
+Decisión V1:
 
-Incluye:
-
-* Corrección de N+1 queries en SearchContractorsAsync.
-* Creación de método agregado para estadísticas de reputación por lista de usuarios.
-* Implementación de GetReputationStatsByUserIdsAsync en RatingRepository.
-* Uso de GroupBy por RatedUserId para obtener AverageScore y TotalRatings.
-* Actualización de SearchContractorsAsync para evitar consultas de ratings dentro del foreach.
-* Verificación de snapshot de EF Core para ProfessionalProfiles.
-* Confirmación de que ProfessionalProfiles ya existía desde InitialCreate.
-* Confirmación de que no se requiere migración AddProfessionalProfiles.
-
-Pruebas realizadas:
-
-* GET /api/contractors → 200 OK.
-* GET /api/contractors?specialty=plomería → 200 OK.
-* GET /api/contractors/{userId} → 200 OK.
-* Verificación de cambios pendientes de EF Core → sin cambios pendientes.
-
-Resultado:
-
-El Bloque 10 queda endurecido a nivel de rendimiento básico y consistencia de migraciones.
-
-Impacto:
-
-La búsqueda de contratistas queda más limpia, más eficiente y sin deuda inmediata relacionada con ProfessionalProfiles.
-
----
-
-## HITO 11
-
-Expiración automática de proyectos completada.
-
-Incluye:
-
-Validación de existencia previa de ProjectStatus.Expirado.
-Confirmación de que Project.CreatedAt ya existía.
-Confirmación de que no se requería migración.
-Creación de método ExpirePublishedProjectsAsync en IProjectRepository.
-Implementación de expiración masiva en ProjectRepository.
-Creación de ProjectExpirationBackgroundService.
-Registro del HostedService en Program.cs.
-Configuración de ProjectExpiration en appsettings.json.
-Ajuste del feed general de proyectos para devolver solo proyectos publicados activos.
-
-Configuración agregada:
-
-ProjectExpiration
-ProjectExpiration
-
-Reglas implementadas:
-
-Solo proyectos con estado Publicado pueden expirar automáticamente.
-Los proyectos eliminados lógicamente no se procesan.
-Los proyectos expirados no aparecen en el feed general.
-La expiración se ejecuta al iniciar la API.
-La expiración se ejecuta periódicamente según configuración.
-No se requiere migración porque los campos necesarios ya existían.
-
-Pruebas realizadas:
-
-Se localizó un proyecto publicado desde SQL Server.
-Se forzó su CreatedAt a una fecha antigua.
-Se reinició la API.
-El BackgroundService ejecutó la expiración.
-El proyecto cambió de Status = 1 a Status = 7.
-Se inició sesión con contratista@ofipro.com.
-GET /api/projects dejó de mostrar el proyecto expirado.
-
-Resultado:
-
-OfiPro ya cuenta con expiración automática de proyectos publicados antiguos.
-
-Impacto:
-
-El feed de proyectos queda más confiable para contratistas y mejor preparado para una experiencia mobile-first.
-
----
-
-## HITO 12
-
-Paginación y ordenamiento básico en listados críticos completado.
-Incluye:
-
-* Creación de DTOs comunes de paginación.
-* Creación de PaginationQueryDto.
-* Creación de PaginatedResponseDto.
-* Organización de DTOs comunes dentro de carpeta Pagination.
-* Paginación en GET /api/projects.
-* Paginación en GET /api/contractors.
-* Paginación en GET /api/notifications.
-* Paginación en GET /api/contracts/mine.
-* Paginación en GET /api/proposals/my-proposals.
-* Paginación en GET /api/projects/my-projects.
-* Ordenamiento básico por campos permitidos en proyectos.
-* Ordenamiento básico por campos permitidos en contratistas.
-* Ordenamiento básico por campos permitidos en notificaciones.
-* Ordenamiento básico por campos permitidos en contratos.
-* Ordenamiento básico por campos permitidos en propuestas.
-* Conteo total de registros para metadata de paginación.
-* Corrección de diagnóstico post-Bloque 11.
-* Acceso anónimo a endpoints públicos de contratistas.
-* Notificación interna cuando un proyecto expira automáticamente.
-
-Endpoints actualizados:
-
-* GET /api/projects
-* GET /api/contractors
-* GET /api/notifications
-* GET /api/contracts/mine
-* GET /api/proposals/my-proposals
-* GET /api/projects/my-projects
-* GET /api/contractors sin token → 200 OK.
-* GET /api/contractors/{userId} sin token → 200 OK.
-* Proyecto expirado automáticamente genera notificación ProjectExpired → 200 OK.
-* Cliente consulta notificaciones y recibe aviso de proyecto expirado → 200 OK.
-
-
-Estructura de respuesta implementada:
-
-* Items
-* PageNumber
-* PageSize
-* TotalItems
-* TotalPages
-* HasPreviousPage
-* HasNextPage
-
-Reglas implementadas:
-
-* PageNumber inicia en 1.
-* PageSize debe estar dentro del rango permitido.
-* SortBy se controla por campos permitidos.
-* SortDirection permite ordenar ascendente o descendente.
-* Los endpoints conservan sus reglas de seguridad existentes.
-* Los endpoints conservan filtros de soft delete y estados activos donde aplica.
-
-Pruebas realizadas:
-
-* GET /api/projects paginado → 200 OK.
-* GET /api/projects con ordenamiento → 200 OK.
-* GET /api/contractors paginado → 200 OK.
-* GET /api/contractors con filtro y ordenamiento → 200 OK.
-* GET /api/notifications paginado → 200 OK.
-* GET /api/notifications con ordenamiento por IsRead → 200 OK.
-* GET /api/contracts/mine paginado como cliente → 200 OK.
-* GET /api/contracts/mine paginado como contratista → 200 OK.
-* GET /api/proposals/my-proposals paginado → 200 OK.
-* GET /api/proposals/my-proposals con ordenamiento por Status → 200 OK.
-* GET /api/projects/my-projects paginado → 200 OK.
-* GET /api/projects/my-projects con ordenamiento por Title → 200 OK.
-
-Resultado:
-Bloque 12 completado y probado correctamente.
-Impacto:
-OfiPro queda mejor preparado para web responsiva y futura app móvil real, evitando respuestas grandes y permitiendo construir pantallas con carga progresiva.
-
----
-
-## HITO 13
-
-Pruebas automatizadas mínimas de API completadas.
-
-Incluye:
-
-* Creación del proyecto OfiPro.Api.Tests.
-* Integración del proyecto de pruebas a la solución.
-* Instalación de Microsoft.AspNetCore.Mvc.Testing.
-* Configuración de Program como partial class para pruebas de integración.
-* Creación de pruebas con WebApplicationFactory.
-* Creación de helper TestAuthHelper para registrar e iniciar sesión con usuarios temporales.
-* Prueba de endpoint público sin token.
-* Prueba de endpoint protegido sin token.
-* Prueba de login inválido.
-* Prueba de registro y login válido.
-* Prueba de endpoint protegido con token.
-* Prueba de autorización por rol incorrecto.
-* Prueba de proyectos paginados.
-* Prueba de contratistas públicos con filtros.
-* Prueba de notificaciones paginadas con token.
-* Prueba de dashboard modes con token.
-
-Pruebas automatizadas creadas:
-
-* GET /api/contractors sin token → 200 OK.
-* GET /api/contractors con filtros sin token → 200 OK.
-* GET /api/notifications sin token → 401 Unauthorized.
-* POST /api/auth/login con credenciales inválidas → 400 Bad Request.
-* POST /api/auth/register + POST /api/auth/login con usuario temporal → 200 OK.
-* GET /api/users/profile con token válido → 200 OK.
-* GET /api/dashboard/contractor/summary con usuario Cliente → 403 Forbidden.
-* GET /api/projects paginado con token → 200 OK.
-* GET /api/notifications paginado con token → 200 OK.
-* GET /api/dashboard/modes con token → 200 OK.
-
-Resultado:
-
-Bloque 13 completado y probado correctamente con dotnet test.
-
-Impacto:
-
-OfiPro ya cuenta con una base mínima de pruebas automatizadas para proteger autenticación, autorización, endpoints públicos y respuestas paginadas.
-
-----
-
-## HITO 14
-
-Invitaciones directas a contratistas completado.
-
-Incluye:
-
-* Creación de InvitationStatus.
-* Refactor de entidad Invitation para invitaciones entre cliente y contratista registrado.
-* Actualización de InvitationConfiguration.
-* Creación de CreateInvitationDto.
-* Creación de InvitationDto.
-* Creación de IInvitationRepository.
-* Implementación de InvitationRepository.
-* Creación de IInvitationService.
-* Implementación de InvitationService.
-* Creación de InvitationsController.
-* Registro de dependencias en Program.cs.
-* Migración RefactorInvitationsForContractorInvites.
-* Notificación al contratista cuando recibe una invitación.
-* Notificación al cliente cuando el contratista acepta una invitación.
-* Notificación al cliente cuando el contratista rechaza una invitación.
-* Endpoints paginados para invitaciones enviadas y recibidas.
-
-Endpoints creados:
-
-* POST /api/projects/{projectId}/invitations
-* GET /api/invitations/sent
-* GET /api/invitations/received
-* PATCH /api/invitations/{invitationId}/accept
-* PATCH /api/invitations/{invitationId}/reject
-
-Reglas implementadas:
-
-* Solo el dueño del proyecto puede invitar contratistas.
-* Solo se pueden enviar invitaciones para proyectos publicados.
-* Un usuario no puede invitarse a su propio proyecto.
-* Solo se puede invitar a usuarios activos con rol Contratista.
-* Solo se puede invitar a contratistas con perfil profesional activo.
-* No puede existir más de una invitación pendiente para el mismo contratista en el mismo proyecto.
-* Solo el contratista invitado puede aceptar o rechazar la invitación.
-* Solo se pueden responder invitaciones pendientes.
-* Las invitaciones enviadas y recibidas se consultan de forma paginada.
-* Las invitaciones generan notificaciones internas.
-
-Tipos de notificación agregados:
-
-* ProjectInvitationReceived
-* ProjectInvitationAccepted
-* ProjectInvitationRejected
-
-Pruebas realizadas:
-
-* Cliente crea invitación a contratista → 200 OK.
-* Cliente consulta invitaciones enviadas → 200 OK.
-* Contratista consulta invitaciones recibidas → 200 OK.
-* Contratista acepta invitación → 200 OK.
-* Cliente recibe notificación de invitación aceptada → 200 OK.
-* Contratista rechaza invitación → 200 OK.
-* Cliente recibe notificación de invitación rechazada → 200 OK.
-* Usuario no dueño intentando invitar → 403 Forbidden.
-* Invitación duplicada pendiente → 400 Bad Request.
-* Cliente intentando aceptar invitación ajena → 403 Forbidden.
-* Rechazar invitación ya aceptada → 400 Bad Request.
-* Cliente consultando invitaciones recibidas → 200 OK.
-
-Resultado:
-
-Bloque 14 completado y probado correctamente.
-
-Impacto:
-
-OfiPro conecta la búsqueda de contratistas con una acción real del marketplace: invitar a un profesional específico a revisar o cotizar un proyecto.
-
----
-
-## HITO 15
-
-Refresh tokens para experiencia móvil completado.
-
-Incluye:
-
-* Creación de entidad RefreshToken.
-* Creación de RefreshTokenConfiguration.
-* Registro de RefreshTokens en ApplicationDbContext.
-* Actualización de JwtSettings.
-* Configuración RefreshTokenExpiresInDays en appsettings.json.
-* Actualización de AuthResponseDto.
-* Creación de RefreshTokenRequestDto.
-* Creación de IRefreshTokenRepository.
-* Implementación de RefreshTokenRepository.
-* Actualización de IAuthService.
-* Actualización de AuthService.
-* Generación segura de refresh tokens.
-* Hash SHA256 para almacenar refresh tokens.
-* Rotación de refresh tokens.
-* Revocación de refresh tokens.
-* Creación de endpoint POST /api/auth/refresh-token.
-* Creación de endpoint POST /api/auth/revoke-refresh-token.
-* Registro de IRefreshTokenRepository en Program.cs.
-* Migración AddRefreshTokens.
-* Pruebas manuales en Swagger.
-* Pruebas automatizadas de refresh tokens.
-
-Endpoints agregados:
-
-* POST /api/auth/refresh-token
-* POST /api/auth/revoke-refresh-token
-
-Reglas implementadas:
-
-* Login devuelve access token y refresh token.
-* Register devuelve access token y refresh token.
-* Refresh token válido genera nuevo access token y nuevo refresh token.
-* Refresh token usado queda revocado.
-* Refresh token revocado no puede volver a usarse.
-* Refresh token inválido devuelve 400 Bad Request.
-* Refresh token expirado devuelve 400 Bad Request.
-* Refresh token de usuario inactivo o eliminado devuelve 403 Forbidden.
-* Revocar refresh token válido devuelve 200 OK.
-* Usar refresh token revocado después de logout/revocación devuelve 400 Bad Request.
-
-Pruebas manuales realizadas:
-
-* Login devuelve refreshToken y refreshTokenExpiresAt → 200 OK.
-* Refresh token válido genera nuevo token y nuevo refresh token → 200 OK.
-* Reutilizar refresh token anterior → 400 Bad Request.
-* Revocar refresh token actual → 200 OK.
-* Usar refresh token revocado → 400 Bad Request.
-
-Pruebas automatizadas agregadas:
-
-* RefreshToken_WithValidRefreshToken_ReturnsOkAndNewTokens.
-* RefreshToken_WithReusedRefreshToken_ReturnsBadRequest.
-* RevokeRefreshToken_WithValidRefreshToken_PreventsFutureRefresh.
-* RefreshToken_WithInvalidRefreshToken_ReturnsBadRequest.
-
-Resultado de pruebas automatizadas:
-
-* Total: 14 pruebas.
-* Correctas: 14.
-* Errores: 0.
-
-Impacto:
-
-OfiPro queda mejor preparado para una experiencia real en web responsiva y app móvil, evitando depender únicamente de JWT de corta duración.
-
+Se mantiene así por simplicidad. Puede endurecerse después si se requiere revocación ligada al usuario autenticado.
 
 ---
 
@@ -3033,6 +2561,46 @@ El usuario puede renovar sesión sin volver a capturar credenciales, mientras el
 
 ---
 
+## P035
+
+El proyecto de pruebas estaba en net10.0 mientras la API estaba en net8.0.
+
+Síntoma:
+
+Al cambiar el TargetFramework del proyecto de pruebas a net8.0, apareció incompatibilidad con Microsoft.AspNetCore.Mvc.Testing 10.0.9.
+
+Solución:
+
+Se cambió el TargetFramework a net8.0 y se ajustó Microsoft.AspNetCore.Mvc.Testing a versión compatible con .NET 8.
+
+Resultado:
+
+Las pruebas quedan alineadas con la API.
+
+---
+
+## P036
+
+InvitationStatus.Cancelada existía pero no se usaba.
+
+Síntoma:
+
+El enum tenía estado Cancelada, pero no existía endpoint ni servicio para cancelar una invitación pendiente.
+
+Riesgo:
+
+El cliente podía invitar a un contratista, pero no podía retirar la invitación si cambiaba de decisión.
+
+Solución:
+
+Se agregó CancelAsync en InvitationService y endpoint PATCH /api/invitations/{invitationId}/cancel.
+
+Resultado:
+
+El cliente puede cancelar invitaciones pendientes y el contratista recibe notificación interna.
+
+---
+
 
 # 16. RIESGOS
 
@@ -3572,6 +3140,582 @@ La reputación queda lista para perfiles públicos en web responsiva y futura ap
 Impacto:
 
 OfiPro fortalece su propuesta de confianza con historial visible, promedio de calificaciones y comentarios públicos controlados.
+
+---
+
+## HITO 8.2
+
+Correcciones de diagnóstico de Ratings y reputación completadas.
+
+Incluye:
+
+* Se agregó NotificationType.RatingReceived.
+* Se inyectó INotificationService en RatingService.
+* Se genera notificación interna cuando un usuario recibe una calificación.
+* Se probó notificación al contratista cuando el cliente lo califica.
+* Se probó notificación al cliente cuando el contratista lo califica.
+* Se refactorizó lógica duplicada de reputación.
+* Se agregó método privado para obtener usuario activo.
+* Se agregó método privado para calcular estadísticas de reputación.
+* Se agregó método privado para mapear ratings públicos.
+
+Pruebas realizadas:
+
+* Cliente califica contratista → 200 OK.
+* Contratista recibe notificación RatingReceived → 200 OK.
+* Contratista califica cliente → 200 OK.
+* Cliente recibe notificación RatingReceived → 200 OK.
+* GET /api/users/{userId}/reputation → 200 OK.
+* GET /api/users/{userId}/ratings/public → 200 OK.
+* GET /api/users/{userId}/reputation/public → 200 OK.
+
+Resultado:
+
+El módulo de Ratings y reputación queda corregido, notificado y con menor duplicación interna.
+
+---
+
+
+## HITO 9
+
+Dashboard mínimo / Resúmenes para móvil y web completado.
+
+Incluye:
+
+* Creación de DTOs de dashboard.
+* Creación de IDashboardRepository.
+* Creación de DashboardRepository.
+* Creación de IDashboardService.
+* Creación de DashboardService.
+* Creación de DashboardController.
+* Resumen de cliente.
+* Resumen de contratista.
+* Resumen de administrador.
+* Actividad reciente para cliente.
+* Actividad reciente para contratista.
+* Notificaciones recientes.
+* Contratos recientes.
+* Propuestas pendientes para cliente.
+* Proyectos disponibles para contratista.
+* Modos disponibles del usuario.
+* Contexto del usuario autenticado.
+* Validación de roles por dashboard.
+
+Endpoints creados:
+
+* GET /api/dashboard/client/summary
+* GET /api/dashboard/contractor/summary
+* GET /api/dashboard/admin/summary
+* GET /api/dashboard/modes
+* GET /api/dashboard/me
+
+Reglas implementadas:
+
+* Solo usuarios con rol Cliente pueden consultar el dashboard de cliente.
+* Solo usuarios con rol Contratista pueden consultar el dashboard de contratista.
+* Solo usuarios con rol Administrador pueden consultar el dashboard administrativo.
+* Un usuario multirol puede consultar los dashboards correspondientes a sus roles.
+* El dashboard de contratista muestra proyectos disponibles y actividad reciente.
+* El dashboard de cliente muestra propuestas pendientes y actividad reciente.
+* El dashboard administrativo muestra métricas generales del sistema.
+* El endpoint de modos informa qué vistas puede usar el usuario autenticado.
+
+Pruebas realizadas:
+
+* [cliente@ofipro.com](mailto:cliente@ofipro.com) consulta client summary → 200 OK.
+* [cliente@ofipro.com](mailto:cliente@ofipro.com) consulta contractor summary → 403 Forbidden.
+* [cliente@ofipro.com](mailto:cliente@ofipro.com) consulta admin summary → 403 Forbidden.
+* [contratista@ofipro.com](mailto:contratista@ofipro.com) consulta contractor summary → 200 OK.
+* [contratista@ofipro.com](mailto:contratista@ofipro.com) consulta client summary → 403 Forbidden.
+* [contratista@ofipro.com](mailto:contratista@ofipro.com) consulta admin summary → 403 Forbidden.
+* [admin@ofipro.com](mailto:admin@ofipro.com) consulta client summary → 200 OK.
+* [admin@ofipro.com](mailto:admin@ofipro.com) consulta contractor summary → 200 OK.
+* [admin@ofipro.com](mailto:admin@ofipro.com) consulta admin summary → 200 OK.
+* GET /api/dashboard/modes probado correctamente.
+* GET /api/dashboard/me probado correctamente.
+
+Resultado:
+
+El backend queda preparado para construir pantallas principales de cliente, contratista y administrador sin hacer múltiples llamadas separadas.
+
+Impacto:
+
+OfiPro queda mejor preparado para web responsiva y futura app móvil real con enfoque mobile-first.
+
+---
+
+## HITO 10
+
+ProfessionalProfile y búsqueda básica de contratistas completado.
+
+Incluye:
+
+Creación de DTOs de ProfessionalProfile.
+Creación de DTO de búsqueda de contratistas.
+Creación de IProfessionalProfileRepository.
+Implementación de ProfessionalProfileRepository.
+Creación de IProfessionalProfileService.
+Implementación de ProfessionalProfileService.
+Registro de dependencias en Program.cs.
+Creación de ProfessionalProfilesController.
+Creación de perfil profesional.
+Consulta de perfil profesional propio.
+Actualización de perfil profesional propio.
+Búsqueda básica de contratistas.
+Consulta pública de perfil de contratista por UserId.
+Validación de rol Contratista para administrar perfil profesional.
+Validación para evitar perfiles profesionales duplicados.
+Filtro para devolver solo perfiles activos.
+Filtro para devolver solo usuarios activos.
+Filtro para devolver solo usuarios con rol Contratista.
+Integración del estado del perfil profesional en el dashboard del contratista.
+
+Endpoints creados:
+
+POST /api/professional-profiles
+GET /api/professional-profiles/me
+PUT /api/professional-profiles/me
+GET /api/contractors
+GET /api/contractors/{userId}
+
+Endpoints actualizados:
+
+GET /api/dashboard/contractor/summary
+
+Reglas implementadas:
+
+Solo usuarios con rol Contratista pueden crear perfil profesional.
+Solo usuarios con rol Contratista pueden consultar y actualizar su perfil profesional.
+Un usuario solo puede tener un perfil profesional activo registrado.
+Un perfil profesional inactivo no aparece en búsqueda pública.
+La búsqueda pública solo muestra usuarios activos y no eliminados.
+La búsqueda pública solo muestra usuarios con rol Contratista.
+El dashboard del contratista indica si el perfil profesional existe y si está activo.
+
+Pruebas realizadas:
+
+Cliente intentando crear perfil profesional → 403 Forbidden.
+Contratista creando perfil profesional → 200 OK.
+Contratista consultando su perfil profesional → 200 OK.
+Contratista intentando crear perfil duplicado → 400 Bad Request.
+Contratista actualizando perfil profesional → 200 OK.
+GET /api/contractors sin filtros → 200 OK.
+GET /api/contractors con filtro por especialidad → 200 OK.
+GET /api/contractors con filtro por ciudad → 200 OK.
+GET /api/contractors/{userId} → 200 OK.
+Perfil profesional inactivo deja de aparecer en búsqueda.
+Perfil profesional reactivado vuelve a aparecer en búsqueda.
+Dashboard de contratista muestra HasProfessionalProfile, ProfessionalProfileId, IsProfessionalProfileActive y MainSpecialty.
+
+Resultado:
+
+OfiPro ya cuenta con perfil profesional de contratista y búsqueda básica de contratistas, cerrando el loop inicial de discovery del marketplace.
+
+Impacto:
+
+La plataforma ya no depende únicamente de que el contratista encuentre proyectos. Ahora el cliente también puede buscar contratistas activos por especialidad y ubicación.
+
+---
+
+## HITO 10.1
+
+Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas.
+
+Incluye:
+
+* Corrección de N+1 queries en SearchContractorsAsync.
+* Creación de método agregado para estadísticas de reputación por lista de usuarios.
+* Implementación de GetReputationStatsByUserIdsAsync en RatingRepository.
+* Uso de GroupBy por RatedUserId para obtener AverageScore y TotalRatings.
+* Actualización de SearchContractorsAsync para evitar consultas de ratings dentro del foreach.
+* Verificación de snapshot de EF Core para ProfessionalProfiles.
+* Confirmación de que ProfessionalProfiles ya existía desde InitialCreate.
+* Confirmación de que no se requiere migración AddProfessionalProfiles.
+
+Pruebas realizadas:
+
+* GET /api/contractors → 200 OK.
+* GET /api/contractors?specialty=plomería → 200 OK.
+* GET /api/contractors/{userId} → 200 OK.
+* Verificación de cambios pendientes de EF Core → sin cambios pendientes.
+
+Resultado:
+
+El Bloque 10 queda endurecido a nivel de rendimiento básico y consistencia de migraciones.
+
+Impacto:
+
+La búsqueda de contratistas queda más limpia, más eficiente y sin deuda inmediata relacionada con ProfessionalProfiles.
+
+---
+
+## HITO 11
+
+Expiración automática de proyectos completada.
+
+Incluye:
+
+Validación de existencia previa de ProjectStatus.Expirado.
+Confirmación de que Project.CreatedAt ya existía.
+Confirmación de que no se requería migración.
+Creación de método ExpirePublishedProjectsAsync en IProjectRepository.
+Implementación de expiración masiva en ProjectRepository.
+Creación de ProjectExpirationBackgroundService.
+Registro del HostedService en Program.cs.
+Configuración de ProjectExpiration en appsettings.json.
+Ajuste del feed general de proyectos para devolver solo proyectos publicados activos.
+
+Configuración agregada:
+
+ProjectExpiration
+ProjectExpiration
+
+Reglas implementadas:
+
+Solo proyectos con estado Publicado pueden expirar automáticamente.
+Los proyectos eliminados lógicamente no se procesan.
+Los proyectos expirados no aparecen en el feed general.
+La expiración se ejecuta al iniciar la API.
+La expiración se ejecuta periódicamente según configuración.
+No se requiere migración porque los campos necesarios ya existían.
+
+Pruebas realizadas:
+
+Se localizó un proyecto publicado desde SQL Server.
+Se forzó su CreatedAt a una fecha antigua.
+Se reinició la API.
+El BackgroundService ejecutó la expiración.
+El proyecto cambió de Status = 1 a Status = 7.
+Se inició sesión con contratista@ofipro.com.
+GET /api/projects dejó de mostrar el proyecto expirado.
+
+Resultado:
+
+OfiPro ya cuenta con expiración automática de proyectos publicados antiguos.
+
+Impacto:
+
+El feed de proyectos queda más confiable para contratistas y mejor preparado para una experiencia mobile-first.
+
+---
+
+## HITO 12
+
+Paginación y ordenamiento básico en listados críticos completado.
+Incluye:
+
+* Creación de DTOs comunes de paginación.
+* Creación de PaginationQueryDto.
+* Creación de PaginatedResponseDto.
+* Organización de DTOs comunes dentro de carpeta Pagination.
+* Paginación en GET /api/projects.
+* Paginación en GET /api/contractors.
+* Paginación en GET /api/notifications.
+* Paginación en GET /api/contracts/mine.
+* Paginación en GET /api/proposals/my-proposals.
+* Paginación en GET /api/projects/my-projects.
+* Ordenamiento básico por campos permitidos en proyectos.
+* Ordenamiento básico por campos permitidos en contratistas.
+* Ordenamiento básico por campos permitidos en notificaciones.
+* Ordenamiento básico por campos permitidos en contratos.
+* Ordenamiento básico por campos permitidos en propuestas.
+* Conteo total de registros para metadata de paginación.
+* Corrección de diagnóstico post-Bloque 11.
+* Acceso anónimo a endpoints públicos de contratistas.
+* Notificación interna cuando un proyecto expira automáticamente.
+
+Endpoints actualizados:
+
+* GET /api/projects
+* GET /api/contractors
+* GET /api/notifications
+* GET /api/contracts/mine
+* GET /api/proposals/my-proposals
+* GET /api/projects/my-projects
+* GET /api/contractors sin token → 200 OK.
+* GET /api/contractors/{userId} sin token → 200 OK.
+* Proyecto expirado automáticamente genera notificación ProjectExpired → 200 OK.
+* Cliente consulta notificaciones y recibe aviso de proyecto expirado → 200 OK.
+
+
+Estructura de respuesta implementada:
+
+* Items
+* PageNumber
+* PageSize
+* TotalItems
+* TotalPages
+* HasPreviousPage
+* HasNextPage
+
+Reglas implementadas:
+
+* PageNumber inicia en 1.
+* PageSize debe estar dentro del rango permitido.
+* SortBy se controla por campos permitidos.
+* SortDirection permite ordenar ascendente o descendente.
+* Los endpoints conservan sus reglas de seguridad existentes.
+* Los endpoints conservan filtros de soft delete y estados activos donde aplica.
+
+Pruebas realizadas:
+
+* GET /api/projects paginado → 200 OK.
+* GET /api/projects con ordenamiento → 200 OK.
+* GET /api/contractors paginado → 200 OK.
+* GET /api/contractors con filtro y ordenamiento → 200 OK.
+* GET /api/notifications paginado → 200 OK.
+* GET /api/notifications con ordenamiento por IsRead → 200 OK.
+* GET /api/contracts/mine paginado como cliente → 200 OK.
+* GET /api/contracts/mine paginado como contratista → 200 OK.
+* GET /api/proposals/my-proposals paginado → 200 OK.
+* GET /api/proposals/my-proposals con ordenamiento por Status → 200 OK.
+* GET /api/projects/my-projects paginado → 200 OK.
+* GET /api/projects/my-projects con ordenamiento por Title → 200 OK.
+
+Resultado:
+Bloque 12 completado y probado correctamente.
+Impacto:
+OfiPro queda mejor preparado para web responsiva y futura app móvil real, evitando respuestas grandes y permitiendo construir pantallas con carga progresiva.
+
+---
+
+## HITO 13
+
+Pruebas automatizadas mínimas de API completadas.
+
+Incluye:
+
+* Creación del proyecto OfiPro.Api.Tests.
+* Integración del proyecto de pruebas a la solución.
+* Instalación de Microsoft.AspNetCore.Mvc.Testing.
+* Configuración de Program como partial class para pruebas de integración.
+* Creación de pruebas con WebApplicationFactory.
+* Creación de helper TestAuthHelper para registrar e iniciar sesión con usuarios temporales.
+* Prueba de endpoint público sin token.
+* Prueba de endpoint protegido sin token.
+* Prueba de login inválido.
+* Prueba de registro y login válido.
+* Prueba de endpoint protegido con token.
+* Prueba de autorización por rol incorrecto.
+* Prueba de proyectos paginados.
+* Prueba de contratistas públicos con filtros.
+* Prueba de notificaciones paginadas con token.
+* Prueba de dashboard modes con token.
+
+Pruebas automatizadas creadas:
+
+* GET /api/contractors sin token → 200 OK.
+* GET /api/contractors con filtros sin token → 200 OK.
+* GET /api/notifications sin token → 401 Unauthorized.
+* POST /api/auth/login con credenciales inválidas → 400 Bad Request.
+* POST /api/auth/register + POST /api/auth/login con usuario temporal → 200 OK.
+* GET /api/users/profile con token válido → 200 OK.
+* GET /api/dashboard/contractor/summary con usuario Cliente → 403 Forbidden.
+* GET /api/projects paginado con token → 200 OK.
+* GET /api/notifications paginado con token → 200 OK.
+* GET /api/dashboard/modes con token → 200 OK.
+
+Resultado:
+
+Bloque 13 completado y probado correctamente con dotnet test.
+
+Impacto:
+
+OfiPro ya cuenta con una base mínima de pruebas automatizadas para proteger autenticación, autorización, endpoints públicos y respuestas paginadas.
+
+----
+
+## HITO 14
+
+Invitaciones directas a contratistas completado.
+
+Incluye:
+
+* Creación de InvitationStatus.
+* Refactor de entidad Invitation para invitaciones entre cliente y contratista registrado.
+* Actualización de InvitationConfiguration.
+* Creación de CreateInvitationDto.
+* Creación de InvitationDto.
+* Creación de IInvitationRepository.
+* Implementación de InvitationRepository.
+* Creación de IInvitationService.
+* Implementación de InvitationService.
+* Creación de InvitationsController.
+* Registro de dependencias en Program.cs.
+* Migración RefactorInvitationsForContractorInvites.
+* Notificación al contratista cuando recibe una invitación.
+* Notificación al cliente cuando el contratista acepta una invitación.
+* Notificación al cliente cuando el contratista rechaza una invitación.
+* Endpoints paginados para invitaciones enviadas y recibidas.
+
+Endpoints creados:
+
+* POST /api/projects/{projectId}/invitations
+* GET /api/invitations/sent
+* GET /api/invitations/received
+* PATCH /api/invitations/{invitationId}/accept
+* PATCH /api/invitations/{invitationId}/reject
+
+Reglas implementadas:
+
+* Solo el dueño del proyecto puede invitar contratistas.
+* Solo se pueden enviar invitaciones para proyectos publicados.
+* Un usuario no puede invitarse a su propio proyecto.
+* Solo se puede invitar a usuarios activos con rol Contratista.
+* Solo se puede invitar a contratistas con perfil profesional activo.
+* No puede existir más de una invitación pendiente para el mismo contratista en el mismo proyecto.
+* Solo el contratista invitado puede aceptar o rechazar la invitación.
+* Solo se pueden responder invitaciones pendientes.
+* Las invitaciones enviadas y recibidas se consultan de forma paginada.
+* Las invitaciones generan notificaciones internas.
+
+Tipos de notificación agregados:
+
+* ProjectInvitationReceived
+* ProjectInvitationAccepted
+* ProjectInvitationRejected
+
+Pruebas realizadas:
+
+* Cliente crea invitación a contratista → 200 OK.
+* Cliente consulta invitaciones enviadas → 200 OK.
+* Contratista consulta invitaciones recibidas → 200 OK.
+* Contratista acepta invitación → 200 OK.
+* Cliente recibe notificación de invitación aceptada → 200 OK.
+* Contratista rechaza invitación → 200 OK.
+* Cliente recibe notificación de invitación rechazada → 200 OK.
+* Usuario no dueño intentando invitar → 403 Forbidden.
+* Invitación duplicada pendiente → 400 Bad Request.
+* Cliente intentando aceptar invitación ajena → 403 Forbidden.
+* Rechazar invitación ya aceptada → 400 Bad Request.
+* Cliente consultando invitaciones recibidas → 200 OK.
+
+Resultado:
+
+Bloque 14 completado y probado correctamente.
+
+Impacto:
+
+OfiPro conecta la búsqueda de contratistas con una acción real del marketplace: invitar a un profesional específico a revisar o cotizar un proyecto.
+
+---
+
+## HITO 15
+
+Refresh tokens para experiencia móvil completado.
+
+Incluye:
+
+* Creación de entidad RefreshToken.
+* Creación de RefreshTokenConfiguration.
+* Registro de RefreshTokens en ApplicationDbContext.
+* Actualización de JwtSettings.
+* Configuración RefreshTokenExpiresInDays en appsettings.json.
+* Actualización de AuthResponseDto.
+* Creación de RefreshTokenRequestDto.
+* Creación de IRefreshTokenRepository.
+* Implementación de RefreshTokenRepository.
+* Actualización de IAuthService.
+* Actualización de AuthService.
+* Generación segura de refresh tokens.
+* Hash SHA256 para almacenar refresh tokens.
+* Rotación de refresh tokens.
+* Revocación de refresh tokens.
+* Creación de endpoint POST /api/auth/refresh-token.
+* Creación de endpoint POST /api/auth/revoke-refresh-token.
+* Registro de IRefreshTokenRepository en Program.cs.
+* Migración AddRefreshTokens.
+* Pruebas manuales en Swagger.
+* Pruebas automatizadas de refresh tokens.
+
+Endpoints agregados:
+
+* POST /api/auth/refresh-token
+* POST /api/auth/revoke-refresh-token
+
+Reglas implementadas:
+
+* Login devuelve access token y refresh token.
+* Register devuelve access token y refresh token.
+* Refresh token válido genera nuevo access token y nuevo refresh token.
+* Refresh token usado queda revocado.
+* Refresh token revocado no puede volver a usarse.
+* Refresh token inválido devuelve 400 Bad Request.
+* Refresh token expirado devuelve 400 Bad Request.
+* Refresh token de usuario inactivo o eliminado devuelve 403 Forbidden.
+* Revocar refresh token válido devuelve 200 OK.
+* Usar refresh token revocado después de logout/revocación devuelve 400 Bad Request.
+
+Pruebas manuales realizadas:
+
+* Login devuelve refreshToken y refreshTokenExpiresAt → 200 OK.
+* Refresh token válido genera nuevo token y nuevo refresh token → 200 OK.
+* Reutilizar refresh token anterior → 400 Bad Request.
+* Revocar refresh token actual → 200 OK.
+* Usar refresh token revocado → 400 Bad Request.
+
+Pruebas automatizadas agregadas:
+
+* RefreshToken_WithValidRefreshToken_ReturnsOkAndNewTokens.
+* RefreshToken_WithReusedRefreshToken_ReturnsBadRequest.
+* RevokeRefreshToken_WithValidRefreshToken_PreventsFutureRefresh.
+* RefreshToken_WithInvalidRefreshToken_ReturnsBadRequest.
+
+Resultado de pruebas automatizadas:
+
+* Total: 14 pruebas.
+* Correctas: 14.
+* Errores: 0.
+
+Impacto:
+
+OfiPro queda mejor preparado para una experiencia real en web responsiva y app móvil, evitando depender únicamente de JWT de corta duración.
+
+
+---
+
+## HITO 15.3
+
+Correcciones diagnóstico post-refresh tokens completadas.
+
+Incluye:
+
+* Alineación de OfiPro.Api.Tests a net8.0.
+* Ajuste de Microsoft.AspNetCore.Mvc.Testing a versión compatible con .NET 8.
+* Agregado ProjectInvitationCanceled a NotificationType.
+* Agregado CancelAsync en IInvitationService.
+* Implementación de CancelAsync en InvitationService.
+* Creación del endpoint PATCH /api/invitations/{invitationId}/cancel.
+* Notificación interna al contratista cuando una invitación es cancelada.
+* Documentación de decisión V1 sobre revoke-refresh-token sin Authorize.
+
+Endpoint agregado:
+
+* PATCH /api/invitations/{invitationId}/cancel
+
+Reglas implementadas:
+
+* Solo el cliente que envió la invitación puede cancelarla.
+* Solo se pueden cancelar invitaciones pendientes.
+* Una invitación cancelada ya no puede ser aceptada ni rechazada.
+* Cancelar una invitación ya cancelada devuelve 400 Bad Request.
+* El contratista recibe notificación cuando una invitación es cancelada.
+
+Pruebas realizadas:
+
+* Cliente cancela invitación pendiente → 200 OK.
+* Invitación aparece con status 4, equivalente a Cancelada → 200 OK.
+* Contratista intenta aceptar invitación cancelada → 400 Bad Request.
+* Cliente intenta cancelar nuevamente una invitación cancelada → 400 Bad Request.
+* dotnet test ejecutado con proyecto de pruebas alineado a net8.0.
+
+Resultado:
+
+Corrección diagnóstico post-refresh tokens completada correctamente.
+
+Impacto:
+
+El backend queda más consistente antes de decidir el siguiente bloque grande.
 
 ---
 
