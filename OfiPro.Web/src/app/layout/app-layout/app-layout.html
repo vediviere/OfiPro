@@ -1,0 +1,19 @@
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">OfiPro</div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/cliente/dashboard">Cliente</a>
+      <a routerLink="/contratista/dashboard">Contratista</a>
+      <a routerLink="/admin/dashboard">Admin</a>
+    </nav>
+
+    <button class="logout-button" type="button" (click)="logout()">
+      Cerrar sesión
+    </button>
+  </aside>
+
+  <section class="app-content">
+    <router-outlet />
+  </section>
+</div>

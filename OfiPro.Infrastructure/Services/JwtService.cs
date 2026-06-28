@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OfiPro.Application.Common.Settings;
 using OfiPro.Application.Interfaces.Services;
+using OfiPro.Domain.Enums;
 
 namespace OfiPro.Infrastructure.Services;
 
@@ -19,33 +20,44 @@ public class JwtService : IJwtService
     }
 
     public string GenerateToken(User user)
+{
+    var roles = user.UserRoles
+        .Select(x => x.Role)
+        .Distinct()
+        .ToList();
+
+    if (!roles.Any())
     {
-        var role = user.UserRoles.FirstOrDefault()?.Role.ToString() ?? "Cliente";
-
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, role)
-        };
-
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_jwtSettings.Key)
-        );
-
-        var credentials = new SigningCredentials(
-            key,
-            SecurityAlgorithms.HmacSha256
-        );
-
-        var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Issuer,
-            audience: _jwtSettings.Audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiresInMinutes),
-            signingCredentials: credentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        roles.Add(UserRoleType.Cliente);
     }
+
+    var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Email, user.Email)
+    };
+
+    claims.AddRange(
+        roles.Select(role => new Claim(ClaimTypes.Role, role.ToString()))
+    );
+
+    var key = new SymmetricSecurityKey(
+        Encoding.UTF8.GetBytes(_jwtSettings.Key)
+    );
+
+    var credentials = new SigningCredentials(
+        key,
+        SecurityAlgorithms.HmacSha256
+    );
+
+    var token = new JwtSecurityToken(
+        issuer: _jwtSettings.Issuer,
+        audience: _jwtSettings.Audience,
+        claims: claims,
+        expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiresInMinutes),
+        signingCredentials: credentials
+    );
+
+    return new JwtSecurityTokenHandler().WriteToken(token);
+}
 }

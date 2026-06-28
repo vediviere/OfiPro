@@ -1,0 +1,41 @@
+<section class="login-page">
+  <div class="login-card">
+    <h1>Iniciar sesión</h1>
+
+    <p>
+      Accede a OfiPro como cliente, contratista o administrador.
+    </p>
+
+    <form (ngSubmit)="login()">
+      <label>
+        Correo electrónico
+        <input
+          type="email"
+          name="email"
+          placeholder="cliente@ofipro.com"
+          [(ngModel)]="credentials.email"
+        />
+      </label>
+
+      <label>
+        Contraseña
+        <input
+          type="password"
+          name="password"
+          placeholder="********"
+          [(ngModel)]="credentials.password"
+        />
+      </label>
+
+      @if (errorMessage) {
+        <div class="error-message">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <button type="submit" [disabled]="isLoading">
+        {{ isLoading ? 'Ingresando...' : 'Entrar' }}
+      </button>
+    </form>
+  </div>
+</section>

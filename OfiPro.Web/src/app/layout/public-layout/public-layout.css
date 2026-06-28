@@ -1,0 +1,59 @@
+.public-layout {
+  min-height: 100vh;
+  background: #f5f7fa;
+  color: #1f2937;
+}
+
+.public-header {
+  height: 64px;
+  padding: 0 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.public-nav {
+  display: flex;
+  gap: 16px;
+}
+
+.public-nav a {
+  color: #374151;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.public-nav a:hover {
+  color: #111827;
+}
+
+.public-main {
+  padding: 32px 24px;
+}
+
+@media (max-width: 640px) {
+  .public-header {
+    height: auto;
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .public-nav {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .public-main {
+    padding: 24px 16px;
+  }
+}

@@ -2172,6 +2172,68 @@ Después:
 
 ---
 
+## D085 — Frontend Angular dentro del mismo repositorio
+
+Se decidió que la web responsiva mínima de OfiPro viva dentro del mismo repositorio del backend, en una carpeta separada llamada:
+
+`OfiPro.Web`
+
+Estructura general:
+
+- OfiPro.Api
+- OfiPro.Application
+- OfiPro.Domain
+- OfiPro.Infrastructure
+- OfiPro.Api.Tests
+- OfiPro.Web
+
+Razón:
+
+En esta etapa, OfiPro sigue construyendo su MVP funcional. Mantener backend, frontend, pruebas y documentación en el mismo repositorio reduce complejidad, facilita commits por bloque y permite revisar con claridad la relación entre API y frontend.
+
+No se utilizará un repositorio separado para frontend por ahora.
+
+---
+
+## D087 — Angular como web responsiva mínima del MVP
+
+Se creó el frontend con Angular para construir la web responsiva mínima de OfiPro.
+
+Configuración inicial:
+
+- Angular CLI 20.
+- CSS normal.
+- Routing activado.
+- Sin SSR.
+- Sin PWA.
+- Sin configuración adicional de herramientas de IA.
+- Proyecto ubicado en `OfiPro.Web`.
+
+Regla:
+
+La web responsiva mínima no sustituye la futura app móvil real. Su objetivo es validar flujos principales del producto, facilitar pruebas funcionales y preparar la transición hacia una experiencia mobile-first más completa.
+
+---
+
+## D086 — JWT interceptor y guards en frontend
+
+Se implementó en Angular un flujo mínimo de seguridad frontend:
+
+- `AuthService` para login, logout, lectura de token y lectura de roles.
+- `authInterceptor` para enviar automáticamente el token JWT en las peticiones HTTP.
+- `authGuard` para bloquear rutas internas sin sesión válida.
+- `roleGuard` para controlar acceso por rol.
+- Redirección automática por rol después del login.
+
+Prioridad de rol en frontend:
+
+1. Administrador.
+2. Contratista.
+3. Cliente.
+
+Esta prioridad es necesaria porque un usuario puede tener más de un rol asignado.
+
+---
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -3062,8 +3124,31 @@ Resultado:
 
 Las respuestas quedan más legibles y cómodas para Angular/web.
 
+---
+
+## P045 — JwtService tomaba un solo rol con FirstOrDefault
+
+Durante las pruebas del Bloque 18 se detectó un problema en el backend:
+
+`JwtService` generaba el JWT tomando únicamente el primer rol del usuario mediante `FirstOrDefault()`.
+
+Problema:
+
+Si un usuario tenía varios roles en `UserRoles`, el token podía generarse con un rol incorrecto. Esto provocó que `admin@ofipro.com`, al tener roles múltiples, fuera redirigido al dashboard de contratista en lugar del dashboard de administrador.
+
+Corrección:
+
+Se ajustó `JwtService` para emitir múltiples claims de rol dentro del JWT, tomando todos los roles registrados en `UserRoles`.
+
+Resultado:
+
+- El token de un usuario multirrol ahora contiene todos sus roles.
+- Angular puede detectar correctamente los roles disponibles.
+- El frontend prioriza `Administrador` sobre `Contratista` y `Cliente`.
+- `admin@ofipro.com` redirige correctamente a `/admin/dashboard`.
 
 ---
+
 
 
 # 16. RIESGOS
@@ -4294,8 +4379,47 @@ OfiPro queda listo para iniciar la etapa de web responsiva mínima con una API m
 
 ---
 
+## HITO — Bloque 18 completado: Web responsiva mínima
 
-## ESTADO ACTUAL ACTUALIZADO
+Se completó el Bloque 18 - Web responsiva mínima.
+
+Resultado:
+
+OfiPro ya cuenta con una primera aplicación frontend en Angular dentro del mismo repositorio, ubicada en la carpeta `OfiPro.Web`.
+
+La web responsiva mínima incluye:
+
+- Estructura base Angular.
+- Layout público.
+- Layout interno autenticado.
+- Página pública inicial.
+- Login conectado al backend real.
+- Dashboards mínimos por rol:
+  - Cliente.
+  - Contratista.
+  - Administrador.
+- Configuración de environments.
+- HttpClient configurado.
+- AuthService.
+- Interceptor JWT.
+- Guards de autenticación.
+- Guards de rol.
+- Logout mínimo.
+- Consumo de endpoint protegido desde frontend.
+
+El frontend ya consume correctamente la API local en:
+
+`https://localhost:7081`
+
+Validaciones finales:
+
+- `dotnet test` ejecutado correctamente.
+- `ng build` ejecutado correctamente.
+
+---
+
+
+## ESTADO ACTUAL BACKEND
 
 Módulos completados:
 
@@ -4378,3 +4502,43 @@ Notas estratégicas vigentes:
   * [contratista@ofipro.com](mailto:contratista@ofipro.com) como Contratista puro.
   * [admin@ofipro.com](mailto:admin@ofipro.com) como usuario multirol.
 
+
+----
+
+## Estado actual del frontend
+
+La carpeta `OfiPro.Web` contiene la web responsiva mínima del MVP.
+
+Estructura funcional inicial:
+
+- `core/models`
+- `core/services`
+- `core/guards`
+- `core/interceptors`
+- `features/auth`
+- `features/public`
+- `features/cliente`
+- `features/contratista`
+- `features/admin`
+- `layout/public-layout`
+- `layout/app-layout`
+- `shared/components`
+
+Rutas actuales:
+
+- `/`
+- `/login`
+- `/cliente/dashboard`
+- `/contratista/dashboard`
+- `/admin/dashboard`
+
+Flujos probados:
+
+- Login cliente.
+- Login contratista.
+- Login administrador.
+- Redirección por rol.
+- Bloqueo de rutas sin sesión.
+- Bloqueo de rutas por rol incorrecto.
+- Logout.
+- Consumo de endpoint protegido `/api/dashboard/me`.

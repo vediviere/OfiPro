@@ -1,0 +1,35 @@
+<section class="dashboard-page">
+  <h1>Dashboard Cliente</h1>
+
+  <p>
+    Aquí el cliente podrá ver sus proyectos, propuestas recibidas,
+    contrataciones y actividad reciente.
+  </p>
+
+  <hr />
+
+  @if (isLoading) {
+    <p>Cargando contexto del usuario...</p>
+  }
+
+  @if (errorMessage) {
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (userContext) {
+    <div class="context-card">
+      <h2>Usuario autenticado</h2>
+
+      <p><strong>Nombre:</strong> {{ userContext.fullName }}</p>
+      <p><strong>Correo:</strong> {{ userContext.email }}</p>
+      <p><strong>Modo predeterminado:</strong> {{ userContext.modes.defaultMode }}</p>
+
+      <p>
+        <strong>Modos disponibles:</strong>
+        {{ userContext.modes.availableModes.join(', ') }}
+      </p>
+    </div>
+  }
+</section>

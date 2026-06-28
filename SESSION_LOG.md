@@ -4280,3 +4280,64 @@ Razón:
 El backend ya está suficientemente preparado para comenzar a construir una primera interfaz web que permita validar el flujo real de OfiPro.
 
 # =====================================
+
+
+## Sesión — Bloque 18: Web responsiva mínima
+
+Se trabajó en el Bloque 18 - Web responsiva mínima.
+
+Avances realizados:
+
+- Se revisó la decisión de estructura del frontend.
+- Se decidió crear el frontend dentro del mismo repositorio bajo `OfiPro.Web`.
+- Se creó el proyecto Angular.
+- Se corrigió un problema local causado por una instalación accidental de Angular en `C:\Users\vediv`.
+- Se limpió la configuración incorrecta que provocaba conflictos con Angular CLI y VS Code.
+- Se corrigió el `tsconfig.app.json` agregando `rootDir`.
+- Se creó la estructura base de carpetas del frontend.
+- Se configuraron rutas públicas e internas.
+- Se crearon layouts:
+  - `PublicLayout`
+  - `AppLayout`
+- Se crearon pantallas mínimas:
+  - Home pública.
+  - Login.
+  - Dashboard cliente.
+  - Dashboard contratista.
+  - Dashboard administrador.
+- Se configuró `environment.ts` con la URL local de API:
+  - `https://localhost:7081`
+- Se activó `HttpClient`.
+- Se creó `AuthService`.
+- Se conectó el login real contra el backend.
+- Se implementó redirección por rol.
+- Se corrigió una colisión de componentes Dashboard.
+- Se implementó interceptor JWT.
+- Se implementaron guards de autenticación y rol.
+- Se agregó logout mínimo.
+- Se consumió el endpoint protegido `/api/dashboard/me` desde Angular.
+- Se validó que el interceptor JWT enviara correctamente el token al backend.
+
+Problema detectado:
+
+El usuario `admin@ofipro.com` era redirigido al dashboard de contratista porque el JWT estaba generando un solo rol usando `FirstOrDefault()`.
+
+Corrección aplicada:
+
+Se modificó `JwtService` para emitir múltiples claims de rol, tomando todos los registros de `UserRoles`.
+
+Validación:
+
+- `admin@ofipro.com` fue probado con roles múltiples.
+- El token incluyó los roles correspondientes.
+- Angular priorizó correctamente `Administrador`.
+- El login de admin redirigió correctamente a `/admin/dashboard`.
+
+Pruebas finales:
+
+- `dotnet test` ejecutado correctamente.
+- `ng build` ejecutado correctamente.
+
+Estado:
+
+Bloque 18 completado correctamente.

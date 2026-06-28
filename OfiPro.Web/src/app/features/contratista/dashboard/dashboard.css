@@ -1,0 +1,17 @@
+.dashboard-page {
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.dashboard-page h1 {
+  margin-top: 0;
+  font-size: 32px;
+}
+
+.dashboard-page p {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #4b5563;
+}
