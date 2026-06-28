@@ -10,6 +10,10 @@ import { ClienteDashboard } from './features/cliente/dashboard/dashboard';
 import { ContratistaDashboard } from './features/contratista/dashboard/dashboard';
 import { AdminDashboard } from './features/admin/dashboard/dashboard';
 
+import { ClientProjects } from './features/cliente/projects/client-projects/client-projects';
+import { ClientProjectCreate } from './features/cliente/projects/client-project-create/client-project-create';
+import { ClientProjectDetail } from './features/cliente/projects/client-project-detail/client-project-detail';
+
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
@@ -20,13 +24,13 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: Home
+        component: Home,
       },
       {
         path: 'login',
-        component: Login
-      }
-    ]
+        component: Login,
+      },
+    ],
   },
   {
     path: '',
@@ -37,29 +41,53 @@ export const routes: Routes = [
         component: ClienteDashboard,
         canActivate: [authGuard, roleGuard],
         data: {
-          roles: ['Cliente']
-        }
+          roles: ['Cliente'],
+        },
+      },
+      {
+        path: 'cliente/proyectos',
+        component: ClientProjects,
+        canActivate: [authGuard, roleGuard],
+        data: {
+          roles: ['Cliente'],
+        },
+      },
+      {
+        path: 'cliente/proyectos/nuevo',
+        component: ClientProjectCreate,
+        canActivate: [authGuard, roleGuard],
+        data: {
+          roles: ['Cliente'],
+        },
+      },
+      {
+        path: 'cliente/proyectos/:id',
+        component: ClientProjectDetail,
+        canActivate: [authGuard, roleGuard],
+        data: {
+          roles: ['Cliente'],
+        },
       },
       {
         path: 'contratista/dashboard',
         component: ContratistaDashboard,
         canActivate: [authGuard, roleGuard],
         data: {
-          roles: ['Contratista']
-        }
+          roles: ['Contratista'],
+        },
       },
       {
         path: 'admin/dashboard',
         component: AdminDashboard,
         canActivate: [authGuard, roleGuard],
         data: {
-          roles: ['Administrador']
-        }
-      }
-    ]
+          roles: ['Administrador'],
+        },
+      },
+    ],
   },
   {
     path: '**',
-    redirectTo: ''
-  }
+    redirectTo: '',
+  },
 ];

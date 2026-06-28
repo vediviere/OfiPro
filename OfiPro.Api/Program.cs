@@ -81,6 +81,9 @@ builder.Services.AddHostedService<ProjectExpirationBackgroundService>();
 builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<IInvitationService, InvitationService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<ICatalogRepository, CatalogRepository>();
+builder.Services.AddScoped<ICatalogService, CatalogService>();
+
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")

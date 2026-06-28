@@ -3,9 +3,18 @@
     <div class="sidebar-brand">OfiPro</div>
 
     <nav class="sidebar-nav">
-      <a routerLink="/cliente/dashboard">Cliente</a>
-      <a routerLink="/contratista/dashboard">Contratista</a>
-      <a routerLink="/admin/dashboard">Admin</a>
+      @if (hasRole('Cliente')) {
+        <a routerLink="/cliente/dashboard">Dashboard cliente</a>
+        <a routerLink="/cliente/proyectos">Mis proyectos</a>
+      }
+
+      @if (hasRole('Contratista')) {
+        <a routerLink="/contratista/dashboard">Dashboard contratista</a>
+      }
+
+      @if (hasRole('Administrador')) {
+        <a routerLink="/admin/dashboard">Dashboard admin</a>
+      }
     </nav>
 
     <button class="logout-button" type="button" (click)="logout()">

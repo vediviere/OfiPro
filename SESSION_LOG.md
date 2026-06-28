@@ -4591,3 +4591,317 @@ El siguiente paso lógico es empezar a conectar pantallas funcionales del client
 * Consumo de `POST /api/projects`.
 
 # =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-28
+
+## Objetivo
+
+Implementar, probar y cerrar Bloque 19 - Frontend: flujo cliente mínimo.
+
+# =====================================
+
+## Contexto
+
+Después de completar Bloque 18 - Web responsiva mínima, OfiPro ya tenía:
+
+* Login real funcionando.
+* JWT interceptor funcionando.
+* Guards de autenticación y rol.
+* Logout funcionando.
+* Layout público.
+* Layout interno autenticado.
+* Dashboards mínimos por rol.
+* Consumo del endpoint protegido `/api/dashboard/me`.
+
+El siguiente paso natural era conectar un flujo real del cliente, comenzando por proyectos:
+
+* Mis proyectos.
+* Crear proyecto.
+* Consultar proyectos propios.
+* Ver detalle básico de proyecto.
+
+# =====================================
+
+## Bloque 19.1 - Flujo cliente de proyectos
+
+Completado:
+
+* Se creó modelo Angular para Project.
+* Se creó modelo Angular para ProjectRequirement.
+* Se creó modelo Angular para CreateProjectRequest.
+* Se creó ProjectService.
+* Se creó pantalla Mis proyectos.
+* Se creó pantalla Crear proyecto.
+* Se creó pantalla Detalle básico de proyecto.
+* Se registraron rutas protegidas para:
+
+  * `/cliente/proyectos`
+  * `/cliente/proyectos/nuevo`
+  * `/cliente/proyectos/:id`
+* Se agregó navegación hacia Mis proyectos en el layout interno.
+* Se conectó GET /api/projects/my-projects.
+* Se conectó GET /api/projects/{id}.
+* Se conectó POST /api/projects.
+* Se ajustó ProjectService para consumir respuesta paginada.
+* Se corrigió creación de proyectos enviando string vacío en lugar de null para campos opcionales de texto.
+
+Resultado:
+
+* El cliente puede consultar sus proyectos desde Angular.
+* El cliente puede crear un proyecto desde Angular.
+* El cliente puede ver el detalle básico de un proyecto.
+* La creación redirige correctamente al detalle del proyecto creado.
+
+# =====================================
+
+## Bloque 19.2 - Catálogos para creación de proyecto
+
+Completado backend:
+
+* Se creó carpeta DTOs/Catalog.
+* Se creó CategoryOptionDto.
+* Se creó SubcategoryOptionDto.
+* Se creó ICatalogRepository.
+* Se creó ICatalogService.
+* Se implementó CatalogRepository.
+* Se implementó CatalogService.
+* Se creó CatalogController.
+* Se registraron ICatalogRepository e ICatalogService en Program.cs.
+
+Endpoints agregados:
+
+* GET /api/catalog/categories
+* GET /api/catalog/categories/{categoryId}/subcategories
+
+Completado frontend:
+
+* Se creó catalog.models.ts.
+* Se creó CatalogService en Angular.
+* Se conectó carga de categorías desde la API.
+* Se conectó carga de subcategorías por categoría seleccionada.
+* Se reemplazó captura manual de CategoryId y SubcategoryId por selects reales.
+* Se mantuvo el formulario de creación conectado a POST /api/projects.
+
+Resultado:
+
+* El cliente ya no necesita pegar GUIDs manualmente.
+* La creación de proyectos usa categorías y subcategorías reales de la base de datos.
+* El flujo queda más presentable y usable para una web responsiva mínima.
+
+# =====================================
+
+## Bloque 19.3 - Menú interno por rol
+
+Completado:
+
+* Se ajustó AppLayout para consultar roles desde AuthService.
+* Se agregó función hasRole en el layout interno.
+* Se modificó el menú autenticado para mostrar opciones según rol.
+
+Reglas visuales:
+
+* Cliente ve:
+
+  * Dashboard cliente.
+  * Mis proyectos.
+* Contratista ve:
+
+  * Dashboard contratista.
+* Administrador ve:
+
+  * Dashboard admin.
+
+Resultado:
+
+* El menú ya no muestra accesos que no corresponden al rol del usuario.
+* La navegación interna queda más limpia y menos confusa.
+* Los guards siguen protegiendo rutas, pero ahora la UI también acompaña correctamente.
+
+# =====================================
+
+## Problemas detectados y corregidos
+
+### Ruta de proyectos no accesible
+
+Síntoma:
+
+* No se podía entrar correctamente a `/cliente/proyectos`.
+
+Causa:
+
+* La ruta no estaba registrada en `app.routes.ts`.
+
+Solución:
+
+* Se agregaron rutas del flujo cliente de proyectos.
+
+Resultado:
+
+* El cliente puede entrar a Mis proyectos desde URL directa y desde navegación.
+
+### Proyectos no visibles en frontend
+
+Síntoma:
+
+* Swagger sí respondía correctamente en `GET /api/projects/my-projects`, pero Angular no mostraba proyectos.
+
+Causa:
+
+* El frontend esperaba un arreglo directo, pero el backend devuelve respuesta paginada.
+
+Solución:
+
+* Se ajustó ProjectService para extraer `items` de la respuesta paginada.
+
+Resultado:
+
+* La lista de proyectos se muestra correctamente.
+
+### Error 400 al crear proyecto desde Angular
+
+Síntoma:
+
+* POST /api/projects devolvía 400 Bad Request.
+
+Causa:
+
+* Angular enviaba null en campos string.
+
+Solución:
+
+* Enviar string vacío en campos opcionales de texto.
+
+Resultado:
+
+* Crear proyecto desde Angular funciona correctamente.
+
+### Menú interno mostraba opciones de todos los roles
+
+Síntoma:
+
+* El usuario veía accesos de Cliente, Contratista y Admin al mismo tiempo.
+
+Solución:
+
+* Filtrar menú por rol usando AuthService.
+
+Resultado:
+
+* El menú muestra solo opciones correspondientes al rol del usuario.
+
+# =====================================
+
+## Pruebas realizadas
+
+Backend:
+
+* GET /api/catalog/categories → correcto.
+* GET /api/catalog/categories/{categoryId}/subcategories → correcto.
+
+Frontend:
+
+* Login como cliente → correcto.
+* Entrada a `/cliente/proyectos` → correcto.
+* Consulta de proyectos del cliente → correcto.
+* Visualización de proyectos en lista → correcto.
+* Entrada a crear proyecto → correcto.
+* Carga de categorías → correcto.
+* Carga de subcategorías por categoría → correcto.
+* Creación de proyecto desde Angular → correcto.
+* Redirección al detalle después de crear proyecto → correcto.
+* Consulta de detalle básico del proyecto → correcto.
+* Regreso a Mis proyectos → correcto.
+* Menú interno como Cliente → correcto.
+* Menú interno como Contratista → correcto.
+* Menú interno como Administrador → correcto.
+* `ng build` → correcto.
+* `dotnet test` → correcto.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+Bloque 2 - Auth → Completo
+Bloque 3 - Usuarios → Completo
+Bloque 4 - Proyectos → Completo
+Bloque 5 - Propuestas → Completo
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+Bloque 6 - Contrataciones → Completo
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+Bloque 6.10 - Orden de interfaces Application → Completo
+Bloque 6.11 - Correcciones de diagnóstico pre-Bloque 7 → Completo
+Bloque 7 - Evidencias V1 → Completo
+Bloque 7.1 - Corrección de diagnóstico de Evidencias → Completo
+Bloque 7.2 - Notificaciones internas base → Completo
+Bloque 8 - Calificaciones y reputación V1 → Completo
+Bloque 8.1 - Endurecimiento de Ratings y reputación → Completo
+Bloque 8.2 - Correcciones de diagnóstico de Ratings y reputación → Completo
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+Bloque 10.1 - Corrección de diagnóstico de ProfessionalProfile y búsqueda de contratistas → Completo
+Bloque 11 - Expiración automática de proyectos → Completo
+Bloque 12 - Paginación y ordenamiento básico en listados críticos → Completo
+Bloque 13 - Pruebas automatizadas mínimas de API → Completo
+Bloque 14 - Invitaciones directas a contratistas → Completo
+Bloque 15 - Refresh tokens para experiencia móvil → Completo
+Bloque 15.3 - Correcciones diagnóstico post-refresh tokens → Completo
+Bloque 16 - Seguridad V1 / Hardening básico → Completo
+Bloque 17 - Revisión de preparación para frontend → Completo
+Bloque 18 - Web responsiva mínima → Completo
+Bloque 19 - Frontend: flujo cliente mínimo → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: Muy bueno.
+
+El bloque avanzó de forma sólida porque ya existía una base frontend funcional del Bloque 18. Se pasó de una web con login y dashboards mínimos a un flujo real de cliente conectado a backend:
+
+* Consulta de proyectos propios.
+* Creación de proyecto.
+* Detalle básico.
+* Catálogos reales.
+* Navegación por rol.
+
+También se corrigieron problemas normales de integración frontend-backend:
+
+* Rutas faltantes.
+* Respuesta paginada.
+* Payload inválido por null.
+* Menú no filtrado por rol.
+
+La velocidad fue buena porque los problemas aparecieron durante pruebas reales y se resolvieron sin cambiar la arquitectura.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Actualizar documentación.
+* Revisar git status.
+* Hacer commit del Bloque 19.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 20 - Frontend: flujo contratista mínimo.
+
+Razón:
+Después de completar el flujo mínimo del cliente, el siguiente paso lógico es permitir que el contratista use la web para:
+
+* Ver proyectos disponibles.
+* Consultar detalle de proyecto disponible.
+* Enviar propuesta.
+* Consultar mis propuestas.
+
+Esto conectaría el otro lado esencial del marketplace y permitiría validar el ciclo:
+Cliente publica proyecto → Contratista ve proyecto → Contratista envía propuesta.
+
+# =====================================

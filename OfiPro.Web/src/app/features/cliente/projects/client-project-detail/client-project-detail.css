@@ -1,0 +1,108 @@
+.detail-page {
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 22px;
+  color: #111827;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 26px;
+}
+
+.detail-header h1 {
+  margin: 0 0 10px;
+  font-size: 32px;
+}
+
+.detail-header p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.status-badge {
+  background: #e0f2fe;
+  color: #075985;
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.detail-card,
+.requirement-card,
+.info-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px;
+  background: #f9fafb;
+}
+
+.detail-card-wide {
+  grid-column: 1 / -1;
+}
+
+.detail-card h2,
+.requirements-section h2 {
+  margin-top: 0;
+}
+
+.requirements-section {
+  margin-top: 28px;
+}
+
+.requirement-list {
+  display: grid;
+  gap: 14px;
+}
+
+.requirement-card h3 {
+  margin: 0 0 8px;
+}
+
+.requirement-card p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.error-message {
+  padding: 12px 14px;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .detail-page {
+    padding: 22px;
+  }
+
+  .detail-header {
+    flex-direction: column;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

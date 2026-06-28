@@ -2262,6 +2262,46 @@ El login puede mandar correctamente al dashboard correspondiente y las rutas int
 
 --------
 
+## D088 El flujo cliente mínimo debe iniciar por proyectos propios.
+
+Resultado: El Bloque 19 conecta en Angular el primer flujo real del cliente:
+
+* Mis proyectos.
+* Crear proyecto.
+* Consultar proyectos del cliente autenticado.
+* Detalle básico de proyecto.
+
+Razón: Después de completar login, JWT, guards, dashboards mínimos y logout, el siguiente paso natural era permitir que el cliente hiciera una acción real dentro de la plataforma, no solo entrar a un dashboard.
+
+Impacto: OfiPro deja de tener una web únicamente de acceso y navegación básica. El cliente ya puede consultar y crear proyectos desde Angular usando el backend real.
+
+## D089 La creación de proyectos desde frontend debe usar catálogos reales.
+
+Resultado: Se agregan endpoints protegidos para consultar categorías y subcategorías:
+
+* GET /api/catalog/categories
+* GET /api/catalog/categories/{categoryId}/subcategories
+
+En Angular, el formulario de creación de proyecto deja de depender de capturar manualmente CategoryId y SubcategoryId. Ahora utiliza selects cargados desde la API.
+
+Razón: Pedir GUIDs manualmente solo sirve para pruebas técnicas, pero no representa una experiencia usable para el cliente.
+
+Impacto: El flujo de creación de proyectos queda más cercano al comportamiento real esperado para una web responsiva y futura app móvil.
+
+## D090 El menú interno debe mostrar opciones según el rol del usuario.
+
+Resultado: El layout interno de Angular muestra navegación según rol:
+
+* Cliente: Dashboard cliente y Mis proyectos.
+* Contratista: Dashboard contratista.
+* Administrador: Dashboard admin.
+
+Razón: Aunque los guards ya bloqueaban rutas no permitidas, visualmente no era correcto que un cliente viera accesos de contratista o administrador.
+
+Impacto: La experiencia interna queda más limpia, menos confusa y más alineada con los modos de operación definidos para OfiPro.
+
+---
+
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -3190,6 +3230,51 @@ Resultado:
 
 ---
 
+## P046 La ruta /cliente/proyectos no estaba registrada en Angular.
+
+Síntoma: Al intentar entrar manualmente a /cliente/proyectos, Angular no mostraba la pantalla esperada.
+
+Riesgo: Aunque el backend ya tuviera el endpoint de proyectos, el cliente no podía llegar al flujo desde la web.
+
+Solución: Registrar las rutas:
+
+* /cliente/proyectos
+* /cliente/proyectos/nuevo
+* /cliente/proyectos/:id
+
+Resultado: El cliente puede entrar a Mis proyectos desde URL directa y desde navegación interna.
+
+## P047 El frontend no mostraba proyectos porque el endpoint devuelve respuesta paginada.
+
+Síntoma: Swagger sí mostraba respuesta correcta en GET /api/projects/my-projects, pero Angular no pintaba proyectos inicialmente.
+
+Causa: El servicio Angular esperaba un arreglo directo, pero el endpoint devuelve una estructura paginada.
+
+Solución: Ajustar ProjectService para soportar respuesta paginada y extraer Items.
+
+Resultado: La pantalla Mis proyectos muestra correctamente los proyectos del cliente autenticado.
+
+## P048 Crear proyecto desde Angular fallaba con 400 Bad Request.
+
+Síntoma: El formulario de creación enviaba el POST /api/projects, pero el backend respondía 400.
+
+Causa: El frontend enviaba null en campos de texto como Zone y AvailableMaterials, mientras el DTO del backend esperaba string.
+
+Solución: Enviar string vacío cuando esos campos no tienen valor.
+
+Resultado: El cliente puede crear proyectos correctamente desde Angular.
+
+## P049 El menú interno mostraba opciones de roles no correspondientes.
+
+Síntoma: El layout autenticado mostraba accesos de Cliente, Contratista y Administrador al mismo tiempo.
+
+Riesgo: Aunque los guards bloquearan el acceso, la navegación resultaba confusa para usuarios de un solo rol.
+
+Solución: Usar AuthService para consultar roles y mostrar links según el rol disponible.
+
+Resultado: El menú interno queda filtrado por rol y la experiencia visual es más limpia.
+
+---
 
 
 # 16. RIESGOS
@@ -4497,6 +4582,74 @@ Impacto:
 
 El proyecto dejó de tener únicamente backend probado por Swagger y ahora cuenta con una base frontend funcional para validar flujos reales de usuario desde navegador.
 
+## HITO 19 Frontend: flujo cliente mínimo completado.
+
+Incluye:
+
+* Creación de modelos Angular para proyectos.
+* Creación de ProjectService.
+* Pantalla Mis proyectos.
+* Pantalla Crear proyecto.
+* Pantalla Detalle básico de proyecto.
+* Registro de rutas protegidas para flujo cliente.
+* Conexión con GET /api/projects/my-projects.
+* Conexión con GET /api/projects/{id}.
+* Conexión con POST /api/projects.
+* Adaptación del frontend para consumir respuestas paginadas.
+* Corrección del envío de campos string vacíos en lugar de null.
+* Creación de endpoints de catálogo en backend.
+* Creación de DTOs de catálogo.
+* Creación de ICatalogRepository.
+* Creación de ICatalogService.
+* Implementación de CatalogRepository.
+* Implementación de CatalogService.
+* Creación de CatalogController.
+* Registro de dependencias de catálogos en Program.cs.
+* Creación de CatalogService en Angular.
+* Creación de modelos Angular de catálogo.
+* Reemplazo de captura manual de CategoryId y SubcategoryId por selects reales.
+* Carga de subcategorías dependiente de la categoría seleccionada.
+* Ajuste del menú interno para mostrar navegación según rol.
+
+Endpoints agregados:
+
+* GET /api/catalog/categories
+* GET /api/catalog/categories/{categoryId}/subcategories
+
+Rutas frontend agregadas:
+
+* /cliente/proyectos
+* /cliente/proyectos/nuevo
+* /cliente/proyectos/:id
+
+Reglas implementadas:
+
+* Solo usuarios con rol Cliente pueden entrar al flujo de proyectos del cliente.
+* El JWT se envía automáticamente al consumir endpoints protegidos.
+* El formulario de creación de proyecto usa categorías y subcategorías reales.
+* El menú interno muestra opciones según el rol del usuario.
+* El cliente puede crear proyectos desde la web sin capturar GUIDs manualmente.
+
+Pruebas realizadas:
+
+* Login como cliente → correcto.
+* Entrada a /cliente/proyectos → correcto.
+* Consulta de proyectos del cliente → correcto.
+* Visualización de lista de proyectos → correcto.
+* Consulta de detalle de proyecto → correcto.
+* Creación de proyecto desde Angular → correcto.
+* Redirección al detalle después de crear proyecto → correcto.
+* Carga de categorías desde API → correcto.
+* Carga de subcategorías por categoría → correcto.
+* Creación de proyecto usando selects de categoría/subcategoría → correcto.
+* Menú interno filtrado por rol Cliente → correcto.
+* Menú interno filtrado por rol Contratista → correcto.
+* Menú interno filtrado por rol Administrador → correcto.
+* ng build → correcto.
+
+Resultado: Bloque 19 completado correctamente. El frontend ya permite que un cliente consulte sus proyectos, cree un proyecto nuevo usando catálogos reales y vea el detalle básico del proyecto.
+
+Impacto: OfiPro ya cuenta con el primer flujo funcional real de cliente dentro de la web responsiva. Esto permite validar comportamiento de usuario desde navegador y prepara los siguientes flujos frontend del marketplace.
 
 ---
 
@@ -4585,7 +4738,6 @@ Notas estratégicas vigentes:
 La carpeta `OfiPro.Web` contiene la web responsiva mínima inicial del MVP.
 
 Estructura funcional actual:
-
 * `core/models`
 * `core/services`
 * `core/guards`
@@ -4595,25 +4747,27 @@ Estructura funcional actual:
 * `features/cliente`
 * `features/contratista`
 * `features/admin`
-* `layout/public-layout`
-* `layout/app-layout`
+* `layout/public*layout`
+* `layout/app*layout`
 * `shared/components`
 
 Rutas actuales:
-
 * `/`
 * `/login`
 * `/cliente/dashboard`
+* `/cliente/proyectos`
+* `/cliente/proyectos/nuevo`
+* `/cliente/proyectos/:id`
 * `/contratista/dashboard`
 * `/admin/dashboard`
 
 Servicios frontend creados:
-
 * `AuthService`
 * `DashboardService`
+* `ProjectService`
+* `CatalogService`
 
 Seguridad frontend implementada:
-
 * Interceptor JWT.
 * Guard de autenticación.
 * Guard de rol.
@@ -4621,9 +4775,9 @@ Seguridad frontend implementada:
 * Logout mínimo.
 * Lectura de roles desde JWT.
 * Soporte para usuarios multirrol.
+* Menú interno filtrado por rol.
 
 Flujos probados:
-
 * Login cliente.
 * Login contratista.
 * Login administrador.
@@ -4632,48 +4786,18 @@ Flujos probados:
 * Bloqueo de rutas por rol incorrecto.
 * Logout.
 * Consumo de endpoint protegido `/api/dashboard/me`.
+* Consulta de proyectos del cliente.
+* Creación de proyecto desde Angular.
+* Consulta de detalle básico de proyecto.
+* Carga de categorías desde API.
+* Carga de subcategorías por categoría.
+* Creación de proyecto usando selects reales.
+* Menú interno por rol.
 
 Validaciones finales:
-
 * `dotnet test` ejecutado correctamente.
 * `ng build` ejecutado correctamente.
 
 Estado:
-
-Bloque 18 - Web responsiva mínima completado correctamente.
-
-La carpeta `OfiPro.Web` contiene la web responsiva mínima del MVP.
-
-Estructura funcional inicial:
-
-- `core/models`
-- `core/services`
-- `core/guards`
-- `core/interceptors`
-- `features/auth`
-- `features/public`
-- `features/cliente`
-- `features/contratista`
-- `features/admin`
-- `layout/public-layout`
-- `layout/app-layout`
-- `shared/components`
-
-Rutas actuales:
-
-- `/`
-- `/login`
-- `/cliente/dashboard`
-- `/contratista/dashboard`
-- `/admin/dashboard`
-
-Flujos probados:
-
-- Login cliente.
-- Login contratista.
-- Login administrador.
-- Redirección por rol.
-- Bloqueo de rutas sin sesión.
-- Bloqueo de rutas por rol incorrecto.
-- Logout.
-- Consumo de endpoint protegido `/api/dashboard/me`.
+* Bloque 18 * Web responsiva mínima completado correctamente.
+* Bloque 19 * Frontend: flujo cliente mínimo completado correctamente.

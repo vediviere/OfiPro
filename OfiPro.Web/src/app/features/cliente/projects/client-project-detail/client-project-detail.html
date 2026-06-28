@@ -1,0 +1,62 @@
+<section class="detail-page">
+  <a routerLink="/cliente/proyectos" class="back-link">← Volver a mis proyectos</a>
+
+  @if (isLoading) {
+    <div class="info-card">Cargando detalle del proyecto...</div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
+
+  @if (project) {
+    <header class="detail-header">
+      <div>
+        <h1>{{ project.title }}</h1>
+        <p>{{ project.description }}</p>
+      </div>
+
+      <span class="status-badge">{{ getStatusName(project.status) }}</span>
+    </header>
+
+    <div class="detail-grid">
+      <article class="detail-card">
+        <h2>Ubicación</h2>
+        <p><strong>Estado:</strong> {{ project.state }}</p>
+        <p><strong>Ciudad:</strong> {{ project.city }}</p>
+        <p><strong>Zona:</strong> {{ project.zone || 'No especificada' }}</p>
+      </article>
+
+      <article class="detail-card">
+        <h2>Información general</h2>
+        <p><strong>Urgencia:</strong> {{ getUrgencyName(project.urgency) }}</p>
+        <p><strong>Publicado:</strong> {{ project.createdAt | date: 'dd/MM/yyyy' }}</p>
+        <p><strong>Cliente:</strong> {{ project.createdByUserName }}</p>
+      </article>
+
+      <article class="detail-card detail-card-wide">
+        <h2>Materiales disponibles</h2>
+        <p>{{ project.availableMaterials || 'No se especificaron materiales disponibles.' }}</p>
+      </article>
+    </div>
+
+    <section class="requirements-section">
+      <h2>Requerimientos del proyecto</h2>
+
+      @if (project.requirements.length === 0) {
+        <p>No hay requerimientos registrados.</p>
+      }
+
+      @if (project.requirements.length > 0) {
+        <div class="requirement-list">
+          @for (requirement of project.requirements; track requirement.projectRequirementId) {
+            <article class="requirement-card">
+              <h3>{{ requirement.categoryName }} / {{ requirement.subcategoryName }}</h3>
+              <p>{{ requirement.description }}</p>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  }
+</section>

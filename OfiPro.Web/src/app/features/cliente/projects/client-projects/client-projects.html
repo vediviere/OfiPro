@@ -1,0 +1,55 @@
+<section class="projects-page">
+  <header class="page-header">
+    <div>
+      <h1>Mis proyectos</h1>
+      <p>Consulta los proyectos que has publicado como cliente.</p>
+    </div>
+
+    <a routerLink="/cliente/proyectos/nuevo" class="primary-button">
+      Crear proyecto
+    </a>
+  </header>
+
+  @if (isLoading) {
+    <div class="info-card">Cargando proyectos...</div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
+
+  @if (!isLoading && !errorMessage && projects.length === 0) {
+    <div class="empty-state">
+      <h2>Aún no tienes proyectos</h2>
+      <p>Cuando publiques tu primer proyecto, aparecerá en esta sección.</p>
+      <a routerLink="/cliente/proyectos/nuevo" class="primary-button">
+        Publicar mi primer proyecto
+      </a>
+    </div>
+  }
+
+  @if (!isLoading && !errorMessage && projects.length > 0) {
+    <div class="project-grid">
+      @for (project of projects; track project.projectId) {
+        <article class="project-card">
+          <div class="project-card-header">
+            <h2>{{ project.title }}</h2>
+            <span class="status-badge">{{ getStatusName(project.status) }}</span>
+          </div>
+
+          <p>{{ project.description }}</p>
+
+          <div class="project-meta">
+            <span>{{ project.city }}, {{ project.state }}</span>
+            <span>{{ getUrgencyName(project.urgency) }}</span>
+            <span>{{ project.createdAt | date: 'dd/MM/yyyy' }}</span>
+          </div>
+
+          <a [routerLink]="['/cliente/proyectos', project.projectId]" class="secondary-button">
+            Ver detalle
+          </a>
+        </article>
+      }
+    </div>
+  }
+</section>
