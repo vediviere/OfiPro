@@ -2172,58 +2172,78 @@ Después:
 
 ---
 
-## D085 — Frontend Angular dentro del mismo repositorio
 
-Se decidió que la web responsiva mínima de OfiPro viva dentro del mismo repositorio del backend, en una carpeta separada llamada:
+## D085
+
+La web responsiva mínima vive dentro del mismo repositorio.
+
+Resultado:
+
+Se creó el proyecto frontend Angular dentro del repositorio principal de OfiPro, en la carpeta:
 
 `OfiPro.Web`
 
-Estructura general:
+Estructura general actual:
 
-- OfiPro.Api
-- OfiPro.Application
-- OfiPro.Domain
-- OfiPro.Infrastructure
-- OfiPro.Api.Tests
-- OfiPro.Web
+* OfiPro.Api
+* OfiPro.Application
+* OfiPro.Domain
+* OfiPro.Infrastructure
+* OfiPro.Api.Tests
+* OfiPro.Web
 
 Razón:
 
 En esta etapa, OfiPro sigue construyendo su MVP funcional. Mantener backend, frontend, pruebas y documentación en el mismo repositorio reduce complejidad, facilita commits por bloque y permite revisar con claridad la relación entre API y frontend.
 
-No se utilizará un repositorio separado para frontend por ahora.
+Regla:
+
+No se utilizará un repositorio separado para el frontend por ahora.
 
 ---
 
-## D087 — Angular como web responsiva mínima del MVP
+## D086
 
-Se creó el frontend con Angular para construir la web responsiva mínima de OfiPro.
+Angular será la base de la web responsiva mínima del MVP.
+
+Resultado:
+
+Se creó el frontend con Angular para construir la primera web responsiva mínima de OfiPro.
 
 Configuración inicial:
 
-- Angular CLI 20.
-- CSS normal.
-- Routing activado.
-- Sin SSR.
-- Sin PWA.
-- Sin configuración adicional de herramientas de IA.
-- Proyecto ubicado en `OfiPro.Web`.
+* Angular CLI 20.
+* CSS normal.
+* Routing activado.
+* Sin SSR.
+* Sin PWA.
+* Proyecto ubicado en `OfiPro.Web`.
+
+Razón:
+
+Angular permite construir una web responsiva estructurada, modular y preparada para consumir la API existente.
 
 Regla:
 
-La web responsiva mínima no sustituye la futura app móvil real. Su objetivo es validar flujos principales del producto, facilitar pruebas funcionales y preparar la transición hacia una experiencia mobile-first más completa.
+La web responsiva mínima no sustituye la futura app móvil real.
+
+La web servirá para validar flujos principales, facilitar pruebas funcionales y preparar la transición hacia una experiencia mobile-first más completa.
 
 ---
 
-## D086 — JWT interceptor y guards en frontend
+## D087
+
+El frontend debe proteger rutas internas mediante JWT, guards y roles.
+
+Resultado:
 
 Se implementó en Angular un flujo mínimo de seguridad frontend:
 
-- `AuthService` para login, logout, lectura de token y lectura de roles.
-- `authInterceptor` para enviar automáticamente el token JWT en las peticiones HTTP.
-- `authGuard` para bloquear rutas internas sin sesión válida.
-- `roleGuard` para controlar acceso por rol.
-- Redirección automática por rol después del login.
+* `AuthService` para login, logout, lectura de token y lectura de roles.
+* `authInterceptor` para enviar automáticamente el JWT en peticiones HTTP.
+* `authGuard` para bloquear rutas internas sin sesión válida.
+* `roleGuard` para controlar acceso por rol.
+* Redirección automática por rol después del login.
 
 Prioridad de rol en frontend:
 
@@ -2231,9 +2251,17 @@ Prioridad de rol en frontend:
 2. Contratista.
 3. Cliente.
 
-Esta prioridad es necesaria porque un usuario puede tener más de un rol asignado.
+Razón:
 
----
+OfiPro permite usuarios con más de un rol. Por eso el frontend no debe asumir que un usuario pertenece a un solo modo de operación.
+
+Impacto:
+
+El login puede mandar correctamente al dashboard correspondiente y las rutas internas quedan protegidas contra accesos sin sesión o con rol incorrecto.
+
+
+--------
+
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -3126,26 +3154,39 @@ Las respuestas quedan más legibles y cómodas para Angular/web.
 
 ---
 
-## P045 — JwtService tomaba un solo rol con FirstOrDefault
+## P045
 
-Durante las pruebas del Bloque 18 se detectó un problema en el backend:
+JwtService tomaba un solo rol con FirstOrDefault.
+
+Síntoma:
+
+Durante las pruebas del Bloque 18 se detectó que `admin@ofipro.com` era redirigido al dashboard de contratista en lugar del dashboard de administrador.
+
+Causa:
 
 `JwtService` generaba el JWT tomando únicamente el primer rol del usuario mediante `FirstOrDefault()`.
 
-Problema:
+Riesgo:
 
-Si un usuario tenía varios roles en `UserRoles`, el token podía generarse con un rol incorrecto. Esto provocó que `admin@ofipro.com`, al tener roles múltiples, fuera redirigido al dashboard de contratista en lugar del dashboard de administrador.
+Si un usuario tenía varios roles en `UserRoles`, el token podía generarse con un rol incorrecto o incompleto.
 
-Corrección:
+Esto afectaba directamente:
+
+* Redirección por rol en Angular.
+* Guards de rol.
+* Experiencia de usuarios multirol.
+* Pruebas del usuario administrador.
+
+Solución:
 
 Se ajustó `JwtService` para emitir múltiples claims de rol dentro del JWT, tomando todos los roles registrados en `UserRoles`.
 
 Resultado:
 
-- El token de un usuario multirrol ahora contiene todos sus roles.
-- Angular puede detectar correctamente los roles disponibles.
-- El frontend prioriza `Administrador` sobre `Contratista` y `Cliente`.
-- `admin@ofipro.com` redirige correctamente a `/admin/dashboard`.
+* El token de un usuario multirrol contiene todos sus roles.
+* Angular puede detectar correctamente los roles disponibles.
+* El frontend prioriza `Administrador` sobre `Contratista` y `Cliente`.
+* `admin@ofipro.com` redirige correctamente a `/admin/dashboard`.
 
 ---
 
@@ -4379,42 +4420,83 @@ OfiPro queda listo para iniciar la etapa de web responsiva mínima con una API m
 
 ---
 
-## HITO — Bloque 18 completado: Web responsiva mínima
+## HITO 18
 
-Se completó el Bloque 18 - Web responsiva mínima.
+Web responsiva mínima completada.
+
+Incluye:
+
+* Creación del proyecto Angular en `OfiPro.Web`.
+* Limpieza de instalación accidental de Angular fuera del repositorio.
+* Corrección de configuración local de Angular y VS Code.
+* Configuración de rutas base.
+* Layout público.
+* Layout interno autenticado.
+* Página pública inicial.
+* Login conectado al backend real.
+* Dashboards mínimos por rol:
+
+  * Cliente.
+  * Contratista.
+  * Administrador.
+* Configuración de environments.
+* Configuración de HttpClient.
+* Creación de modelos de autenticación.
+* Creación de `AuthService`.
+* Implementación de login real.
+* Implementación de redirección por rol.
+* Implementación de interceptor JWT.
+* Implementación de `authGuard`.
+* Implementación de `roleGuard`.
+* Implementación de logout mínimo.
+* Creación de servicio de dashboard.
+* Consumo del endpoint protegido `/api/dashboard/me`.
+* Corrección de colisión de componentes Dashboard.
+* Corrección backend de JWT para usuarios multirrol.
+* Validación de login con usuarios Cliente, Contratista y Administrador.
+* Validación de rutas protegidas.
+* Validación de rutas por rol.
+* Validación de logout.
+* Validación de consumo de endpoint protegido desde Angular.
+
+Rutas actuales:
+
+* `/`
+* `/login`
+* `/cliente/dashboard`
+* `/contratista/dashboard`
+* `/admin/dashboard`
+
+Reglas implementadas:
+
+* Un usuario sin sesión no puede entrar a dashboards.
+* Un usuario con sesión expirada vuelve a login.
+* Un usuario con rol incorrecto no puede permanecer en rutas no permitidas.
+* El administrador tiene prioridad cuando el usuario posee múltiples roles.
+* El token JWT se envía automáticamente a endpoints protegidos.
+* El logout limpia la sesión local y redirige a login.
+
+Pruebas realizadas:
+
+* Login cliente → redirección a `/cliente/dashboard`.
+* Login contratista → redirección a `/contratista/dashboard`.
+* Login administrador multirol → redirección a `/admin/dashboard`.
+* Acceso manual a ruta protegida sin sesión → redirección a `/login`.
+* Acceso manual a ruta no correspondiente al rol → redirección al dashboard permitido.
+* Logout desde layout interno → redirección a `/login`.
+* Intento de volver al dashboard después de logout → redirección a `/login`.
+* Consumo de `GET /api/dashboard/me` desde Angular → 200 OK.
+* `dotnet test` → correcto.
+* `ng build` → correcto.
 
 Resultado:
 
-OfiPro ya cuenta con una primera aplicación frontend en Angular dentro del mismo repositorio, ubicada en la carpeta `OfiPro.Web`.
+OfiPro ya cuenta con una primera web responsiva mínima conectada al backend real.
 
-La web responsiva mínima incluye:
+Impacto:
 
-- Estructura base Angular.
-- Layout público.
-- Layout interno autenticado.
-- Página pública inicial.
-- Login conectado al backend real.
-- Dashboards mínimos por rol:
-  - Cliente.
-  - Contratista.
-  - Administrador.
-- Configuración de environments.
-- HttpClient configurado.
-- AuthService.
-- Interceptor JWT.
-- Guards de autenticación.
-- Guards de rol.
-- Logout mínimo.
-- Consumo de endpoint protegido desde frontend.
+El proyecto dejó de tener únicamente backend probado por Swagger y ahora cuenta con una base frontend funcional para validar flujos reales de usuario desde navegador.
 
-El frontend ya consume correctamente la API local en:
-
-`https://localhost:7081`
-
-Validaciones finales:
-
-- `dotnet test` ejecutado correctamente.
-- `ng build` ejecutado correctamente.
 
 ---
 
@@ -4450,32 +4532,25 @@ Módulos completados:
 * Bloque 15 - Refresh tokens para experiencia móvil
 * Bloque 16 - Seguridad V1 / Hardening básico
 * Bloque 17 - Revisión de preparación para frontend
+* Bloque 18 - Web responsiva mínima
 
 Próximo bloque recomendado:
 
-* Bloque 18 - Web responsiva mínima
+* Bloque 19 - Frontend: flujo cliente mínimo
 
 Razón:
 
-El backend ya cuenta con autenticación, refresh tokens, roles, proyectos, propuestas, contratos, evidencias, notificaciones, ratings, reputación, perfiles profesionales, búsqueda de contratistas, invitaciones, paginación, seguridad base, pruebas automatizadas y ajustes de preparación para frontend.
+La web responsiva mínima ya tiene login, sesión, layouts, dashboards, guards, logout y consumo de endpoint protegido.
 
-El siguiente paso natural es construir una primera web responsiva que consuma la API y permita validar el producto con flujo real.
+El siguiente paso natural es conectar flujos reales del cliente, iniciando con sus proyectos.
 
 Pantallas mínimas sugeridas para Bloque 18:
 
-* Login.
-* Registro.
-* Dashboard base por modo.
-* Buscar contratistas.
-* Perfil público de contratista.
 * Mis proyectos.
 * Crear proyecto.
-* Proyectos disponibles.
-* Mis propuestas.
-* Invitaciones enviadas/recibidas.
-* Mis contratos.
-* Notificaciones.
-* Mi perfil profesional.
+* Detalle básico de proyecto.
+* Listado de proyectos del cliente consumido desde API.
+* Formulario mínimo conectado al backend.
 
 Opciones posteriores:
 
@@ -4506,6 +4581,66 @@ Notas estratégicas vigentes:
 ----
 
 ## Estado actual del frontend
+
+La carpeta `OfiPro.Web` contiene la web responsiva mínima inicial del MVP.
+
+Estructura funcional actual:
+
+* `core/models`
+* `core/services`
+* `core/guards`
+* `core/interceptors`
+* `features/auth`
+* `features/public`
+* `features/cliente`
+* `features/contratista`
+* `features/admin`
+* `layout/public-layout`
+* `layout/app-layout`
+* `shared/components`
+
+Rutas actuales:
+
+* `/`
+* `/login`
+* `/cliente/dashboard`
+* `/contratista/dashboard`
+* `/admin/dashboard`
+
+Servicios frontend creados:
+
+* `AuthService`
+* `DashboardService`
+
+Seguridad frontend implementada:
+
+* Interceptor JWT.
+* Guard de autenticación.
+* Guard de rol.
+* Redirección por rol.
+* Logout mínimo.
+* Lectura de roles desde JWT.
+* Soporte para usuarios multirrol.
+
+Flujos probados:
+
+* Login cliente.
+* Login contratista.
+* Login administrador.
+* Redirección por rol.
+* Bloqueo de rutas sin sesión.
+* Bloqueo de rutas por rol incorrecto.
+* Logout.
+* Consumo de endpoint protegido `/api/dashboard/me`.
+
+Validaciones finales:
+
+* `dotnet test` ejecutado correctamente.
+* `ng build` ejecutado correctamente.
+
+Estado:
+
+Bloque 18 - Web responsiva mínima completado correctamente.
 
 La carpeta `OfiPro.Web` contiene la web responsiva mínima del MVP.
 
