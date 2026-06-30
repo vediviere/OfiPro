@@ -10,6 +10,8 @@
 
       @if (hasRole('Contratista')) {
         <a routerLink="/contratista/dashboard">Dashboard contratista</a>
+        <a routerLink="/contratista/proyectos-disponibles">Proyectos disponibles</a>
+        <a routerLink="/contratista/propuestas">Mis propuestas</a>
       }
 
       @if (hasRole('Administrador')) {
@@ -17,9 +19,7 @@
       }
     </nav>
 
-    <button class="logout-button" type="button" (click)="logout()">
-      Cerrar sesión
-    </button>
+    <button class="logout-button" type="button" (click)="logout()">Cerrar sesión</button>
   </aside>
 
   <section class="app-content">

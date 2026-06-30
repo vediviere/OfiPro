@@ -1,0 +1,113 @@
+.projects-page {
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+}
+
+.page-header p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 17px;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.project-card,
+.info-card,
+.empty-state {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px;
+  background: #f9fafb;
+}
+
+.project-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.project-card h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.project-card p {
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.urgency-badge {
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.project-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 16px 0;
+  color: #374151;
+  font-size: 14px;
+}
+
+.primary-button,
+.secondary-button {
+  display: inline-block;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 700;
+  padding: 10px 14px;
+}
+
+.primary-button {
+  background: #111827;
+  color: #ffffff;
+}
+
+.secondary-button {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.error-message {
+  padding: 12px 14px;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .projects-page {
+    padding: 22px;
+  }
+
+  .page-header {
+    flex-direction: column;
+  }
+}

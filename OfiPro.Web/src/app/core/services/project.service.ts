@@ -3,11 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import {
-  CreateProjectRequest,
-  PaginatedResponse,
-  Project,
-} from '../models/project.models';
+import { CreateProjectRequest, PaginatedResponse, Project } from '../models/project.models';
 
 @Injectable({
   providedIn: 'root',
@@ -18,17 +14,27 @@ export class ProjectService {
   constructor(private readonly http: HttpClient) {}
 
   getMyProjects(): Observable<Project[]> {
-    return this.http
-      .get<Project[] | PaginatedResponse<Project>>(`${this.apiUrl}/my-projects`)
-      .pipe(
-        map((response) => {
-          if (Array.isArray(response)) {
-            return response;
-          }
+    return this.http.get<Project[] | PaginatedResponse<Project>>(`${this.apiUrl}/my-projects`).pipe(
+      map((response) => {
+        if (Array.isArray(response)) {
+          return response;
+        }
 
-          return response.items ?? response.data ?? response.records ?? [];
-        })
-      );
+        return response.items ?? response.data ?? response.records ?? [];
+      }),
+    );
+  }
+
+  getAvailableProjects(): Observable<Project[]> {
+    return this.http.get<Project[] | PaginatedResponse<Project>>(this.apiUrl).pipe(
+      map((response) => {
+        const projects = Array.isArray(response)
+          ? response
+          : (response.items ?? response.data ?? response.records ?? []);
+
+        return projects.filter((project) => project.status === 1);
+      }),
+    );
   }
 
   getById(projectId: string): Observable<Project> {

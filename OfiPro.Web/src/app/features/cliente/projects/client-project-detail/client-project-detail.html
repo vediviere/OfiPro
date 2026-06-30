@@ -9,6 +9,10 @@
     <div class="error-message">{{ errorMessage }}</div>
   }
 
+  @if (successMessage) {
+    <div class="success-message">{{ successMessage }}</div>
+  }
+
   @if (project) {
     <header class="detail-header">
       <div>
@@ -41,7 +45,11 @@
     </div>
 
     <section class="requirements-section">
-      <h2>Requerimientos del proyecto</h2>
+      <h2>Requerimientos y propuestas recibidas</h2>
+
+      @if (isLoadingProposals) {
+        <div class="info-card">Cargando propuestas recibidas...</div>
+      }
 
       @if (project.requirements.length === 0) {
         <p>No hay requerimientos registrados.</p>
@@ -53,6 +61,106 @@
             <article class="requirement-card">
               <h3>{{ requirement.categoryName }} / {{ requirement.subcategoryName }}</h3>
               <p>{{ requirement.description }}</p>
+
+              <div class="proposals-block">
+                <h4>Propuestas recibidas</h4>
+
+                @if (getRequirementProposals(requirement.projectRequirementId).length === 0) {
+                  <p class="muted-text">Aún no hay propuestas para este requerimiento.</p>
+                }
+
+                @if (getRequirementProposals(requirement.projectRequirementId).length > 0) {
+                  <div class="proposal-list">
+                    @for (
+                      proposal of getRequirementProposals(requirement.projectRequirementId);
+                      track proposal.proposalId
+                    ) {
+                      <article class="proposal-card">
+                        <div class="proposal-header">
+                          <div>
+                            <h5>{{ proposal.contractorName }}</h5>
+                            <p>{{ proposal.createdAt | date: 'dd/MM/yyyy' }}</p>
+                          </div>
+
+                          <span class="proposal-status">
+                            {{ getProposalStatusName(proposal.status) }}
+                          </span>
+                        </div>
+
+                        <div class="proposal-meta">
+                          <span
+                            ><strong>Precio:</strong> {{ proposal.price | currency: 'MXN' }}</span
+                          >
+                          <span><strong>Tiempo:</strong> {{ proposal.estimatedTime }}</span>
+                          <span
+                            ><strong>Materiales:</strong>
+                            {{ proposal.includesMaterials ? 'Incluidos' : 'No incluidos' }}</span
+                          >
+                          <span
+                            ><strong>Garantía:</strong>
+                            {{ proposal.hasWarranty ? 'Sí' : 'No' }}</span
+                          >
+                        </div>
+
+                        <div class="proposal-detail">
+                          <strong>Alcance</strong>
+                          <p>{{ proposal.scopeDescription }}</p>
+                        </div>
+
+                        @if (proposal.includes) {
+                          <div class="proposal-detail">
+                            <strong>Incluye</strong>
+                            <p>{{ proposal.includes }}</p>
+                          </div>
+                        }
+
+                        @if (proposal.doesNotInclude) {
+                          <div class="proposal-detail">
+                            <strong>No incluye</strong>
+                            <p>{{ proposal.doesNotInclude }}</p>
+                          </div>
+                        }
+
+                        @if (proposal.warrantyDescription) {
+                          <div class="proposal-detail">
+                            <strong>Garantía</strong>
+                            <p>{{ proposal.warrantyDescription }}</p>
+                          </div>
+                        }
+
+                        @if (proposal.comment) {
+                          <div class="proposal-detail">
+                            <strong>Comentario</strong>
+                            <p>{{ proposal.comment }}</p>
+                          </div>
+                        }
+
+                        @if (proposal.status === 1) {
+                          <div class="proposal-actions">
+                            <button
+                              type="button"
+                              class="accept-button"
+                              [disabled]="isProcessingProposal"
+                              (click)="acceptProposal(proposal)"
+                            >
+                              Aceptar
+                            </button>
+
+                            <button
+                              type="button"
+                              class="reject-button"
+                              [disabled]="isProcessingProposal"
+                              (click)="rejectProposal(proposal)"
+                            >
+                              Rechazar
+                            </button>
+                          </div>
+                        }
+                      </article>
+                    }
+                  </div>
+                }
+              </div>
             </article>
           }
         </div>

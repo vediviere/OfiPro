@@ -1,0 +1,50 @@
+<section class="projects-page">
+  <header class="page-header">
+    <div>
+      <h1>Proyectos disponibles</h1>
+      <p>Consulta oportunidades publicadas por clientes y envía una propuesta.</p>
+    </div>
+
+    <a routerLink="/contratista/propuestas" class="secondary-button"> Mis propuestas </a>
+  </header>
+
+  @if (isLoading) {
+    <div class="info-card">Cargando proyectos disponibles...</div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
+
+  @if (!isLoading && !errorMessage && projects.length === 0) {
+    <div class="empty-state">
+      <h2>No hay proyectos disponibles</h2>
+      <p>Cuando un cliente publique un proyecto, aparecerá aquí.</p>
+    </div>
+  }
+
+  @if (!isLoading && !errorMessage && projects.length > 0) {
+    <div class="project-grid">
+      @for (project of projects; track project.projectId) {
+        <article class="project-card">
+          <div class="project-card-header">
+            <h2>{{ project.title }}</h2>
+            <span class="urgency-badge">{{ getUrgencyName(project.urgency) }}</span>
+          </div>
+
+          <p>{{ project.description }}</p>
+
+          <div class="project-meta">
+            <span>{{ project.city }}, {{ project.state }}</span>
+            <span>{{ project.createdAt | date: 'dd/MM/yyyy' }}</span>
+            <span>{{ project.requirements.length }} requerimiento(s)</span>
+          </div>
+
+          <a [routerLink]="['/contratista/proyectos', project.projectId]" class="primary-button">
+            Ver y enviar propuesta
+          </a>
+        </article>
+      }
+    </div>
+  }
+</section>

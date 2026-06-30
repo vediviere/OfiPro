@@ -4905,3 +4905,318 @@ Esto conectaría el otro lado esencial del marketplace y permitiría validar el 
 Cliente publica proyecto → Contratista ve proyecto → Contratista envía propuesta.
 
 # =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-29
+
+## Objetivo
+
+Implementar, probar y cerrar:
+
+* Bloque 20 - Frontend: flujo contratista mínimo.
+* Bloque 21 - Frontend: cliente revisa propuestas recibidas.
+
+# =====================================
+
+## Contexto
+
+Después del Bloque 19, OfiPro ya tenía un flujo cliente funcional desde Angular:
+
+* Mis proyectos.
+* Crear proyecto.
+* Cargar categorías y subcategorías reales.
+* Consultar detalle básico de proyecto.
+* Menú interno por rol.
+
+El siguiente objetivo era completar el otro lado del marketplace:
+
+* Que el contratista pudiera ver proyectos disponibles.
+* Que el contratista pudiera enviar propuestas.
+* Que el contratista pudiera consultar sus propuestas enviadas.
+* Que el cliente pudiera revisar propuestas recibidas.
+* Que el cliente pudiera aceptar o rechazar propuestas desde Angular.
+
+# =====================================
+
+## Bloque 20 - Frontend: flujo contratista mínimo
+
+Completado:
+
+* Se creó `proposal.models.ts`.
+* Se creó `ProposalService`.
+* Se agregó método `getAvailableProjects()` en `ProjectService`.
+* Se creó pantalla Proyectos disponibles.
+* Se creó pantalla Detalle de proyecto disponible.
+* Se creó formulario de envío de propuesta.
+* Se creó pantalla Mis propuestas.
+* Se agregaron rutas protegidas:
+
+  * `/contratista/proyectos-disponibles`
+  * `/contratista/proyectos/:id`
+  * `/contratista/propuestas`
+* Se ajustó el menú interno para mostrar:
+
+  * Dashboard contratista.
+  * Proyectos disponibles.
+  * Mis propuestas.
+* Se conectó envío de propuesta contra `POST /api/proposals`.
+* Se conectó consulta de propuestas contra `GET /api/proposals/my-proposals`.
+* Se agregó visualización completa de propuesta enviada:
+
+  * Precio.
+  * Tiempo estimado.
+  * Materiales.
+  * Alcance.
+  * Incluye.
+  * No incluye.
+  * Garantía.
+  * Comentario.
+  * Estado.
+
+Resultado:
+
+* El contratista puede ver proyectos publicados.
+* El contratista puede abrir el detalle de un proyecto.
+* El contratista puede enviar una propuesta real.
+* Después de enviar propuesta, Angular redirige a Mis propuestas.
+* El contratista puede consultar lo que envió.
+
+# =====================================
+
+## Bloque 21 - Cliente revisa propuestas recibidas
+
+Completado:
+
+* Se agregaron métodos en `ProposalService`:
+
+  * `getByProjectRequirement`.
+  * `accept`.
+  * `reject`.
+* Se modificó `ClientProjectDetail` para cargar propuestas por requerimiento.
+* Se usó `forkJoin` para cargar propuestas de todos los requerimientos del proyecto.
+* Se agregó visualización de propuestas recibidas dentro del detalle del proyecto.
+* Se agregó información completa de cada propuesta:
+
+  * Contratista.
+  * Fecha.
+  * Estado.
+  * Precio.
+  * Tiempo estimado.
+  * Materiales.
+  * Garantía.
+  * Alcance.
+  * Incluye.
+  * No incluye.
+  * Comentario.
+* Se agregaron botones para:
+
+  * Aceptar propuesta.
+  * Rechazar propuesta.
+* Se agregó confirmación básica antes de aceptar o rechazar.
+* Se agregó manejo de mensajes de éxito.
+* Se agregó manejo de errores de backend.
+* Se recargan propuestas después de aceptar o rechazar.
+
+Resultado:
+
+* El cliente puede abrir un proyecto y ver las propuestas recibidas.
+* El cliente puede aceptar propuestas pendientes desde Angular.
+* El cliente puede rechazar propuestas pendientes desde Angular.
+* La pantalla actualiza estados después de ejecutar acciones.
+* El flujo principal del marketplace queda funcional desde la web responsiva.
+
+# =====================================
+
+## Problemas detectados y corregidos
+
+### Contratista sin flujo operativo real en web
+
+Síntoma:
+
+* El contratista podía iniciar sesión, pero no tenía flujo para consultar oportunidades.
+
+Solución:
+
+* Crear Proyectos disponibles.
+* Crear Detalle de proyecto disponible.
+* Crear Mis propuestas.
+* Agregar rutas y navegación por rol.
+
+Resultado:
+
+* El contratista ya puede operar desde Angular.
+
+### Mis propuestas mostraba información insuficiente
+
+Síntoma:
+
+* La propuesta enviada se veía correctamente, pero faltaban campos útiles para confirmar lo enviado.
+
+Solución:
+
+* Agregar visualización de:
+
+  * Incluye.
+  * No incluye.
+  * Garantía.
+  * Comentario.
+
+Resultado:
+
+* La pantalla Mis propuestas muestra una vista más completa.
+
+### Cliente no podía revisar propuestas desde frontend
+
+Síntoma:
+
+* El backend ya tenía endpoints de propuestas, pero el cliente no podía verlas desde Angular.
+
+Solución:
+
+* Integrar propuestas recibidas en el detalle del proyecto.
+
+Resultado:
+
+* El cliente puede revisar propuestas recibidas por requerimiento.
+
+### Cliente no podía aceptar o rechazar desde Angular
+
+Síntoma:
+
+* El flujo dependía todavía de Swagger para completar la decisión del cliente.
+
+Solución:
+
+* Agregar acciones Aceptar y Rechazar en propuestas pendientes.
+
+Resultado:
+
+* El cliente puede tomar decisión desde la web.
+
+### Estados visuales podían quedar desactualizados
+
+Síntoma:
+
+* Después de una acción, la vista podía conservar datos anteriores si no se recargaba.
+
+Solución:
+
+* Recargar propuestas después de aceptar o rechazar.
+
+Resultado:
+
+* La pantalla refleja los estados actualizados.
+
+# =====================================
+
+## Pruebas realizadas
+
+Frontend - Contratista:
+
+* Login como contratista → correcto.
+* Entrada a `/contratista/proyectos-disponibles` → correcto.
+* Visualización de proyectos publicados → correcto.
+* Entrada al detalle de proyecto disponible → correcto.
+* Visualización de requerimientos → correcto.
+* Envío de propuesta desde Angular → correcto.
+* Redirección a `/contratista/propuestas` → correcto.
+* Visualización de propuesta enviada → correcto.
+* Visualización de campos completos de propuesta → correcto.
+
+Frontend - Cliente:
+
+* Login como cliente → correcto.
+* Entrada a `/cliente/proyectos` → correcto.
+* Entrada al detalle de proyecto → correcto.
+* Visualización de requerimientos → correcto.
+* Visualización de propuestas recibidas → correcto.
+* Visualización de datos completos de propuesta → correcto.
+* Aceptar propuesta desde Angular → correcto.
+* Rechazar propuesta desde Angular → correcto.
+* Actualización visual de estado después de aceptar/rechazar → correcto.
+
+Compilación:
+
+* `ng build` → correcto.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+Bloque 2 - Auth → Completo
+Bloque 3 - Usuarios → Completo
+Bloque 4 - Proyectos → Completo
+Bloque 5 - Propuestas → Completo
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+Bloque 6 - Contrataciones → Completo
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+Bloque 6.10 - Orden de interfaces Application → Completo
+Bloque 6.11 - Correcciones diagnóstico pre-Bloque 7 → Completo
+Bloque 7 - Evidencias V1 → Completo
+Bloque 7.1 - Corrección diagnóstico Evidencias → Completo
+Bloque 7.2 - Notificaciones internas base → Completo
+Bloque 8 - Calificaciones y reputación V1 → Completo
+Bloque 8.1 - Endurecimiento Ratings/Reputación → Completo
+Bloque 8.2 - Correcciones diagnóstico Ratings/Reputación → Completo
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+Bloque 10.1 - Corrección diagnóstico ProfessionalProfile y búsqueda → Completo
+Bloque 11 - Expiración automática de proyectos → Completo
+Bloque 12 - Paginación y ordenamiento básico → Completo
+Bloque 13 - Pruebas automatizadas mínimas de API → Completo
+Bloque 14 - Invitaciones directas a contratistas → Completo
+Bloque 15 - Refresh tokens para experiencia móvil → Completo
+Bloque 15.3 - Correcciones diagnóstico post-refresh tokens → Completo
+Bloque 16 - Seguridad V1 / Hardening básico → Completo
+Bloque 17 - Revisión de preparación para frontend → Completo
+Bloque 18 - Web responsiva mínima → Completo
+Bloque 19 - Frontend: flujo cliente mínimo → Completo
+Bloque 20 - Frontend: flujo contratista mínimo → Completo
+Bloque 21 - Frontend: cliente revisa propuestas recibidas → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: Muy bueno.
+
+Se avanzó rápido porque el backend ya tenía reglas sólidas para proyectos, propuestas y contrataciones. El trabajo principal fue conectar Angular con endpoints existentes y resolver detalles normales de integración.
+
+El avance es importante porque se completó el ciclo mínimo del marketplace:
+Cliente crea proyecto → Contratista ve proyecto → Contratista envía propuesta → Cliente revisa → Cliente acepta o rechaza.
+
+Aunque la UI/UX todavía no está lista para producción, funcionalmente la columna vertebral del producto ya está caminando desde web responsiva.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Pegar documentación en `OFIPRO_MASTER.md`.
+* Pegar documentación en `SESSION_LOG.md`.
+* Revisar `git status`.
+* Ejecutar `ng build` si no se hizo después de documentar.
+* Hacer commit de Bloques 20 y 21.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 22 - Frontend: contratos mínimos.
+
+Razón:
+Después de aceptar una propuesta, el backend genera una contratación. El siguiente paso lógico es permitir que cliente y contratista vean sus contratos desde Angular.
+
+Alcance sugerido:
+
+* Cliente ve sus contratos.
+* Contratista ve sus contratos.
+* Detalle básico de contrato.
+* Estado de contratación.
+* Acceso desde propuesta aceptada o desde menú interno.
+
+# =====================================

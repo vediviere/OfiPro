@@ -1,0 +1,92 @@
+<section class="proposals-page">
+  <header class="page-header">
+    <div>
+      <h1>Mis propuestas</h1>
+      <p>Consulta las propuestas que has enviado a clientes.</p>
+    </div>
+
+    <a routerLink="/contratista/proyectos-disponibles" class="primary-button">
+      Ver proyectos disponibles
+    </a>
+  </header>
+
+  @if (isLoading) {
+    <div class="info-card">Cargando propuestas...</div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
+
+  @if (!isLoading && !errorMessage && proposals.length === 0) {
+    <div class="empty-state">
+      <h2>Aún no has enviado propuestas</h2>
+      <p>Cuando envíes una propuesta, aparecerá en esta sección.</p>
+      <a routerLink="/contratista/proyectos-disponibles" class="primary-button">
+        Buscar proyectos
+      </a>
+    </div>
+  }
+
+  @if (!isLoading && !errorMessage && proposals.length > 0) {
+    <div class="proposal-list">
+      @for (proposal of proposals; track proposal.proposalId) {
+        <article class="proposal-card">
+          <div class="proposal-card-header">
+            <div>
+              <h2>{{ proposal.projectTitle }}</h2>
+              <p>{{ proposal.requirementDescription }}</p>
+            </div>
+
+            <span class="status-badge">{{ getStatusName(proposal.status) }}</span>
+          </div>
+
+          <div class="proposal-meta">
+            <span><strong>Precio:</strong> {{ proposal.price | currency: 'MXN' }}</span>
+            <span><strong>Tiempo estimado:</strong> {{ proposal.estimatedTime }}</span>
+            <span
+              ><strong>Materiales:</strong>
+              {{ proposal.includesMaterials ? 'Incluidos' : 'No incluidos' }}</span
+            >
+            <span><strong>Enviada:</strong> {{ proposal.createdAt | date: 'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="proposal-scope">
+            <h3>Alcance</h3>
+            <p>{{ proposal.scopeDescription }}</p>
+          </div>
+
+          <div class="proposal-extra">
+            @if (proposal.includes) {
+              <div>
+                <strong>Incluye:</strong>
+                <p>{{ proposal.includes }}</p>
+              </div>
+            }
+
+            @if (proposal.doesNotInclude) {
+              <div>
+                <strong>No incluye:</strong>
+                <p>{{ proposal.doesNotInclude }}</p>
+              </div>
+            }
+
+            @if (proposal.hasWarranty) {
+              <div>
+                <strong>Garantía:</strong>
+                <p>{{ proposal.warrantyDescription || 'Sí ofrece garantía.' }}</p>
+              </div>
+            }
+
+            @if (proposal.comment) {
+              <div>
+                <strong>Comentario:</strong>
+                <p>{{ proposal.comment }}</p>
+              </div>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

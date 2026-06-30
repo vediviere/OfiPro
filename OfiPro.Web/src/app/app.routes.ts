@@ -17,6 +17,10 @@ import { ClientProjectDetail } from './features/cliente/projects/client-project-
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
+import { AvailableProjects } from './features/contratista/projects/available-projects/available-projects';
+import { AvailableProjectDetail } from './features/contratista/projects/available-project-detail/available-project-detail';
+import { MyProposals } from './features/contratista/proposals/my-proposals/my-proposals';
+
 export const routes: Routes = [
   {
     path: '',
@@ -71,6 +75,30 @@ export const routes: Routes = [
       {
         path: 'contratista/dashboard',
         component: ContratistaDashboard,
+        canActivate: [authGuard, roleGuard],
+        data: {
+          roles: ['Contratista'],
+        },
+      },
+      {
+        path: 'contratista/proyectos-disponibles',
+        component: AvailableProjects,
+        canActivate: [authGuard, roleGuard],
+        data: {
+          roles: ['Contratista'],
+        },
+      },
+      {
+        path: 'contratista/proyectos/:id',
+        component: AvailableProjectDetail,
+        canActivate: [authGuard, roleGuard],
+        data: {
+          roles: ['Contratista'],
+        },
+      },
+      {
+        path: 'contratista/propuestas',
+        component: MyProposals,
         canActivate: [authGuard, roleGuard],
         data: {
           roles: ['Contratista'],
