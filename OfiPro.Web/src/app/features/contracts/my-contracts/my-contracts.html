@@ -1,0 +1,58 @@
+<section class="contracts-page">
+  <header class="page-header">
+    <div>
+      <h1>Mis contratos</h1>
+      <p>Consulta las contrataciones generadas a partir de propuestas aceptadas.</p>
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <div class="info-card">Cargando contratos...</div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
+
+  @if (!isLoading && !errorMessage && contracts.length === 0) {
+    <div class="empty-state">
+      <h2>Aún no tienes contratos</h2>
+      <p>Cuando una propuesta sea aceptada, aparecerá una contratación en esta sección.</p>
+    </div>
+  }
+
+  @if (!isLoading && !errorMessage && contracts.length > 0) {
+    <div class="contract-list">
+      @for (contract of contracts; track contract.contractId) {
+        <article class="contract-card">
+          <div class="contract-card-header">
+            <div>
+              <h2>{{ contract.projectTitle }}</h2>
+              <p>{{ contract.requirementDescription }}</p>
+            </div>
+
+            <span class="status-badge">
+              {{ contract.status | contractStatusName }}
+            </span>
+          </div>
+
+          <div class="contract-meta">
+            <span
+              ><strong>{{ getCounterpartLabel() }}:</strong>
+              {{ getCounterpartName(contract) }}</span
+            >
+            <span
+              ><strong>Precio acordado:</strong> {{ contract.agreedPrice | currency: 'MXN' }}</span
+            >
+            <span><strong>Tiempo estimado:</strong> {{ contract.estimatedTime }}</span>
+            <span><strong>Creado:</strong> {{ contract.createdAt | date: 'dd/MM/yyyy' }}</span>
+          </div>
+
+          <a [routerLink]="['/contratos', contract.contractId]" class="primary-button">
+            Ver detalle
+          </a>
+        </article>
+      }
+    </div>
+  }
+</section>

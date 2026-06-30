@@ -34,14 +34,14 @@
         <article class="project-card">
           <div class="project-card-header">
             <h2>{{ project.title }}</h2>
-            <span class="status-badge">{{ getStatusName(project.status) }}</span>
+            {{ project.status | projectStatusName }}
           </div>
 
           <p>{{ project.description }}</p>
 
           <div class="project-meta">
             <span>{{ project.city }}, {{ project.state }}</span>
-            <span>{{ getUrgencyName(project.urgency) }}</span>
+            <span>{{ project.urgency | urgencyName }}</span>
             <span>{{ project.createdAt | date: 'dd/MM/yyyy' }}</span>
           </div>
 

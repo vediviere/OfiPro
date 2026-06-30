@@ -2371,6 +2371,70 @@ Impacto: Antes de producción será necesario hacer una pasada completa de UI/UX
 
 ---
 
+## D096 Antes de continuar con contratos era necesario limpiar duplicación de mapeos en frontend.
+
+Resultado: Se crea el Bloque 21.1 como limpieza técnica pre-contratos.
+
+Razón: Los métodos de mapeo como `getUrgencyName`, `getStatusName` y equivalentes ya estaban duplicados en varios componentes. Con el Bloque 22 se iba a agregar más duplicación si no se corregía antes.
+
+Impacto: Se reduce deuda técnica en Angular antes de seguir creciendo el frontend.
+
+---
+
+## D097 Los nombres de urgencia y estados deben centralizarse en Pipes.
+
+Resultado: Se crean Pipes reutilizables para mostrar nombres legibles desde enums numéricos:
+
+* `UrgencyNamePipe`
+* `ProjectStatusNamePipe`
+* `ProposalStatusNamePipe`
+* `ContractStatusNamePipe`
+
+Razón: El HTML debe encargarse de mostrar el texto final usando pipes, evitando que cada componente tenga sus propios métodos repetidos de mapeo.
+
+Impacto: Los componentes quedan más limpios y se evita mantenimiento duplicado cuando cambien nombres, estados o etiquetas.
+
+---
+
+## D098 El frontend debe contar con environment de producción.
+
+Resultado: Se crea/corrige `environment.prod.ts` y se verifica el build de producción.
+
+Razón: El archivo de environment de producción estaba pendiente y podía provocar problemas al preparar compilaciones productivas.
+
+Impacto: Angular ya puede compilar correctamente en modo producción con `ng build --configuration production`.
+
+---
+
+## D099 Los catálogos de categorías y subcategorías deben poder consultarse sin autenticación.
+
+Resultado: Los endpoints de catálogo quedan disponibles con `[AllowAnonymous]`:
+
+* GET /api/catalog/categories
+* GET /api/catalog/categories/{categoryId}/subcategories
+
+Razón: Las categorías y subcategorías no son información sensible. Además, en una experiencia pública o previa al registro, un usuario debería poder explorar qué tipos de servicios existen.
+
+Impacto: El catálogo queda preparado para ser usado tanto por usuarios autenticados como por pantallas públicas futuras.
+
+---
+
+## D100 Los contratos deben quedar visibles desde frontend después de aceptar una propuesta.
+
+Resultado: El Bloque 22 agrega flujo mínimo de contratos en Angular:
+
+* Mis contratos.
+* Detalle de contrato.
+* Acciones básicas por rol.
+* Cambio de estado de contrato.
+
+Razón: Al aceptar una propuesta, el backend ya genera una contratación. Sin una pantalla frontend, el contrato quedaba oculto y el flujo post-aceptación quedaba incompleto para el usuario.
+
+Impacto: Cliente y contratista ya pueden consultar y avanzar el estado de una contratación desde la web responsiva.
+
+
+---
+
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -3423,6 +3487,66 @@ Riesgo: Confusión visual y posibilidad de intentar acciones sobre propuestas qu
 Solución: Recargar propuestas del proyecto después de aceptar o rechazar.
 
 Resultado: La pantalla refleja el estado actualizado de las propuestas después de cada acción.
+
+---
+
+## P055 Existía duplicación creciente de mapeos de estados y urgencias.
+
+Síntoma: Métodos como `getUrgencyName`, `getStatusName` y equivalentes estaban repetidos en varios componentes.
+
+Riesgo: Cada nuevo flujo frontend podía aumentar la duplicación y hacer más difícil mantener nombres de estados o urgencias.
+
+Solución: Crear Pipes reutilizables para urgencias, estados de proyecto, estados de propuesta y estados de contrato.
+
+Resultado: Los componentes dejan de duplicar lógica de presentación y usan pipes desde el HTML.
+
+---
+
+## P056 El Bloque 22 podía reintroducir duplicación si no usaba ContractStatusNamePipe.
+
+Síntoma: Al agregar contratos, los componentes podían incluir nuevamente métodos locales para traducir estados.
+
+Riesgo: Se corregía duplicación en proyectos/propuestas, pero se volvía a crear en contratos.
+
+Solución: Ajustar `MyContracts` y `ContractDetail` para usar `ContractStatusNamePipe`.
+
+Resultado: Contratos queda alineado con la limpieza técnica del Bloque 21.1.
+
+---
+
+## P057 Faltaba cerrar environment de producción en Angular.
+
+Síntoma: El environment de producción estaba pendiente y podía afectar compilaciones productivas.
+
+Riesgo: `ng build --configuration production` podía fallar o tomar configuración incorrecta.
+
+Solución: Crear/corregir `environment.prod.ts` y verificar configuración de reemplazo en `angular.json`.
+
+Resultado: El frontend compila correctamente en modo producción.
+
+---
+
+## P058 CatalogController seguía requiriendo autenticación.
+
+Síntoma: Los endpoints de categorías y subcategorías estaban protegidos por `[Authorize]`.
+
+Riesgo: Pantallas públicas futuras no podrían mostrar tipos de servicios sin iniciar sesión.
+
+Solución: Agregar `[AllowAnonymous]` a los endpoints de consulta de catálogo.
+
+Resultado: El catálogo queda disponible sin token JWT.
+
+---
+
+## P059 El contrato generado al aceptar propuesta no era visible en Angular.
+
+Síntoma: El backend generaba contrato correctamente, pero cliente y contratista no tenían una pantalla para consultarlo.
+
+Riesgo: El usuario no podía continuar el flujo posterior a una propuesta aceptada desde la web.
+
+Solución: Crear pantallas de Mis contratos y Detalle de contrato, conectadas a los endpoints existentes del backend.
+
+Resultado: Cliente y contratista pueden consultar contratos y cambiar estados básicos según su rol.
 
 ---
 
@@ -4921,6 +5045,126 @@ Cliente crea proyecto → Contratista ve proyecto → Contratista envía propues
 
 ---
 
+## HITO 21.1 Limpieza técnica pre-contratos completada.
+
+Incluye:
+
+* Creación de carpeta `core/pipes`.
+* Creación de `UrgencyNamePipe`.
+* Creación de `ProjectStatusNamePipe`.
+* Creación de `ProposalStatusNamePipe`.
+* Creación de `ContractStatusNamePipe`.
+* Eliminación de métodos duplicados de mapeo en componentes de cliente.
+* Eliminación de métodos duplicados de mapeo en componentes de contratista.
+* Preparación de pipe de contratos antes de Bloque 22.
+* Creación/corrección de `environment.prod.ts`.
+* Verificación de configuración productiva en Angular.
+* Ajuste de `CatalogController` para permitir consulta anónima de catálogos.
+* Prueba de build normal.
+* Prueba de build productivo.
+
+Pipes creados:
+
+* `urgencyName`
+* `projectStatusName`
+* `proposalStatusName`
+* `contractStatusName`
+
+Endpoints ajustados:
+
+* GET /api/catalog/categories
+* GET /api/catalog/categories/{categoryId}/subcategories
+
+Reglas implementadas:
+
+* Los mapeos de presentación no deben duplicarse en componentes.
+* Los estados y urgencias deben mostrarse mediante pipes.
+* Los catálogos públicos no requieren JWT.
+* El frontend debe compilar en modo producción.
+
+Pruebas realizadas:
+
+* `ng build` → correcto.
+* `ng build --configuration production` → correcto.
+* Consulta de catálogo sin token → correcto.
+* Pantallas existentes con pipes → correcto.
+* Eliminación de advertencia de pipe no usado → correcto.
+
+Resultado: Bloque 21.1 completado correctamente. El frontend queda más limpio antes de continuar con contratos.
+
+Impacto: Se evita que la duplicación de mapeos crezca en los siguientes bloques y se mejora la preparación técnica del frontend.
+
+---
+
+## HITO 22 Frontend: contratos mínimos completado.
+
+Incluye:
+
+* Creación de modelos Angular para contratos.
+* Creación de `ContractService`.
+* Pantalla Mis contratos.
+* Pantalla Detalle de contrato.
+* Registro de rutas protegidas para contratos.
+* Agregado de links de contratos en menú de Cliente.
+* Agregado de links de contratos en menú de Contratista.
+* Conexión con GET /api/contracts/mine.
+* Conexión con GET /api/contracts/{contractId}.
+* Conexión con PATCH /api/contracts/{contractId}/status.
+* Visualización de contratos generados al aceptar propuesta.
+* Visualización de participantes:
+
+  * Cliente.
+  * Contratista.
+* Visualización de acuerdo:
+
+  * Precio acordado.
+  * Tiempo estimado.
+  * Estado.
+* Visualización de fechas:
+
+  * Creado.
+  * Iniciado.
+  * Finalizado.
+  * Cancelado.
+* Acciones básicas por rol.
+* Uso de `ContractStatusNamePipe` para mostrar estados.
+
+Rutas frontend agregadas:
+
+* /contratos
+* /contratos/:id
+
+Reglas implementadas:
+
+* Cliente y Contratista pueden ver sus contratos.
+* Solo Cliente y Contratista pueden acceder a rutas de contratos.
+* El contratista puede iniciar contratación cuando está pendiente de inicio.
+* El contratista puede enviar contratación a confirmación cuando está en proceso.
+* El cliente puede finalizar contratación cuando está pendiente de confirmación.
+* Cliente y Contratista pueden cancelar contratación cuando el estado lo permite.
+* El frontend no duplica reglas críticas de negocio; solo muestra acciones disponibles y consume backend.
+
+Pruebas realizadas:
+
+* Login como cliente → correcto.
+* Consulta de Mis contratos como cliente → correcto.
+* Detalle de contrato como cliente → correcto.
+* Login como contratista → correcto.
+* Consulta de Mis contratos como contratista → correcto.
+* Detalle de contrato como contratista → correcto.
+* Cambio de estado Pendiente de inicio → En proceso → correcto.
+* Cambio de estado En proceso → Pendiente de confirmación → correcto.
+* Cambio de estado Pendiente de confirmación → Finalizado → correcto.
+* Cancelación según estado permitido → correcto.
+* `ng build` → correcto.
+* `ng build --configuration production` → correcto.
+
+Resultado: Bloque 22 completado correctamente. Cliente y contratista ya pueden consultar contratos y avanzar estados básicos desde Angular.
+
+Impacto: El flujo posterior a la aceptación de propuesta ya no queda oculto en backend. OfiPro ya permite avanzar desde proyecto y propuesta hasta contratación desde la web responsiva.
+
+---
+
 
 ## ESTADO ACTUAL BACKEND
 
@@ -5001,9 +5245,10 @@ Notas estratégicas vigentes:
 
 ----
 
+
 ## Estado actual del frontend
 
-La carpeta `OfiPro.Web` contiene la web responsiva mínima del MVP.
+La carpeta `OfiPro.Web` contiene la web responsiva mínima funcional del MVP.
 
 Estructura funcional actual:
 
@@ -5011,10 +5256,12 @@ Estructura funcional actual:
 * `core/services`
 * `core/guards`
 * `core/interceptors`
+* `core/pipes`
 * `features/auth`
 * `features/public`
 * `features/cliente`
 * `features/contratista`
+* `features/contracts`
 * `features/admin`
 * `layout/public-layout`
 * `layout/app-layout`
@@ -5032,6 +5279,8 @@ Rutas actuales:
 * `/contratista/proyectos-disponibles`
 * `/contratista/proyectos/:id`
 * `/contratista/propuestas`
+* `/contratos`
+* `/contratos/:id`
 * `/admin/dashboard`
 
 Servicios frontend creados:
@@ -5041,6 +5290,14 @@ Servicios frontend creados:
 * `ProjectService`
 * `CatalogService`
 * `ProposalService`
+* `ContractService`
+
+Pipes frontend creados:
+
+* `UrgencyNamePipe`
+* `ProjectStatusNamePipe`
+* `ProposalStatusNamePipe`
+* `ContractStatusNamePipe`
 
 Seguridad frontend implementada:
 
@@ -5079,10 +5336,17 @@ Flujos probados:
 * Aceptación de propuesta desde Angular.
 * Rechazo de propuesta desde Angular.
 * Actualización visual de propuestas después de aceptar o rechazar.
+* Consulta de Mis contratos como cliente.
+* Consulta de Mis contratos como contratista.
+* Consulta de detalle de contrato.
+* Cambio de estado de contrato según rol.
+* Consulta de catálogos sin autenticación.
+* Uso de pipes para estados y urgencias.
 
 Validaciones finales:
 
 * `ng build` ejecutado correctamente.
+* `ng build --configuration production` ejecutado correctamente.
 * Pruebas funcionales manuales completadas correctamente.
 
 Estado:
@@ -5091,3 +5355,5 @@ Estado:
 * Bloque 19 - Frontend: flujo cliente mínimo completado correctamente.
 * Bloque 20 - Frontend: flujo contratista mínimo completado correctamente.
 * Bloque 21 - Frontend: cliente revisa propuestas recibidas completado correctamente.
+* Bloque 21.1 - Limpieza técnica pre-contratos completado correctamente.
+* Bloque 22 - Frontend: contratos mínimos completado correctamente.

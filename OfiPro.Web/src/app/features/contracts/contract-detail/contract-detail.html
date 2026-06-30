@@ -1,0 +1,124 @@
+<section class="contract-detail-page">
+  <a routerLink="/contratos" class="back-link">← Volver a mis contratos</a>
+
+  @if (isLoading) {
+    <div class="info-card">Cargando detalle del contrato...</div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="success-message">{{ successMessage }}</div>
+  }
+
+  @if (contract) {
+    <header class="detail-header">
+      <div>
+        <h1>{{ contract.projectTitle }}</h1>
+        <p>{{ contract.requirementDescription }}</p>
+      </div>
+
+      <span class="status-badge">
+        {{ contract.status | contractStatusName }}
+      </span>
+    </header>
+
+    <div class="detail-grid">
+      <article class="detail-card">
+        <h2>Participantes</h2>
+        <p><strong>Cliente:</strong> {{ contract.clientName }}</p>
+        <p><strong>Contratista:</strong> {{ contract.contractorName }}</p>
+      </article>
+
+      <article class="detail-card">
+        <h2>Acuerdo</h2>
+        <p><strong>Precio acordado:</strong> {{ contract.agreedPrice | currency: 'MXN' }}</p>
+        <p><strong>Tiempo estimado:</strong> {{ contract.estimatedTime }}</p>
+        <p><strong>Estado:</strong> {{ contract.status | contractStatusName }}</p>
+      </article>
+
+      <article class="detail-card detail-card-wide">
+        <h2>Fechas</h2>
+        <div class="date-grid">
+          <p><strong>Creado:</strong> {{ contract.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+          <p>
+            <strong>Iniciado:</strong>
+            {{ contract.startedAt ? (contract.startedAt | date: 'dd/MM/yyyy HH:mm') : 'Pendiente' }}
+          </p>
+          <p>
+            <strong>Finalizado:</strong>
+            {{
+              contract.finishedAt ? (contract.finishedAt | date: 'dd/MM/yyyy HH:mm') : 'Pendiente'
+            }}
+          </p>
+          <p>
+            <strong>Cancelado:</strong>
+            {{
+              contract.cancelledAt
+                ? (contract.cancelledAt | date: 'dd/MM/yyyy HH:mm')
+                : 'No cancelado'
+            }}
+          </p>
+        </div>
+      </article>
+    </div>
+
+    <section class="actions-section">
+      <h2>Acciones disponibles</h2>
+
+      @if (!canStart() && !canSendToConfirmation() && !canFinish() && !canCancel()) {
+        <p class="muted-text">
+          No hay acciones disponibles para el estado actual de este contrato.
+        </p>
+      }
+
+      <div class="actions-row">
+        @if (canStart()) {
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="isProcessing"
+            (click)="startContract()"
+          >
+            Iniciar contratación
+          </button>
+        }
+
+        @if (canSendToConfirmation()) {
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="isProcessing"
+            (click)="sendToConfirmation()"
+          >
+            Enviar a confirmación
+          </button>
+        }
+
+        @if (canFinish()) {
+          <button
+            type="button"
+            class="success-button"
+            [disabled]="isProcessing"
+            (click)="finishContract()"
+          >
+            Finalizar contratación
+          </button>
+        }
+
+        @if (canCancel()) {
+          <button
+            type="button"
+            class="danger-button"
+            [disabled]="isProcessing"
+            (click)="cancelContract()"
+          >
+            Cancelar contratación
+          </button>
+        }
+      </div>
+    </section>
+  }
+</section>

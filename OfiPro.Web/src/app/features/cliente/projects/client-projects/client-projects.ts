@@ -5,9 +5,12 @@ import { RouterLink } from '@angular/router';
 import { Project } from '../../../../core/models/project.models';
 import { ProjectService } from '../../../../core/services/project.service';
 
+import { ProjectStatusNamePipe } from '../../../../core/pipes/project-status-name.pipe';
+import { UrgencyNamePipe } from '../../../../core/pipes/urgency-name.pipe';
+
 @Component({
   selector: 'app-client-projects',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ProjectStatusNamePipe, UrgencyNamePipe],
   templateUrl: './client-projects.html',
   styleUrl: './client-projects.css',
 })
@@ -20,40 +23,6 @@ export class ClientProjects implements OnInit {
 
   ngOnInit(): void {
     this.loadProjects();
-  }
-
-  getStatusName(status: number): string {
-    switch (status) {
-      case 1:
-        return 'Publicado';
-      case 2:
-        return 'Asignado';
-      case 3:
-        return 'En proceso';
-      case 4:
-        return 'Pendiente de confirmación';
-      case 5:
-        return 'Finalizado';
-      case 6:
-        return 'Cancelado';
-      case 7:
-        return 'Expirado';
-      default:
-        return 'Desconocido';
-    }
-  }
-
-  getUrgencyName(urgency: number): string {
-    switch (urgency) {
-      case 1:
-        return 'Flexible';
-      case 2:
-        return 'Esta semana';
-      case 3:
-        return 'Urgente';
-      default:
-        return 'No especificada';
-    }
   }
 
   private loadProjects(): void {

@@ -1,0 +1,156 @@
+.contract-detail-page {
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 22px;
+  color: #111827;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 26px;
+}
+
+.detail-header h1 {
+  margin: 0 0 10px;
+  font-size: 32px;
+}
+
+.detail-header p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.status-badge {
+  background: #e0f2fe;
+  color: #075985;
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.detail-card,
+.info-card,
+.actions-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px;
+  background: #f9fafb;
+}
+
+.detail-card-wide {
+  grid-column: 1 / -1;
+}
+
+.detail-card h2,
+.actions-section h2 {
+  margin-top: 0;
+}
+
+.date-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 18px;
+}
+
+.actions-section {
+  margin-top: 28px;
+}
+
+.actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.primary-button,
+.success-button,
+.danger-button {
+  border: none;
+  border-radius: 10px;
+  padding: 11px 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-button {
+  background: #111827;
+  color: #ffffff;
+}
+
+.success-button {
+  background: #166534;
+  color: #ffffff;
+}
+
+.danger-button {
+  background: #991b1b;
+  color: #ffffff;
+}
+
+.primary-button:disabled,
+.success-button:disabled,
+.danger-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.muted-text {
+  color: #6b7280;
+}
+
+.error-message {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+}
+
+.success-message {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .contract-detail-page {
+    padding: 22px;
+  }
+
+  .detail-header {
+    flex-direction: column;
+  }
+
+  .detail-grid,
+  .date-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions-row {
+    flex-direction: column;
+  }
+}

@@ -21,6 +21,9 @@ import { AvailableProjects } from './features/contratista/projects/available-pro
 import { AvailableProjectDetail } from './features/contratista/projects/available-project-detail/available-project-detail';
 import { MyProposals } from './features/contratista/proposals/my-proposals/my-proposals';
 
+import { MyContracts } from './features/contracts/my-contracts/my-contracts';
+import { ContractDetail } from './features/contracts/contract-detail/contract-detail';
+
 export const routes: Routes = [
   {
     path: '',
@@ -110,6 +113,22 @@ export const routes: Routes = [
         canActivate: [authGuard, roleGuard],
         data: {
           roles: ['Administrador'],
+        },
+      },
+      {
+        path: 'contratos',
+        component: MyContracts,
+        canActivate: [authGuard, roleGuard],
+        data: {
+          roles: ['Cliente', 'Contratista'],
+        },
+      },
+      {
+        path: 'contratos/:id',
+        component: ContractDetail,
+        canActivate: [authGuard, roleGuard],
+        data: {
+          roles: ['Cliente', 'Contratista'],
         },
       },
     ],

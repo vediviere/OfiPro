@@ -22,7 +22,7 @@
         <p>{{ project.description }}</p>
       </div>
 
-      <span class="urgency-badge">{{ getUrgencyName(project.urgency) }}</span>
+      {{ project.urgency | urgencyName }}
     </header>
 
     <div class="detail-grid">
@@ -37,7 +37,7 @@
         <h2>Información del cliente</h2>
         <p><strong>Cliente:</strong> {{ project.createdByUserName }}</p>
         <p><strong>Publicado:</strong> {{ project.createdAt | date: 'dd/MM/yyyy' }}</p>
-        <p><strong>Urgencia:</strong> {{ getUrgencyName(project.urgency) }}</p>
+        <p><strong>Urgencia:</strong> {{ project.urgency | urgencyName }}</p>
       </article>
 
       <article class="detail-card detail-card-wide">

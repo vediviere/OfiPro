@@ -5,9 +5,11 @@ import { RouterLink } from '@angular/router';
 import { Project } from '../../../../core/models/project.models';
 import { ProjectService } from '../../../../core/services/project.service';
 
+import { UrgencyNamePipe } from '../../../../core/pipes/urgency-name.pipe';
+
 @Component({
   selector: 'app-available-projects',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, UrgencyNamePipe],
   templateUrl: './available-projects.html',
   styleUrl: './available-projects.css',
 })
@@ -20,19 +22,6 @@ export class AvailableProjects implements OnInit {
 
   ngOnInit(): void {
     this.loadProjects();
-  }
-
-  getUrgencyName(urgency: number): string {
-    switch (urgency) {
-      case 1:
-        return 'Flexible';
-      case 2:
-        return 'Esta semana';
-      case 3:
-        return 'Urgente';
-      default:
-        return 'No especificada';
-    }
   }
 
   private loadProjects(): void {

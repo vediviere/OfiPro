@@ -6,12 +6,14 @@
       @if (hasRole('Cliente')) {
         <a routerLink="/cliente/dashboard">Dashboard cliente</a>
         <a routerLink="/cliente/proyectos">Mis proyectos</a>
+        <a routerLink="/contratos">Mis contratos</a>
       }
 
       @if (hasRole('Contratista')) {
         <a routerLink="/contratista/dashboard">Dashboard contratista</a>
         <a routerLink="/contratista/proyectos-disponibles">Proyectos disponibles</a>
         <a routerLink="/contratista/propuestas">Mis propuestas</a>
+        <a routerLink="/contratos">Mis contratos</a>
       }
 
       @if (hasRole('Administrador')) {

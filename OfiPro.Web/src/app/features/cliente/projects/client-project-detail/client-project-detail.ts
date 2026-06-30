@@ -9,9 +9,13 @@ import { Proposal } from '../../../../core/models/proposal.models';
 import { ProjectService } from '../../../../core/services/project.service';
 import { ProposalService } from '../../../../core/services/proposal.service';
 
+import { ProjectStatusNamePipe } from '../../../../core/pipes/project-status-name.pipe';
+import { ProposalStatusNamePipe } from '../../../../core/pipes/proposal-status-name.pipe';
+import { UrgencyNamePipe } from '../../../../core/pipes/urgency-name.pipe';
+
 @Component({
   selector: 'app-client-project-detail',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ProjectStatusNamePipe, ProposalStatusNamePipe, UrgencyNamePipe],
   templateUrl: './client-project-detail.html',
   styleUrl: './client-project-detail.css',
 })
@@ -44,54 +48,6 @@ export class ClientProjectDetail implements OnInit {
     this.loadProject(projectId);
   }
 
-  getStatusName(status: number): string {
-    switch (status) {
-      case 1:
-        return 'Publicado';
-      case 2:
-        return 'Asignado';
-      case 3:
-        return 'En proceso';
-      case 4:
-        return 'Pendiente de confirmación';
-      case 5:
-        return 'Finalizado';
-      case 6:
-        return 'Cancelado';
-      case 7:
-        return 'Expirado';
-      default:
-        return 'Desconocido';
-    }
-  }
-
-  getUrgencyName(urgency: number): string {
-    switch (urgency) {
-      case 1:
-        return 'Flexible';
-      case 2:
-        return 'Esta semana';
-      case 3:
-        return 'Urgente';
-      default:
-        return 'No especificada';
-    }
-  }
-
-  getProposalStatusName(status: number): string {
-    switch (status) {
-      case 1:
-        return 'Pendiente';
-      case 2:
-        return 'Aceptada';
-      case 3:
-        return 'Rechazada';
-      case 4:
-        return 'Retirada';
-      default:
-        return 'Desconocida';
-    }
-  }
 
   getRequirementProposals(projectRequirementId: string): Proposal[] {
     return this.proposalsByRequirement[projectRequirementId] ?? [];

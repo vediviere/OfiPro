@@ -16,6 +16,7 @@ public class CatalogController : ControllerBase
         _catalogService = catalogService;
     }
 
+    [AllowAnonymous]
     [HttpGet("categories")]
     public async Task<IActionResult> GetCategories()
     {
@@ -24,6 +25,7 @@ public class CatalogController : ControllerBase
         return Ok(categories);
     }
 
+    [AllowAnonymous]
     [HttpGet("categories/{categoryId:guid}/subcategories")]
     public async Task<IActionResult> GetSubcategoriesByCategoryId(Guid categoryId)
     {

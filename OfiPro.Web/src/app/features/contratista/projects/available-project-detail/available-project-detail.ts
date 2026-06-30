@@ -9,9 +9,11 @@ import { Project } from '../../../../core/models/project.models';
 import { ProjectService } from '../../../../core/services/project.service';
 import { ProposalService } from '../../../../core/services/proposal.service';
 
+import { UrgencyNamePipe } from '../../../../core/pipes/urgency-name.pipe';
+
 @Component({
   selector: 'app-available-project-detail',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, UrgencyNamePipe],
   templateUrl: './available-project-detail.html',
   styleUrl: './available-project-detail.css',
 })
@@ -53,19 +55,6 @@ export class AvailableProjectDetail implements OnInit {
     }
 
     this.loadProject(projectId);
-  }
-
-  getUrgencyName(urgency: number): string {
-    switch (urgency) {
-      case 1:
-        return 'Flexible';
-      case 2:
-        return 'Esta semana';
-      case 3:
-        return 'Urgente';
-      default:
-        return 'No especificada';
-    }
   }
 
   saveProposal(): void {

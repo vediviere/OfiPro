@@ -29,7 +29,7 @@
         <article class="project-card">
           <div class="project-card-header">
             <h2>{{ project.title }}</h2>
-            <span class="urgency-badge">{{ getUrgencyName(project.urgency) }}</span>
+            <span class="urgency-badge">{{ project.urgency | urgencyName }}</span>
           </div>
 
           <p>{{ project.description }}</p>

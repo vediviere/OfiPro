@@ -5220,3 +5220,301 @@ Alcance sugerido:
 * Acceso desde propuesta aceptada o desde menú interno.
 
 # =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-29
+
+## Objetivo
+
+Implementar, probar y cerrar:
+
+* Bloque 21.1 - Limpieza técnica pre-contratos.
+* Bloque 22 - Frontend: contratos mínimos.
+
+# =====================================
+
+## Contexto
+
+Después de los Bloques 20 y 21, OfiPro ya tenía completo el ciclo central del marketplace desde Angular:
+
+* Cliente crea proyecto.
+* Contratista ve proyecto disponible.
+* Contratista envía propuesta.
+* Cliente revisa propuesta.
+* Cliente acepta o rechaza propuesta.
+* Backend genera contrato automáticamente al aceptar.
+
+Antes de continuar con contratos, se detectó deuda técnica en frontend:
+
+* Métodos de mapeo duplicados en varios componentes.
+* Falta de `environment.prod.ts`.
+* Catálogos todavía protegidos por autenticación.
+* Riesgo de duplicar más lógica al agregar contratos.
+
+Por eso se decidió hacer una limpieza técnica antes de implementar el Bloque 22.
+
+# =====================================
+
+## Bloque 21.1 - Limpieza técnica pre-contratos
+
+Completado:
+
+* Se creó carpeta `core/pipes`.
+* Se creó `UrgencyNamePipe`.
+* Se creó `ProjectStatusNamePipe`.
+* Se creó `ProposalStatusNamePipe`.
+* Se creó `ContractStatusNamePipe`.
+* Se reemplazaron métodos duplicados de urgencia por `urgencyName`.
+* Se reemplazaron métodos duplicados de estado de proyecto por `projectStatusName`.
+* Se reemplazaron métodos duplicados de estado de propuesta por `proposalStatusName`.
+* Se preparó `contractStatusName` para el Bloque 22.
+* Se creó/corrigió `environment.prod.ts`.
+* Se verificó configuración productiva de Angular.
+* Se ajustó `CatalogController` para permitir consulta anónima de categorías y subcategorías.
+
+Endpoints ajustados:
+
+* GET /api/catalog/categories
+* GET /api/catalog/categories/{categoryId}/subcategories
+
+Resultado:
+
+* Se eliminó duplicación de mapeos.
+* Los componentes quedan más limpios.
+* Los catálogos pueden consultarse sin token.
+* Angular compila correctamente en modo producción.
+
+# =====================================
+
+## Bloque 22 - Frontend: contratos mínimos
+
+Completado:
+
+* Se creó `contract.models.ts`.
+* Se creó `ContractService`.
+* Se creó pantalla Mis contratos.
+* Se creó pantalla Detalle de contrato.
+* Se agregaron rutas:
+
+  * `/contratos`
+  * `/contratos/:id`
+* Se agregaron accesos a Mis contratos en el menú de Cliente.
+* Se agregaron accesos a Mis contratos en el menú de Contratista.
+* Se conectó GET /api/contracts/mine.
+* Se conectó GET /api/contracts/{contractId}.
+* Se conectó PATCH /api/contracts/{contractId}/status.
+* Se mostró información principal del contrato:
+
+  * Proyecto.
+  * Requerimiento.
+  * Cliente.
+  * Contratista.
+  * Precio acordado.
+  * Tiempo estimado.
+  * Estado.
+  * Fechas.
+* Se agregaron acciones según rol:
+
+  * Contratista inicia contratación.
+  * Contratista envía a confirmación.
+  * Cliente finaliza contratación.
+  * Cliente o contratista cancelan cuando aplica.
+* Se ajustó contratos para usar `ContractStatusNamePipe` y evitar duplicación de `getStatusName`.
+
+Resultado:
+
+* Cliente puede ver sus contratos.
+* Contratista puede ver sus contratos.
+* Ambos pueden consultar detalle.
+* El estado del contrato puede avanzar desde Angular según reglas existentes en backend.
+* El flujo posterior a propuesta aceptada ya es visible desde frontend.
+
+# =====================================
+
+## Problemas detectados y corregidos
+
+### Duplicación de mapeos en frontend
+
+Síntoma:
+
+* Los componentes repetían métodos para traducir urgencias y estados.
+
+Solución:
+
+* Crear pipes reutilizables.
+
+Resultado:
+
+* Los mapeos quedan centralizados.
+
+### Contratos podía reintroducir duplicación
+
+Síntoma:
+
+* El código inicial de contratos usaba `getStatusName`.
+
+Solución:
+
+* Usar `ContractStatusNamePipe` en `MyContracts` y `ContractDetail`.
+
+Resultado:
+
+* No se deja deuda nueva en contratos.
+
+### Warning de pipe importado pero no usado
+
+Síntoma:
+
+* Angular mostraba advertencia de `ContractStatusNamePipe is not used within the template`.
+
+Causa:
+
+* El pipe estaba importado en el componente, pero el HTML todavía no lo usaba.
+
+Solución:
+
+* Reemplazar `getStatusName(contract.status)` por `contract.status | contractStatusName`.
+
+Resultado:
+
+* Advertencia corregida.
+
+### Catálogo protegido innecesariamente
+
+Síntoma:
+
+* Categorías y subcategorías requerían token JWT.
+
+Solución:
+
+* Agregar `[AllowAnonymous]` en endpoints de catálogo.
+
+Resultado:
+
+* Catálogo disponible sin autenticación.
+
+### Contrato no visible desde frontend
+
+Síntoma:
+
+* Backend generaba contrato al aceptar propuesta, pero Angular no tenía pantalla para verlo.
+
+Solución:
+
+* Crear flujo mínimo de contratos.
+
+Resultado:
+
+* Cliente y contratista pueden consultar y avanzar contratos desde la web.
+
+# =====================================
+
+## Pruebas realizadas
+
+Backend:
+
+* Consulta de categorías sin token → correcto.
+* Consulta de subcategorías sin token → correcto.
+* Cambio de estado de contrato desde Angular → correcto.
+
+Frontend:
+
+* `ng build` → correcto.
+* `ng build --configuration production` → correcto.
+* Pantallas con pipes de urgencia → correcto.
+* Pantallas con pipes de estado de proyecto → correcto.
+* Pantallas con pipes de estado de propuesta → correcto.
+* Pantallas con pipes de estado de contrato → correcto.
+* Login como cliente → correcto.
+* Login como contratista → correcto.
+* Consulta de Mis contratos como cliente → correcto.
+* Consulta de Mis contratos como contratista → correcto.
+* Detalle de contrato → correcto.
+* Contratista inicia contrato → correcto.
+* Contratista envía contrato a confirmación → correcto.
+* Cliente finaliza contrato → correcto.
+* Cancelación según estado permitido → correcto.
+* Advertencia de pipe no usado → corregida.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+Bloque 2 - Auth → Completo
+Bloque 3 - Usuarios → Completo
+Bloque 4 - Proyectos → Completo
+Bloque 5 - Propuestas → Completo
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+Bloque 6 - Contrataciones → Completo
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+Bloque 6.10 - Orden de interfaces Application → Completo
+Bloque 6.11 - Correcciones diagnóstico pre-Bloque 7 → Completo
+Bloque 7 - Evidencias V1 → Completo
+Bloque 7.1 - Corrección diagnóstico Evidencias → Completo
+Bloque 7.2 - Notificaciones internas base → Completo
+Bloque 8 - Calificaciones y reputación V1 → Completo
+Bloque 8.1 - Endurecimiento Ratings/Reputación → Completo
+Bloque 8.2 - Correcciones diagnóstico Ratings/Reputación → Completo
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+Bloque 10.1 - Corrección diagnóstico ProfessionalProfile y búsqueda → Completo
+Bloque 11 - Expiración automática de proyectos → Completo
+Bloque 12 - Paginación y ordenamiento básico → Completo
+Bloque 13 - Pruebas automatizadas mínimas de API → Completo
+Bloque 14 - Invitaciones directas a contratistas → Completo
+Bloque 15 - Refresh tokens para experiencia móvil → Completo
+Bloque 15.3 - Correcciones diagnóstico post-refresh tokens → Completo
+Bloque 16 - Seguridad V1 / Hardening básico → Completo
+Bloque 17 - Revisión de preparación para frontend → Completo
+Bloque 18 - Web responsiva mínima → Completo
+Bloque 19 - Frontend: flujo cliente mínimo → Completo
+Bloque 20 - Frontend: flujo contratista mínimo → Completo
+Bloque 21 - Frontend: cliente revisa propuestas recibidas → Completo
+Bloque 21.1 - Limpieza técnica pre-contratos → Completo
+Bloque 22 - Frontend: contratos mínimos → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: Muy bueno.
+
+El avance fue ordenado porque se detuvo el desarrollo antes de que la duplicación creciera más. La limpieza con pipes llegó en el momento correcto: antes de contratos y antes de que el frontend se volviera difícil de mantener.
+
+El Bloque 22 también avanzó bien porque el backend ya tenía reglas de contrato listas. Angular se limitó a consumir endpoints existentes y mostrar acciones según rol.
+
+La web ya cubre el camino:
+Cliente crea proyecto → Contratista propone → Cliente acepta → Se genera contrato → Cliente y contratista consultan contrato → Se actualiza estado del contrato.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Pegar documentación en `OFIPRO_MASTER.md`.
+* Pegar documentación en `SESSION_LOG.md`.
+* Revisar `git status`.
+* Hacer commit de Bloque 21.1 y Bloque 22.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 23 - Frontend: evidencias mínimas por contrato.
+
+Razón:
+Después de que el contrato puede iniciar y avanzar de estado, el siguiente paso natural es permitir que el contratista agregue evidencias y que el cliente pueda consultarlas.
+
+Alcance sugerido:
+
+* Ver evidencias por contrato.
+* Contratista agrega evidencia.
+* Cliente consulta evidencias.
+* Mostrar tipo de evidencia, URL, descripción y fecha.
+* Conectar evidencias con el flujo de contrato.
+
+# =====================================
