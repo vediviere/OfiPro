@@ -1,34 +1,54 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { UserRole } from '../../../core/models/auth.models';
 import { Contract, ContractStatus } from '../../../core/models/contract.models';
+import { Evidence, fileTypeOptions } from '../../../core/models/evidence.models';
 import { AuthService } from '../../../core/services/auth.service';
 import { ContractService } from '../../../core/services/contract.service';
-
+import { EvidenceService } from '../../../core/services/evidence.service';
 import { ContractStatusNamePipe } from '../../../core/pipes/contract-status-name.pipe';
+import { EvidenceTypeNamePipe } from '../../../core/pipes/evidence-type-name.pipe';
 
 @Component({
   selector: 'app-contract-detail',
-  imports: [CommonModule, RouterLink, ContractStatusNamePipe],
+  imports: [CommonModule, FormsModule, RouterLink, ContractStatusNamePipe, EvidenceTypeNamePipe],
   templateUrl: './contract-detail.html',
   styleUrl: './contract-detail.css',
 })
 export class ContractDetail implements OnInit {
   contract: Contract | null = null;
+  evidences: Evidence[] = [];
   currentRole: UserRole | null = null;
 
+  readonly fileTypeOptions = fileTypeOptions;
+
+  evidenceForm = {
+    evidenceType: 1,
+    title: '',
+    description: '',
+    fileUrl: '',
+    fileType: 'image/jpeg',
+  };
+
   isLoading = true;
+  isLoadingEvidences = false;
   isProcessing = false;
+  isSavingEvidence = false;
+  isDeletingEvidence = false;
 
   errorMessage = '';
   successMessage = '';
+  evidenceErrorMessage = '';
+  evidenceSuccessMessage = '';
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly contractService: ContractService,
+    private readonly evidenceService: EvidenceService,
     private readonly authService: AuthService,
   ) {}
 
@@ -44,6 +64,7 @@ export class ContractDetail implements OnInit {
     }
 
     this.loadContract(contractId);
+    this.loadEvidences(contractId);
   }
 
   canStart(): boolean {
@@ -72,6 +93,16 @@ export class ContractDetail implements OnInit {
     );
   }
 
+  canUploadEvidence(): boolean {
+    return (
+      this.currentRole === 'Contratista' &&
+      !!this.contract &&
+      this.contract.status !== ContractStatus.PendienteInicio &&
+      this.contract.status !== ContractStatus.Finalizado &&
+      this.contract.status !== ContractStatus.Cancelado
+    );
+  }
+
   startContract(): void {
     this.updateStatus(ContractStatus.EnProceso, '¿Seguro que deseas iniciar esta contratación?');
   }
@@ -91,6 +122,78 @@ export class ContractDetail implements OnInit {
     this.updateStatus(ContractStatus.Cancelado, '¿Seguro que deseas cancelar esta contratación?');
   }
 
+  saveEvidence(): void {
+    this.evidenceErrorMessage = '';
+    this.evidenceSuccessMessage = '';
+
+    if (!this.contract) {
+      this.evidenceErrorMessage = 'No se encontró la contratación.';
+      return;
+    }
+
+    if (!this.isEvidenceFormValid()) {
+      this.evidenceErrorMessage = 'Completa tipo, título, URL válida y tipo de archivo.';
+      return;
+    }
+
+    this.isSavingEvidence = true;
+
+    this.evidenceService
+      .create(this.contract.contractId, {
+        evidenceType: Number(this.evidenceForm.evidenceType),
+        title: this.evidenceForm.title.trim(),
+        description: this.evidenceForm.description.trim(),
+        fileUrl: this.evidenceForm.fileUrl.trim(),
+        fileType: this.evidenceForm.fileType.trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.evidenceSuccessMessage = 'Evidencia agregada correctamente.';
+          this.isSavingEvidence = false;
+          this.resetEvidenceForm();
+          this.loadEvidences(this.contract!.contractId);
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error('Error al agregar evidencia:', error.error);
+
+          this.evidenceErrorMessage =
+            this.getBackendErrorMessage(error) ||
+            'No se pudo agregar la evidencia. Revisa los datos capturados.';
+
+          this.isSavingEvidence = false;
+        },
+      });
+  }
+
+  deleteEvidence(evidence: Evidence): void {
+    if (!confirm('¿Seguro que deseas eliminar esta evidencia?')) {
+      return;
+    }
+
+    this.evidenceErrorMessage = '';
+    this.evidenceSuccessMessage = '';
+    this.isDeletingEvidence = true;
+
+    this.evidenceService.delete(evidence.evidenceId).subscribe({
+      next: () => {
+        this.evidenceSuccessMessage = 'Evidencia eliminada correctamente.';
+        this.isDeletingEvidence = false;
+
+        if (this.contract) {
+          this.loadEvidences(this.contract.contractId);
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        console.error('Error al eliminar evidencia:', error.error);
+
+        this.evidenceErrorMessage =
+          this.getBackendErrorMessage(error) || 'No se pudo eliminar la evidencia.';
+
+        this.isDeletingEvidence = false;
+      },
+    });
+  }
+
   private loadContract(contractId: string): void {
     this.contractService.getById(contractId).subscribe({
       next: (response) => {
@@ -100,6 +203,21 @@ export class ContractDetail implements OnInit {
       error: () => {
         this.errorMessage = 'No se pudo cargar el detalle del contrato.';
         this.isLoading = false;
+      },
+    });
+  }
+
+  private loadEvidences(contractId: string): void {
+    this.isLoadingEvidences = true;
+
+    this.evidenceService.getByContract(contractId).subscribe({
+      next: (response) => {
+        this.evidences = response;
+        this.isLoadingEvidences = false;
+      },
+      error: () => {
+        this.evidenceErrorMessage = 'No se pudieron cargar las evidencias del contrato.';
+        this.isLoadingEvidences = false;
       },
     });
   }
@@ -133,6 +251,25 @@ export class ContractDetail implements OnInit {
         this.isProcessing = false;
       },
     });
+  }
+
+  private isEvidenceFormValid(): boolean {
+    return (
+      Number(this.evidenceForm.evidenceType) > 0 &&
+      this.evidenceForm.title.trim().length > 0 &&
+      this.evidenceForm.fileUrl.trim().length > 0 &&
+      this.evidenceForm.fileType.trim().length > 0
+    );
+  }
+
+  private resetEvidenceForm(): void {
+    this.evidenceForm = {
+      evidenceType: 1,
+      title: '',
+      description: '',
+      fileUrl: '',
+      fileType: 'image/jpeg',
+    };
   }
 
   private getBackendErrorMessage(error: HttpErrorResponse): string {

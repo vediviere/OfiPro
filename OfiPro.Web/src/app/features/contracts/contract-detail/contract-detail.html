@@ -118,6 +118,151 @@
             Cancelar contratación
           </button>
         }
+        <section class="evidences-section">
+          <h2>Evidencias del contrato</h2>
+
+          @if (evidenceErrorMessage) {
+            <div class="error-message">{{ evidenceErrorMessage }}</div>
+          }
+
+          @if (evidenceSuccessMessage) {
+            <div class="success-message">{{ evidenceSuccessMessage }}</div>
+          }
+
+          @if (isLoadingEvidences) {
+            <div class="info-card">Cargando evidencias...</div>
+          }
+
+          @if (!isLoadingEvidences && evidences.length === 0) {
+            <div class="empty-evidence">
+              <h3>Aún no hay evidencias</h3>
+              <p>Cuando el contratista agregue evidencias, aparecerán en esta sección.</p>
+            </div>
+          }
+
+          @if (!isLoadingEvidences && evidences.length > 0) {
+            <div class="evidence-list">
+              @for (evidence of evidences; track evidence.evidenceId) {
+                <article class="evidence-card">
+                  <div class="evidence-header">
+                    <div>
+                      <h3>{{ evidence.title }}</h3>
+                      <p>{{ evidence.uploadedByUserName || 'Usuario no especificado' }}</p>
+                    </div>
+
+                    <span class="evidence-type">
+                      {{ evidence.evidenceType | evidenceTypeName }}
+                    </span>
+                  </div>
+
+                  @if (evidence.description) {
+                    <p class="evidence-description">{{ evidence.description }}</p>
+                  }
+
+                  <div class="evidence-meta">
+                    <span><strong>Archivo:</strong> {{ evidence.fileType }}</span>
+                    <span
+                      ><strong>Fecha:</strong>
+                      {{ evidence.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span
+                    >
+                  </div>
+
+                  <a
+                    [href]="evidence.fileUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="secondary-button"
+                  >
+                    Ver archivo
+                  </a>
+
+                  @if (currentRole === 'Contratista') {
+                    <button
+                      type="button"
+                      class="danger-button evidence-delete-button"
+                      [disabled]="isDeletingEvidence"
+                      (click)="deleteEvidence(evidence)"
+                    >
+                      Eliminar evidencia
+                    </button>
+                  }
+                </article>
+              }
+            </div>
+          }
+
+          @if (canUploadEvidence()) {
+            <div class="evidence-form-box">
+              <h3>Agregar evidencia</h3>
+              <p>Agrega una URL de imagen o PDF como evidencia del avance del trabajo.</p>
+
+              <form class="evidence-form" (ngSubmit)="saveEvidence()">
+                <div class="form-grid">
+                  <label>
+                    Tipo de evidencia
+                    <select name="evidenceType" [(ngModel)]="evidenceForm.evidenceType" required>
+                      <option [ngValue]="1">Antes</option>
+                      <option [ngValue]="2">Durante</option>
+                      <option [ngValue]="3">Después</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    Tipo de archivo
+                    <select name="fileType" [(ngModel)]="evidenceForm.fileType" required>
+                      @for (option of fileTypeOptions; track option.value) {
+                        <option [value]="option.value">{{ option.label }}</option>
+                      }
+                    </select>
+                  </label>
+                </div>
+
+                <label>
+                  Título
+                  <input
+                    name="title"
+                    type="text"
+                    [(ngModel)]="evidenceForm.title"
+                    placeholder="Ej. Avance de instalación eléctrica"
+                    required
+                  />
+                </label>
+
+                <label>
+                  URL del archivo
+                  <input
+                    name="fileUrl"
+                    type="url"
+                    [(ngModel)]="evidenceForm.fileUrl"
+                    placeholder="https://..."
+                    required
+                  />
+                </label>
+
+                <label>
+                  Descripción
+                  <textarea
+                    name="description"
+                    rows="4"
+                    [(ngModel)]="evidenceForm.description"
+                    placeholder="Describe brevemente qué muestra esta evidencia."
+                  ></textarea>
+                </label>
+
+                <button type="submit" class="primary-button" [disabled]="isSavingEvidence">
+                  {{ isSavingEvidence ? 'Guardando...' : 'Agregar evidencia' }}
+                </button>
+              </form>
+            </div>
+          }
+
+          @if (!canUploadEvidence() && currentRole === 'Contratista') {
+            <p class="muted-text">
+              Solo puedes agregar evidencias cuando el contrato está en proceso o pendiente de
+              confirmación.
+            </p>
+          }
+        </section>
       </div>
     </section>
   }

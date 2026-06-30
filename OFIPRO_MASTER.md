@@ -2435,6 +2435,35 @@ Impacto: Cliente y contratista ya pueden consultar y avanzar el estado de una co
 
 ---
 
+## D101 Las evidencias deben integrarse al detalle del contrato.
+
+Resultado: El Bloque 23 agrega la visualización y gestión mínima de evidencias dentro del detalle del contrato.
+
+Razón: Las evidencias pertenecen naturalmente al avance de una contratación. No conviene tratarlas como un flujo aislado fuera del contexto del contrato.
+
+Impacto: Cliente y contratista pueden revisar evidencias asociadas directamente a una contratación.
+
+---
+
+## D102 El contratista puede agregar evidencias únicamente cuando el contrato está activo.
+
+Resultado: El formulario de evidencias se muestra al contratista solo cuando el contrato ya no está pendiente de inicio y no está finalizado ni cancelado.
+
+Razón: No tiene sentido permitir evidencias antes de iniciar un trabajo, ni después de finalizar o cancelar la contratación.
+
+Impacto: La UI acompaña las reglas existentes del backend y evita acciones inválidas desde frontend.
+
+---
+
+## D103 Las evidencias del MVP se capturan por URL manual, no por carga real de archivos.
+
+Resultado: En el Bloque 23, el contratista registra evidencias indicando tipo, título, URL, tipo de archivo y descripción.
+
+Razón: El objetivo actual es validar el flujo funcional de evidencias antes de implementar almacenamiento real de archivos.
+
+Impacto: El flujo de evidencias queda probado de extremo a extremo, pero para producción será necesario evolucionarlo a carga real de archivos con almacenamiento seguro.
+
+---
 
 # 15. PROBLEMAS DETECTADOS
 
@@ -3547,6 +3576,54 @@ Riesgo: El usuario no podía continuar el flujo posterior a una propuesta acepta
 Solución: Crear pantallas de Mis contratos y Detalle de contrato, conectadas a los endpoints existentes del backend.
 
 Resultado: Cliente y contratista pueden consultar contratos y cambiar estados básicos según su rol.
+
+---
+
+## P060 El contrato no tenía evidencias visibles desde Angular.
+
+Síntoma: El backend ya contaba con endpoints de evidencias, pero la web no mostraba evidencias dentro del contrato.
+
+Riesgo: El flujo de avance del trabajo quedaba incompleto desde frontend.
+
+Solución: Integrar listado de evidencias dentro del detalle del contrato.
+
+Resultado: Cliente y contratista pueden consultar evidencias asociadas al contrato.
+
+---
+
+## P061 El contratista no podía agregar evidencias desde la web.
+
+Síntoma: Aunque existía endpoint para crear evidencias, el contratista dependía de Swagger o pruebas manuales.
+
+Riesgo: El avance real del trabajo no podía registrarse desde la experiencia web.
+
+Solución: Agregar formulario de evidencia en el detalle del contrato para usuarios con rol Contratista.
+
+Resultado: El contratista puede agregar evidencias desde Angular cuando el estado del contrato lo permite.
+
+---
+
+## P062 El cliente necesitaba consultar evidencias sin tener permisos de edición.
+
+Síntoma: Cliente y contratista debían poder ver evidencias, pero solo el contratista debía poder agregarlas.
+
+Riesgo: Mostrar acciones incorrectas al cliente podía causar confusión y romper la separación de responsabilidades.
+
+Solución: Mostrar listado de evidencias para ambos roles, pero formulario de creación solo para Contratista.
+
+Resultado: El cliente puede consultar evidencias sin ver acciones que no le corresponden.
+
+---
+
+## P063 La eliminación de evidencias necesitaba acción mínima desde frontend.
+
+Síntoma: El contratista podía crear evidencias, pero no tenía forma de eliminarlas desde Angular.
+
+Riesgo: Una evidencia agregada por error quedaba dependiente de intervención técnica.
+
+Solución: Agregar botón de eliminación de evidencia para rol Contratista.
+
+Resultado: El contratista puede eliminar evidencias desde el detalle del contrato.
 
 ---
 
@@ -5165,6 +5242,64 @@ Impacto: El flujo posterior a la aceptación de propuesta ya no queda oculto en 
 
 ---
 
+## HITO 23 Frontend: evidencias mínimas por contrato completado.
+Incluye:
+
+* Creación de modelos Angular para evidencias.
+* Creación de `EvidenceService`.
+* Creación de `EvidenceTypeNamePipe`.
+* Integración de evidencias dentro del detalle del contrato.
+* Consulta de evidencias por contrato.
+* Formulario para agregar evidencia.
+* Eliminación de evidencia.
+* Visualización de tipo de evidencia.
+* Visualización de título, descripción, URL, tipo de archivo, usuario y fecha.
+* Control visual por rol.
+* Control visual por estado de contrato.
+* Manejo de mensajes de éxito y error.
+* Recarga de evidencias después de crear o eliminar.
+
+Archivos agregados:
+
+* `core/models/evidence.models.ts`
+* `core/services/evidence.service.ts`
+* `core/pipes/evidence-type-name.pipe.ts`
+
+Endpoint consumidos:
+
+* GET /api/contracts/{contractId}/evidences
+* POST /api/contracts/{contractId}/evidences
+* DELETE /api/evidences/{evidenceId}
+
+Reglas implementadas:
+
+* Cliente y Contratista pueden ver evidencias del contrato.
+* Solo Contratista puede ver el formulario para agregar evidencia.
+* El formulario de evidencia solo se muestra cuando el contrato está En proceso o Pendiente de confirmación.
+* No se permite agregar evidencia desde la UI si el contrato está Pendiente de inicio, Finalizado o Cancelado.
+* El contratista puede eliminar evidencias desde Angular.
+* El frontend no sube archivos reales todavía; registra URL de archivo como flujo mínimo.
+
+Pruebas realizadas:
+
+* Contratista abre detalle de contrato → correcto.
+* Contratista ve sección de evidencias → correcto.
+* Contratista no puede agregar evidencia si contrato está Pendiente de inicio → correcto.
+* Contratista inicia contrato → correcto.
+* Contratista agrega evidencia en contrato activo → correcto.
+* Evidencia aparece en listado → correcto.
+* Cliente abre el mismo contrato → correcto.
+* Cliente ve evidencia agregada por contratista → correcto.
+* Cliente no ve formulario para agregar evidencia → correcto.
+* Contratista elimina evidencia → correcto.
+* Recarga de evidencias después de eliminar → correcto.
+* `ng build` → correcto.
+* `ng build --configuration production` → correcto.
+
+Resultado: Bloque 23 completado correctamente. El contrato ya permite consultar y registrar evidencias mínimas desde Angular.
+
+Impacto: OfiPro ya conecta el flujo de trabajo posterior a la contratación: contrato activo → evidencias del avance → consulta por cliente y contratista.
+
 
 ## ESTADO ACTUAL BACKEND
 
@@ -5291,6 +5426,7 @@ Servicios frontend creados:
 * `CatalogService`
 * `ProposalService`
 * `ContractService`
+* `EvidenceService`
 
 Pipes frontend creados:
 
@@ -5298,6 +5434,7 @@ Pipes frontend creados:
 * `ProjectStatusNamePipe`
 * `ProposalStatusNamePipe`
 * `ContractStatusNamePipe`
+* `EvidenceTypeNamePipe`
 
 Seguridad frontend implementada:
 
@@ -5340,8 +5477,12 @@ Flujos probados:
 * Consulta de Mis contratos como contratista.
 * Consulta de detalle de contrato.
 * Cambio de estado de contrato según rol.
+* Consulta de evidencias por contrato.
+* Agregado de evidencia por contratista.
+* Visualización de evidencia por cliente.
+* Eliminación de evidencia por contratista.
 * Consulta de catálogos sin autenticación.
-* Uso de pipes para estados y urgencias.
+* Uso de pipes para estados, urgencias y tipos de evidencia.
 
 Validaciones finales:
 
@@ -5357,3 +5498,6 @@ Estado:
 * Bloque 21 - Frontend: cliente revisa propuestas recibidas completado correctamente.
 * Bloque 21.1 - Limpieza técnica pre-contratos completado correctamente.
 * Bloque 22 - Frontend: contratos mínimos completado correctamente.
+* Bloque 23 - Frontend: evidencias mínimas por contrato completado correctamente.
+
+

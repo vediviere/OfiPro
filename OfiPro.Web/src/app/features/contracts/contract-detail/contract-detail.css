@@ -136,6 +136,142 @@
   border-radius: 10px;
 }
 
+.evidences-section {
+  margin-top: 28px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px;
+  background: #f9fafb;
+}
+
+.evidences-section h2 {
+  margin-top: 0;
+}
+
+.empty-evidence,
+.evidence-card,
+.evidence-form-box {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  background: #ffffff;
+}
+
+.empty-evidence h3 {
+  margin: 0 0 8px;
+}
+
+.empty-evidence p {
+  margin: 0;
+  color: #4b5563;
+}
+
+.evidence-list {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.evidence-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.evidence-header h3 {
+  margin: 0 0 4px;
+}
+
+.evidence-header p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.evidence-type {
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.evidence-description {
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.evidence-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0;
+  color: #374151;
+}
+
+.secondary-button {
+  display: inline-block;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 700;
+  padding: 10px 14px;
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.evidence-delete-button {
+  margin-left: 10px;
+}
+
+.evidence-form-box {
+  margin-top: 22px;
+}
+
+.evidence-form-box h3 {
+  margin: 0 0 8px;
+}
+
+.evidence-form-box p {
+  margin: 0 0 18px;
+  color: #4b5563;
+}
+
+.evidence-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-weight: 700;
+  color: #111827;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 11px 12px;
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
 @media (max-width: 768px) {
   .contract-detail-page {
     padding: 22px;
@@ -152,5 +288,19 @@
 
   .actions-row {
     flex-direction: column;
+  }
+
+  .evidence-header {
+    flex-direction: column;
+  }
+
+  .evidence-meta,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .evidence-delete-button {
+    margin-left: 0;
+    margin-top: 10px;
   }
 }

@@ -4859,7 +4859,7 @@ Bloque 19 - Frontend: flujo cliente mínimo → Completo
 
 ## Evaluación de velocidad
 
-Ritmo: Muy bueno.
+Ritmo: 🟢 Muy bueno.
 
 El bloque avanzó de forma sólida porque ya existía una base frontend funcional del Bloque 18. Se pasó de una web con login y dashboards mínimos a un flujo real de cliente conectado a backend:
 
@@ -5182,7 +5182,7 @@ Bloque 21 - Frontend: cliente revisa propuestas recibidas → Completo
 
 ## Evaluación de velocidad
 
-Ritmo: Muy bueno.
+Ritmo: 🟢 Muy bueno.
 
 Se avanzó rápido porque el backend ya tenía reglas sólidas para proyectos, propuestas y contrataciones. El trabajo principal fue conectar Angular con endpoints existentes y resolver detalles normales de integración.
 
@@ -5481,7 +5481,7 @@ Bloque 22 - Frontend: contratos mínimos → Completo
 
 ## Evaluación de velocidad
 
-Ritmo: Muy bueno.
+Ritmo: 🟢 Muy bueno.
 
 El avance fue ordenado porque se detuvo el desarrollo antes de que la duplicación creciera más. La limpieza con pipes llegó en el momento correcto: antes de contratos y antes de que el frontend se volviera difícil de mantener.
 
@@ -5516,5 +5516,243 @@ Alcance sugerido:
 * Cliente consulta evidencias.
 * Mostrar tipo de evidencia, URL, descripción y fecha.
 * Conectar evidencias con el flujo de contrato.
+
+# =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-30
+
+## Objetivo
+
+Implementar, probar y cerrar:
+
+* Bloque 23 - Frontend: evidencias mínimas por contrato.
+
+# =====================================
+
+## Contexto
+
+Después del Bloque 22, OfiPro ya permitía consultar contratos y avanzar estados básicos desde Angular:
+
+* Contratista inicia contratación.
+* Contratista envía a confirmación.
+* Cliente finaliza contratación.
+* Cliente o contratista cancelan cuando aplica.
+
+El siguiente paso natural era conectar el avance real del trabajo con evidencias visibles dentro del contrato.
+
+# =====================================
+
+## Bloque 23 - Frontend: evidencias mínimas por contrato
+
+Completado:
+
+* Se creó `evidence.models.ts`.
+* Se creó `EvidenceService`.
+* Se creó `EvidenceTypeNamePipe`.
+* Se integró sección de evidencias dentro de `ContractDetail`.
+* Se conectó consulta de evidencias por contrato.
+* Se conectó creación de evidencia por contrato.
+* Se conectó eliminación de evidencia.
+* Se agregó formulario mínimo para evidencias.
+* Se agregó visualización de evidencias existentes.
+* Se agregó control visual por rol.
+* Se agregó control visual por estado del contrato.
+* Se agregaron mensajes de éxito y error.
+* Se recargan evidencias después de crear o eliminar.
+
+Endpoints consumidos:
+
+* GET /api/contracts/{contractId}/evidences
+* POST /api/contracts/{contractId}/evidences
+* DELETE /api/evidences/{evidenceId}
+
+Datos mostrados por evidencia:
+
+* Tipo de evidencia.
+* Título.
+* Descripción.
+* URL del archivo.
+* Tipo de archivo.
+* Usuario que subió la evidencia.
+* Fecha de creación.
+
+Reglas aplicadas:
+
+* Cliente y Contratista pueden consultar evidencias.
+* Solo Contratista puede agregar evidencias.
+* Solo se muestra formulario de evidencia cuando el contrato está activo.
+* No se muestra formulario si el contrato está Pendiente de inicio, Finalizado o Cancelado.
+* El contratista puede eliminar evidencias.
+* El MVP usa URL manual de archivo; no carga física de archivos todavía.
+
+Resultado:
+
+* Contratista puede agregar evidencia desde Angular.
+* Cliente puede ver evidencia desde Angular.
+* Contratista puede eliminar evidencia desde Angular.
+* El flujo de avance del contrato queda conectado visualmente.
+
+# =====================================
+
+## Problemas detectados y corregidos
+
+### Evidencias no visibles desde Angular
+
+Síntoma:
+
+* El backend ya tenía endpoints de evidencias, pero no existía UI para consultarlas.
+
+Solución:
+
+* Agregar sección de evidencias en el detalle del contrato.
+
+Resultado:
+
+* Cliente y contratista pueden consultar evidencias asociadas al contrato.
+
+### Contratista no podía agregar evidencias desde la web
+
+Síntoma:
+
+* El contratista dependía de Swagger para crear evidencias.
+
+Solución:
+
+* Agregar formulario mínimo de evidencia en el detalle del contrato.
+
+Resultado:
+
+* El contratista puede registrar evidencias desde Angular.
+
+### Cliente debía ver evidencias sin poder editarlas
+
+Síntoma:
+
+* Era necesario diferenciar visualmente permisos entre Cliente y Contratista.
+
+Solución:
+
+* Mostrar evidencias a ambos roles, pero formulario solo al Contratista.
+
+Resultado:
+
+* El cliente consulta evidencias sin ver acciones que no le corresponden.
+
+### Evidencias por URL manual
+
+Síntoma:
+
+* El MVP todavía no cuenta con carga real de archivos.
+
+Decisión:
+
+* Usar URL manual para validar flujo funcional.
+
+Resultado:
+
+* El flujo queda probado, dejando carga real de archivos como mejora futura.
+
+# =====================================
+
+## Pruebas realizadas
+
+Frontend:
+
+* Contratista abre detalle de contrato → correcto.
+* Contratista ve sección de evidencias → correcto.
+* Contratista no puede agregar evidencia si contrato está Pendiente de inicio → correcto.
+* Contratista inicia contrato → correcto.
+* Contratista agrega evidencia en contrato activo → correcto.
+* Evidencia aparece en listado → correcto.
+* Cliente abre el mismo contrato → correcto.
+* Cliente ve evidencia agregada → correcto.
+* Cliente no ve formulario para agregar evidencia → correcto.
+* Contratista elimina evidencia → correcto.
+* Evidencias se recargan después de eliminar → correcto.
+* `ng build` → correcto.
+* `ng build --configuration production` → correcto.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+Bloque 2 - Auth → Completo
+Bloque 3 - Usuarios → Completo
+Bloque 4 - Proyectos → Completo
+Bloque 5 - Propuestas → Completo
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+Bloque 6 - Contrataciones → Completo
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+Bloque 6.10 - Orden de interfaces Application → Completo
+Bloque 6.11 - Correcciones diagnóstico pre-Bloque 7 → Completo
+Bloque 7 - Evidencias V1 → Completo
+Bloque 7.1 - Corrección diagnóstico Evidencias → Completo
+Bloque 7.2 - Notificaciones internas base → Completo
+Bloque 8 - Calificaciones y reputación V1 → Completo
+Bloque 8.1 - Endurecimiento Ratings/Reputación → Completo
+Bloque 8.2 - Correcciones diagnóstico Ratings/Reputación → Completo
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+Bloque 10.1 - Corrección diagnóstico ProfessionalProfile y búsqueda → Completo
+Bloque 11 - Expiración automática de proyectos → Completo
+Bloque 12 - Paginación y ordenamiento básico → Completo
+Bloque 13 - Pruebas automatizadas mínimas de API → Completo
+Bloque 14 - Invitaciones directas a contratistas → Completo
+Bloque 15 - Refresh tokens para experiencia móvil → Completo
+Bloque 15.3 - Correcciones diagnóstico post-refresh tokens → Completo
+Bloque 16 - Seguridad V1 / Hardening básico → Completo
+Bloque 17 - Revisión de preparación para frontend → Completo
+Bloque 18 - Web responsiva mínima → Completo
+Bloque 19 - Frontend: flujo cliente mínimo → Completo
+Bloque 20 - Frontend: flujo contratista mínimo → Completo
+Bloque 21 - Frontend: cliente revisa propuestas recibidas → Completo
+Bloque 21.1 - Limpieza técnica pre-contratos → Completo
+Bloque 22 - Frontend: contratos mínimos → Completo
+Bloque 23 - Frontend: evidencias mínimas por contrato → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: Muy bueno.
+
+El bloque avanzó rápido porque el backend ya tenía reglas de evidencias bien definidas. Angular se concentró en consumir los endpoints existentes, mostrar la información correcta y limitar acciones por rol y estado del contrato.
+
+El flujo de OfiPro ya cubre:
+Cliente publica → Contratista propone → Cliente acepta → Se genera contrato → Contratista inicia → Contratista agrega evidencia → Cliente revisa evidencia.
+
+Todavía falta pulido UI/UX y carga real de archivos para producción, pero funcionalmente el avance del trabajo ya puede registrarse y visualizarse.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Pegar documentación en `OFIPRO_MASTER.md`.
+* Pegar documentación en `SESSION_LOG.md`.
+* Revisar `git status`.
+* Hacer commit de Bloque 23.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 24 - Frontend: calificaciones mínimas post-contrato.
+
+Razón:
+Después de que un contrato puede finalizar, el siguiente paso natural es permitir que cliente y contratista califiquen la experiencia desde Angular.
+
+Alcance sugerido:
+
+* Cliente califica contratista.
+* Contratista califica cliente.
+* Ver calificaciones asociadas a contrato.
+* Evitar duplicar calificación si ya existe.
+* Mostrar reputación básica en perfil o vista relacionada.
 
 # =====================================
