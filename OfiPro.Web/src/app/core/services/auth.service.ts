@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { finalize, Observable, shareReplay, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginRequest, UserRole } from '../models/auth.models';
+import { AuthResponse, LoginRequest, RefreshTokenRequest, UserRole } from '../models/auth.models';
 
 @Injectable({
   providedIn: 'root',
@@ -15,12 +15,38 @@ export class AuthService {
   private readonly refreshTokenKey = 'ofipro_refresh_token';
   private readonly userKey = 'ofipro_user';
 
+  private refreshTokenRequest$: Observable<AuthResponse> | null = null;
+
   constructor(private readonly http: HttpClient) {}
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/login`, request)
       .pipe(tap((response) => this.saveSession(response)));
+  }
+
+  refreshToken(): Observable<AuthResponse> {
+    if (this.refreshTokenRequest$) {
+      return this.refreshTokenRequest$;
+    }
+
+    const refreshToken = this.getRefreshToken();
+
+    const request: RefreshTokenRequest = {
+      refreshToken: refreshToken ?? '',
+    };
+
+    this.refreshTokenRequest$ = this.http
+      .post<AuthResponse>(`${this.apiUrl}/refresh-token`, request)
+      .pipe(
+        tap((response) => this.saveSession(response)),
+        finalize(() => {
+          this.refreshTokenRequest$ = null;
+        }),
+        shareReplay(1),
+      );
+
+    return this.refreshTokenRequest$;
   }
 
   logout(): void {

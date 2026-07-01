@@ -13,6 +13,9 @@ import { EvidenceService } from '../../../core/services/evidence.service';
 import { ContractStatusNamePipe } from '../../../core/pipes/contract-status-name.pipe';
 import { EvidenceTypeNamePipe } from '../../../core/pipes/evidence-type-name.pipe';
 
+import { Rating, ratingScoreOptions } from '../../../core/models/rating.models';
+import { RatingService } from '../../../core/services/rating.service';
+
 @Component({
   selector: 'app-contract-detail',
   imports: [CommonModule, FormsModule, RouterLink, ContractStatusNamePipe, EvidenceTypeNamePipe],
@@ -22,9 +25,11 @@ import { EvidenceTypeNamePipe } from '../../../core/pipes/evidence-type-name.pip
 export class ContractDetail implements OnInit {
   contract: Contract | null = null;
   evidences: Evidence[] = [];
+  ratings: Rating[] = [];
   currentRole: UserRole | null = null;
 
   readonly fileTypeOptions = fileTypeOptions;
+  readonly ratingScoreOptions = ratingScoreOptions;
 
   evidenceForm = {
     evidenceType: 1,
@@ -34,21 +39,31 @@ export class ContractDetail implements OnInit {
     fileType: 'image/jpeg',
   };
 
+  ratingForm = {
+    score: 5,
+    comment: '',
+  };
+
   isLoading = true;
   isLoadingEvidences = false;
   isProcessing = false;
   isSavingEvidence = false;
   isDeletingEvidence = false;
+  isLoadingRatings = false;
+  isSavingRating = false;
 
   errorMessage = '';
   successMessage = '';
   evidenceErrorMessage = '';
   evidenceSuccessMessage = '';
+  ratingErrorMessage = '';
+  ratingSuccessMessage = '';
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly contractService: ContractService,
     private readonly evidenceService: EvidenceService,
+    private readonly ratingService: RatingService,
     private readonly authService: AuthService,
   ) {}
 
@@ -65,6 +80,7 @@ export class ContractDetail implements OnInit {
 
     this.loadContract(contractId);
     this.loadEvidences(contractId);
+    this.loadRatings(contractId);
   }
 
   canStart(): boolean {
@@ -101,6 +117,90 @@ export class ContractDetail implements OnInit {
       this.contract.status !== ContractStatus.Finalizado &&
       this.contract.status !== ContractStatus.Cancelado
     );
+  }
+
+  canRateContract(): boolean {
+    return (
+      !!this.contract &&
+      this.contract.status === ContractStatus.Finalizado &&
+      (this.currentRole === 'Cliente' || this.currentRole === 'Contratista') &&
+      !this.hasCurrentUserRated()
+    );
+  }
+
+  hasCurrentUserRated(): boolean {
+    const currentUserId = this.getCurrentUserIdFromContract();
+
+    if (!currentUserId) {
+      return false;
+    }
+
+    return this.ratings.some((rating) => rating.raterUserId === currentUserId);
+  }
+
+  getCurrentUserRating(): Rating | null {
+    const currentUserId = this.getCurrentUserIdFromContract();
+
+    if (!currentUserId) {
+      return null;
+    }
+
+    return this.ratings.find((rating) => rating.raterUserId === currentUserId) ?? null;
+  }
+
+  getCounterpartNameForRating(): string {
+    if (!this.contract) {
+      return 'el usuario';
+    }
+
+    if (this.currentRole === 'Cliente') {
+      return this.contract.contractorName;
+    }
+
+    if (this.currentRole === 'Contratista') {
+      return this.contract.clientName;
+    }
+
+    return 'el usuario';
+  }
+
+  saveRating(): void {
+    this.ratingErrorMessage = '';
+    this.ratingSuccessMessage = '';
+
+    if (!this.contract) {
+      this.ratingErrorMessage = 'No se encontró la contratación.';
+      return;
+    }
+
+    if (!this.isRatingFormValid()) {
+      this.ratingErrorMessage = 'Selecciona una calificación válida entre 1 y 5.';
+      return;
+    }
+
+    this.isSavingRating = true;
+
+    this.ratingService
+      .create(this.contract.contractId, {
+        score: Number(this.ratingForm.score),
+        comment: this.ratingForm.comment.trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.ratingSuccessMessage = 'Calificación registrada correctamente.';
+          this.isSavingRating = false;
+          this.resetRatingForm();
+          this.loadRatings(this.contract!.contractId);
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error('Error al registrar calificación:', error.error);
+
+          this.ratingErrorMessage =
+            this.getBackendErrorMessage(error) || 'No se pudo registrar la calificación.';
+
+          this.isSavingRating = false;
+        },
+      });
   }
 
   startContract(): void {
@@ -222,6 +322,21 @@ export class ContractDetail implements OnInit {
     });
   }
 
+  private loadRatings(contractId: string): void {
+    this.isLoadingRatings = true;
+
+    this.ratingService.getByContract(contractId).subscribe({
+      next: (response) => {
+        this.ratings = response;
+        this.isLoadingRatings = false;
+      },
+      error: () => {
+        this.ratingErrorMessage = 'No se pudieron cargar las calificaciones del contrato.';
+        this.isLoadingRatings = false;
+      },
+    });
+  }
+
   private updateStatus(newStatus: number, confirmationMessage: string): void {
     if (!this.contract) {
       return;
@@ -269,6 +384,35 @@ export class ContractDetail implements OnInit {
       description: '',
       fileUrl: '',
       fileType: 'image/jpeg',
+    };
+  }
+
+  private getCurrentUserIdFromContract(): string {
+    if (!this.contract) {
+      return '';
+    }
+
+    if (this.currentRole === 'Cliente') {
+      return this.contract.clientUserId;
+    }
+
+    if (this.currentRole === 'Contratista') {
+      return this.contract.contractorUserId;
+    }
+
+    return '';
+  }
+
+  private isRatingFormValid(): boolean {
+    const score = Number(this.ratingForm.score);
+
+    return score >= 1 && score <= 5;
+  }
+
+  private resetRatingForm(): void {
+    this.ratingForm = {
+      score: 5,
+      comment: '',
     };
   }
 

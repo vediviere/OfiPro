@@ -265,5 +265,104 @@
         </section>
       </div>
     </section>
+    <section class="ratings-section">
+      <h2>Calificaciones del contrato</h2>
+
+      @if (ratingErrorMessage) {
+        <div class="error-message">{{ ratingErrorMessage }}</div>
+      }
+
+      @if (ratingSuccessMessage) {
+        <div class="success-message">{{ ratingSuccessMessage }}</div>
+      }
+
+      @if (isLoadingRatings) {
+        <div class="info-card">Cargando calificaciones...</div>
+      }
+
+      @if (!isLoadingRatings && ratings.length === 0) {
+        <div class="empty-rating">
+          <h3>Aún no hay calificaciones</h3>
+          <p>
+            Cuando el contrato esté finalizado, cliente y contratista podrán calificar la
+            experiencia.
+          </p>
+        </div>
+      }
+
+      @if (!isLoadingRatings && ratings.length > 0) {
+        <div class="rating-list">
+          @for (rating of ratings; track rating.ratingId) {
+            <article class="rating-card">
+              <div class="rating-header">
+                <div>
+                  <h3>{{ rating.raterUserName }}</h3>
+                  <p>Calificó a {{ rating.ratedUserName }}</p>
+                </div>
+
+                <span class="rating-score"> {{ rating.score }}/5 </span>
+              </div>
+
+              @if (rating.comment) {
+                <p class="rating-comment">{{ rating.comment }}</p>
+              }
+
+              <p class="rating-date">
+                {{ rating.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+              </p>
+            </article>
+          }
+        </div>
+      }
+
+      @if (contract.status !== 4) {
+        <p class="muted-text">
+          Las calificaciones estarán disponibles cuando el contrato esté finalizado.
+        </p>
+      }
+
+      @if (getCurrentUserRating()) {
+        <div class="current-rating-box">
+          <h3>Tu calificación ya fue registrada</h3>
+          <p>
+            Ya calificaste esta contratación. El backend no permite duplicar calificaciones en la
+            misma dirección.
+          </p>
+        </div>
+      }
+
+      @if (canRateContract()) {
+        <div class="rating-form-box">
+          <h3>Calificar a {{ getCounterpartNameForRating() }}</h3>
+          <p>Registra tu experiencia en esta contratación.</p>
+
+          <form class="rating-form" (ngSubmit)="saveRating()">
+            <label>
+              Calificación
+              <select name="score" [(ngModel)]="ratingForm.score" required>
+                @for (option of ratingScoreOptions; track option.value) {
+                  <option [ngValue]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </label>
+
+            <label>
+              Comentario
+              <textarea
+                name="comment"
+                rows="4"
+                [(ngModel)]="ratingForm.comment"
+                maxlength="1000"
+                placeholder="Describe brevemente cómo fue la experiencia."
+              ></textarea>
+            </label>
+
+            <button type="submit" class="primary-button" [disabled]="isSavingRating">
+              {{ isSavingRating ? 'Guardando...' : 'Registrar calificación' }}
+            </button>
+          </form>
+        </div>
+      }
+    </section>
   }
 </section>

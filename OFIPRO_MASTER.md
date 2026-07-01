@@ -2465,6 +2465,71 @@ Impacto: El flujo de evidencias queda probado de extremo a extremo, pero para pr
 
 ---
 
+## D104 Las calificaciones deben integrarse al detalle del contrato finalizado.
+
+Resultado: El Bloque 24 agrega la consulta y creación de calificaciones dentro del detalle del contrato.
+
+Razón: La calificación es una consecuencia natural de una contratación finalizada. No conviene manejarla como una pantalla aislada sin contexto.
+
+Impacto: Cliente y contratista pueden cerrar el ciclo de reputación desde el mismo flujo de contrato.
+
+---
+
+## D105 Solo contratos finalizados deben permitir calificación.
+
+Resultado: El formulario de calificación solo se muestra cuando el contrato está en estado Finalizado.
+
+Razón: No tiene sentido calificar una contratación que todavía está pendiente, en proceso, pendiente de confirmación o cancelada.
+
+Impacto: La UI acompaña las reglas del backend y evita acciones inválidas desde frontend.
+
+---
+
+## D106 Cliente y contratista califican en direcciones opuestas.
+
+Resultado: El cliente califica al contratista y el contratista califica al cliente dentro del mismo contrato.
+
+Razón: OfiPro usa reputación bidireccional. La confianza no solo debe medirse del cliente hacia el contratista, sino también del contratista hacia el cliente.
+
+Impacto: El sistema mantiene el enfoque de reputación en doble sentido definido desde backend.
+
+---
+
+## D107 El frontend no debe permitir visualmente duplicar calificaciones.
+
+Resultado: Después de que el usuario actual califica, el formulario desaparece y se muestra aviso de calificación ya registrada.
+
+Razón: El backend ya impide duplicados, pero la UI debe evitar que el usuario intente repetir una acción que ya no corresponde.
+
+Impacto: La experiencia queda más clara y se reducen errores esperados de uso.
+
+---
+
+## D108 El refresh token debe integrarse con guards e interceptor.
+
+Resultado: El Bloque 24.1 integra refresh token automático en:
+
+* AuthService.
+* AuthInterceptor.
+* AuthGuard.
+* RoleGuard.
+
+Razón: El interceptor solo puede actuar cuando existe una respuesta HTTP 401. Si el token falla antes de entrar a una ruta, los guards pueden mandar al login antes de que el interceptor intervenga.
+
+Impacto: La sesión del usuario queda más estable durante navegación y consumo de API.
+
+---
+
+## D109 El refresh token debe evitar múltiples refresh simultáneos.
+
+Resultado: Se usa una estrategia compartida para que varios requests o guards no intenten refrescar el token al mismo tiempo.
+
+Razón: El backend revoca/genera refresh tokens. Si varias peticiones intentan usar el mismo refresh token simultáneamente, pueden invalidarse entre sí.
+
+Impacto: Se reduce el riesgo de cierres de sesión innecesarios y fallos por concurrencia básica.
+
+---
+
 # 15. PROBLEMAS DETECTADOS
 
 ## P01
@@ -3627,6 +3692,77 @@ Resultado: El contratista puede eliminar evidencias desde el detalle del contrat
 
 ---
 
+## P064 No existía flujo de calificaciones desde Angular.
+
+Síntoma: El backend ya permitía crear y consultar calificaciones, pero la web no tenía UI para usarlas.
+
+Riesgo: El ciclo de reputación quedaba incompleto desde frontend.
+
+Solución: Agregar sección de calificaciones dentro del detalle del contrato.
+
+Resultado: Cliente y contratista pueden consultar calificaciones del contrato desde Angular.
+
+---
+
+## P065 El usuario podía terminar contrato sin cerrar la experiencia con reputación.
+
+Síntoma: Después de finalizar una contratación, no había una acción visible para calificar.
+
+Riesgo: La reputación quedaba desconectada del cierre natural del trabajo.
+
+Solución: Mostrar formulario de calificación cuando el contrato está finalizado.
+
+Resultado: La calificación queda conectada al cierre del contrato.
+
+---
+
+## P066 Era necesario evitar duplicación visual de calificaciones.
+
+Síntoma: Sin control visual, el usuario podía intentar calificar más de una vez.
+
+Riesgo: Aunque backend rechazara el duplicado, la experiencia podía parecer rota o confusa.
+
+Solución: Detectar si el usuario actual ya calificó y ocultar el formulario.
+
+Resultado: El usuario ve aviso de calificación registrada y no intenta repetir la acción.
+
+---
+
+## P067 El refresh token pendiente desde Bloque 18 no estaba integrado en frontend.
+
+Síntoma: Si el access token expiraba, el usuario podía recibir 401 y terminar obligado a iniciar sesión otra vez.
+
+Riesgo: Mala experiencia de sesión, especialmente en flujos largos como proyectos, contratos, evidencias y calificaciones.
+
+Solución: Agregar refresh token automático en AuthService e interceptor.
+
+Resultado: Requests con 401 pueden refrescar token y reintentarse automáticamente.
+
+---
+
+## P068 El refresh desde interceptor no cubría navegación protegida por guards.
+
+Síntoma: Al entrar a una ruta protegida con token inválido o vencido, el guard podía redirigir a login antes de que existiera una llamada HTTP interceptable.
+
+Riesgo: El refresh token parecía no funcionar al navegar entre rutas.
+
+Solución: Ajustar AuthGuard y RoleGuard para intentar refresh antes de mandar al login.
+
+Resultado: La navegación protegida puede recuperar sesión usando refresh token.
+
+---
+
+## P069 Refresh token inválido debía cerrar sesión correctamente.
+
+Síntoma: Si access token y refresh token eran inválidos, la sesión podía quedar en estado inconsistente.
+
+Riesgo: El usuario podía quedar con datos locales inválidos o navegación rota.
+
+Solución: Si falla refresh token, limpiar sesión y redirigir a login.
+
+Resultado: El sistema falla de forma segura y limpia.
+
+---
 
 # 16. RIESGOS
 
@@ -5300,6 +5436,115 @@ Resultado: Bloque 23 completado correctamente. El contrato ya permite consultar 
 
 Impacto: OfiPro ya conecta el flujo de trabajo posterior a la contratación: contrato activo → evidencias del avance → consulta por cliente y contratista.
 
+---
+
+## HITO 24 Frontend: calificaciones mínimas post-contrato completado.
+
+Incluye:
+
+* Creación de modelos Angular para calificaciones.
+* Creación de `RatingService`.
+* Integración de calificaciones dentro del detalle del contrato.
+* Consulta de calificaciones por contrato.
+* Formulario para registrar calificación.
+* Visualización de calificaciones existentes.
+* Control visual por estado de contrato.
+* Control visual para evitar duplicar calificación del usuario actual.
+* Manejo de mensajes de éxito y error.
+* Recarga de calificaciones después de registrar una nueva.
+
+Archivos agregados:
+
+* `core/models/rating.models.ts`
+* `core/services/rating.service.ts`
+
+Endpoints consumidos:
+
+* GET /api/contracts/{contractId}/ratings
+* POST /api/contracts/{contractId}/ratings
+
+Reglas implementadas:
+
+* Solo contratos finalizados muestran formulario de calificación.
+* Cliente califica al contratista.
+* Contratista califica al cliente.
+* Cliente y contratista pueden ver calificaciones del contrato.
+* Si el usuario actual ya calificó, el formulario no vuelve a mostrarse.
+* El backend conserva la autoridad para impedir duplicados y validar reglas críticas.
+
+Pruebas realizadas:
+
+* Contrato no finalizado no muestra formulario de calificación → correcto.
+* Cliente finaliza contrato → correcto.
+* Cliente califica contratista → correcto.
+* Calificación aparece en listado → correcto.
+* Cliente ya no ve formulario después de calificar → correcto.
+* Contratista abre el mismo contrato → correcto.
+* Contratista califica cliente → correcto.
+* Ambas calificaciones aparecen en listado → correcto.
+* `ng build` → correcto.
+* `ng build --configuration production` → correcto.
+
+Resultado: Bloque 24 completado correctamente. El flujo de contrato finalizado ya conecta con reputación básica desde Angular.
+
+Impacto: OfiPro ya permite cerrar el ciclo completo del marketplace desde web responsiva:
+Cliente publica → Contratista propone → Cliente acepta → Contrato inicia → Evidencias → Contrato finaliza → Calificaciones.
+
+---
+
+## HITO 24.1 Refresh token automático en Angular completado.
+
+Incluye:
+
+* Ajuste de modelos de autenticación para refresh token.
+* Agregado de `refreshToken()` en `AuthService`.
+* Reutilización de `saveSession()` para guardar nueva sesión.
+* Prevención de múltiples refresh simultáneos desde AuthService.
+* Ajuste de `authInterceptor`.
+* Reintento automático del request original después de refresh exitoso.
+* Exclusión de endpoints de autenticación para evitar loops.
+* Ajuste de `authGuard`.
+* Ajuste de `roleGuard`.
+* Limpieza de sesión si refresh token falla.
+* Redirección a login cuando refresh token es inválido.
+
+Archivos modificados:
+
+* `core/models/auth.models.ts`
+* `core/services/auth.service.ts`
+* `core/interceptors/auth.interceptor.ts`
+* `core/guards/auth.guard.ts`
+* `core/guards/role.guard.ts`
+
+Reglas implementadas:
+
+* Requests normales envían JWT.
+* Si API responde 401, Angular intenta refresh token.
+* Si refresh token funciona, se guarda nueva sesión.
+* Si refresh token funciona, se reintenta el request original.
+* Si refresh token falla, se limpia sesión y se redirige a login.
+* Los guards intentan refresh antes de mandar a login.
+* RoleGuard valida rol después del refresh.
+* Endpoints de login, register, refresh y revoke no se interceptan con token viejo.
+
+Pruebas realizadas:
+
+* Login normal → correcto.
+* Refresh desde AuthGuard → correcto.
+* Refresh desde RoleGuard → correcto.
+* Refresh desde interceptor → correcto.
+* Reintento automático del request original → correcto.
+* Refresh token inválido limpia sesión → correcto.
+* Refresh token inválido redirige a login → correcto.
+* Validación de roles después del refresh → correcto.
+* `ng build` → correcto.
+* `ng build --configuration production` → correcto.
+
+Resultado: Bloque 24.1 completado correctamente. La sesión frontend ya soporta refresh token automático de forma funcional para el MVP.
+
+Impacto: La experiencia de usuario mejora considerablemente, especialmente en sesiones largas donde el access token puede expirar mientras el usuario navega o realiza acciones.
+
+---
 
 ## ESTADO ACTUAL BACKEND
 
@@ -5427,6 +5672,7 @@ Servicios frontend creados:
 * `ProposalService`
 * `ContractService`
 * `EvidenceService`
+* `RatingService`
 
 Pipes frontend creados:
 
@@ -5446,6 +5692,10 @@ Seguridad frontend implementada:
 * Lectura de roles desde JWT.
 * Soporte para usuarios multirrol.
 * Menú interno filtrado por rol.
+* Refresh token automático.
+* Reintento automático de requests con 401.
+* Refresh desde guards antes de redirigir a login.
+* Limpieza de sesión si refresh token falla.
 
 Flujos probados:
 
@@ -5456,6 +5706,9 @@ Flujos probados:
 * Bloqueo de rutas sin sesión.
 * Bloqueo de rutas por rol incorrecto.
 * Logout.
+* Refresh token desde navegación protegida.
+* Refresh token desde requests HTTP.
+* Cierre de sesión por refresh token inválido.
 * Consumo de endpoint protegido `/api/dashboard/me`.
 * Consulta de proyectos del cliente.
 * Creación de proyecto desde Angular.
@@ -5481,6 +5734,10 @@ Flujos probados:
 * Agregado de evidencia por contratista.
 * Visualización de evidencia por cliente.
 * Eliminación de evidencia por contratista.
+* Consulta de calificaciones por contrato.
+* Cliente califica contratista.
+* Contratista califica cliente.
+* Prevención visual de calificación duplicada.
 * Consulta de catálogos sin autenticación.
 * Uso de pipes para estados, urgencias y tipos de evidencia.
 
@@ -5499,5 +5756,9 @@ Estado:
 * Bloque 21.1 - Limpieza técnica pre-contratos completado correctamente.
 * Bloque 22 - Frontend: contratos mínimos completado correctamente.
 * Bloque 23 - Frontend: evidencias mínimas por contrato completado correctamente.
+* Bloque 24 - Frontend: calificaciones mínimas post-contrato completado correctamente.
+* Bloque 24.1 - Refresh token automático en Angular completado correctamente.
 
+
+---
 

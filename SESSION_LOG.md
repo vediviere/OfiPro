@@ -5756,3 +5756,271 @@ Alcance sugerido:
 * Mostrar reputación básica en perfil o vista relacionada.
 
 # =====================================
+
+# =====================================
+
+# SESIÓN 2026-06-30
+
+## Objetivo
+
+Implementar, probar y cerrar:
+
+* Bloque 24 - Frontend: calificaciones mínimas post-contrato.
+* Bloque 24.1 - Refresh token automático en Angular.
+
+# =====================================
+
+## Contexto
+
+Después del Bloque 23, OfiPro ya permitía:
+
+* Consultar contratos.
+* Avanzar estados de contrato.
+* Agregar evidencias.
+* Consultar evidencias.
+* Eliminar evidencias.
+
+El siguiente paso natural era cerrar el ciclo post-contrato con calificaciones y corregir el pendiente de refresh token automático en frontend.
+
+# =====================================
+
+## Bloque 24 - Frontend: calificaciones mínimas post-contrato
+
+Completado:
+
+* Se creó `rating.models.ts`.
+* Se creó `RatingService`.
+* Se integró sección de calificaciones dentro de `ContractDetail`.
+* Se conectó consulta de calificaciones por contrato.
+* Se conectó creación de calificación por contrato.
+* Se agregó formulario de calificación.
+* Se agregó visualización de calificaciones existentes.
+* Se agregó control para mostrar formulario solo si el contrato está finalizado.
+* Se agregó control para ocultar formulario si el usuario actual ya calificó.
+* Se agregaron mensajes de éxito y error.
+* Se recargan calificaciones después de registrar una nueva.
+
+Endpoints consumidos:
+
+* GET /api/contracts/{contractId}/ratings
+* POST /api/contracts/{contractId}/ratings
+
+Resultado:
+
+* Cliente puede calificar al contratista después de finalizar contrato.
+* Contratista puede calificar al cliente después de finalizar contrato.
+* Ambos pueden ver calificaciones del contrato.
+* El formulario no aparece antes de finalizar contrato.
+* El formulario no aparece si el usuario actual ya calificó.
+
+# =====================================
+
+## Bloque 24.1 - Refresh token automático en Angular
+
+Completado:
+
+* Se agregó modelo `RefreshTokenRequest`.
+* Se agregó método `refreshToken()` en `AuthService`.
+* Se reutiliza `saveSession()` para guardar nuevo token y refresh token.
+* Se agregó prevención de refresh simultáneo.
+* Se ajustó `authInterceptor`.
+* Se excluyeron endpoints de autenticación del manejo normal de JWT.
+* Se agregó reintento del request original después del refresh.
+* Se ajustó `authGuard` para intentar refresh antes de mandar a login.
+* Se ajustó `roleGuard` para intentar refresh antes de validar rol o redirigir.
+* Se limpia sesión cuando refresh token falla.
+* Se redirige a login cuando refresh token es inválido.
+
+Resultado:
+
+* Si access token expira durante un request, Angular intenta refresh y reintenta la petición.
+* Si access token falla antes de entrar a una ruta protegida, el guard intenta refresh.
+* Si refresh token es inválido, Angular limpia sesión y manda a login.
+* La validación de roles sigue funcionando después de refrescar token.
+
+# =====================================
+
+## Problemas detectados y corregidos
+
+### Calificaciones no conectadas desde frontend
+
+Síntoma:
+
+* Backend ya tenía ratings, pero Angular no permitía usarlos.
+
+Solución:
+
+* Integrar calificaciones dentro del detalle del contrato.
+
+Resultado:
+
+* Cliente y contratista pueden calificar desde la web.
+
+### Formulario de calificación podía aparecer en estados incorrectos
+
+Síntoma:
+
+* El flujo necesitaba restringirse a contratos finalizados.
+
+Solución:
+
+* Mostrar formulario solo si el contrato está Finalizado.
+
+Resultado:
+
+* La UI respeta el ciclo correcto de contratación.
+
+### Se necesitaba evitar calificación duplicada desde UI
+
+Síntoma:
+
+* El backend rechazaba duplicados, pero frontend podía seguir mostrando formulario.
+
+Solución:
+
+* Detectar si el usuario actual ya calificó.
+
+Resultado:
+
+* El formulario desaparece después de calificar.
+
+### Refresh token solo en interceptor no era suficiente
+
+Síntoma:
+
+* Al manipular o expirar token antes de entrar a una ruta, el guard mandaba a login antes de que el interceptor actuara.
+
+Solución:
+
+* Integrar refresh token también en AuthGuard y RoleGuard.
+
+Resultado:
+
+* La navegación protegida puede recuperar sesión antes de redirigir.
+
+### Refresh token inválido requería salida segura
+
+Síntoma:
+
+* Si el refresh token era inválido, había riesgo de sesión local inconsistente.
+
+Solución:
+
+* Limpiar sesión y redirigir a login cuando falla refresh.
+
+Resultado:
+
+* El sistema falla de forma segura.
+
+# =====================================
+
+## Pruebas realizadas
+
+Bloque 24:
+
+* Contrato no finalizado no muestra formulario de calificación → correcto.
+* Cliente finaliza contrato → correcto.
+* Cliente califica contratista → correcto.
+* Calificación aparece en listado → correcto.
+* Cliente ya no ve formulario después de calificar → correcto.
+* Contratista abre el mismo contrato → correcto.
+* Contratista califica cliente → correcto.
+* Ambas calificaciones aparecen en listado → correcto.
+
+Bloque 24.1:
+
+* Login normal → correcto.
+* Refresh desde AuthGuard → correcto.
+* Refresh desde RoleGuard → correcto.
+* Refresh desde interceptor → correcto.
+* Reintento automático del request original → correcto.
+* Refresh token inválido limpia sesión → correcto.
+* Refresh token inválido redirige a login → correcto.
+* Validación de roles después del refresh → correcto.
+
+Compilación:
+
+* `ng build` → correcto.
+* `ng build --configuration production` → correcto.
+
+# =====================================
+
+## Estado general
+
+Bloque 1 - Fundación → Completo
+Bloque 2 - Auth → Completo
+Bloque 3 - Usuarios → Completo
+Bloque 4 - Proyectos → Completo
+Bloque 5 - Propuestas → Completo
+Bloque 5.5 - Seguridad y Calidad Base → Completo
+Bloque 5.6 - Limpieza de Consistencia API → Completo
+Bloque 6 - Contrataciones → Completo
+Bloque 6.8 - Refactor de nombres descriptivos en DTOs → Completo
+Bloque 6.9 - Flujo mínimo de Contratista → Completo
+Bloque 6.10 - Orden de interfaces Application → Completo
+Bloque 6.11 - Correcciones diagnóstico pre-Bloque 7 → Completo
+Bloque 7 - Evidencias V1 → Completo
+Bloque 7.1 - Corrección diagnóstico Evidencias → Completo
+Bloque 7.2 - Notificaciones internas base → Completo
+Bloque 8 - Calificaciones y reputación V1 → Completo
+Bloque 8.1 - Endurecimiento Ratings/Reputación → Completo
+Bloque 8.2 - Correcciones diagnóstico Ratings/Reputación → Completo
+Bloque 9 - Dashboard mínimo / Resúmenes para móvil y web → Completo
+Bloque 10 - ProfessionalProfile y búsqueda básica de contratistas → Completo
+Bloque 10.1 - Corrección diagnóstico ProfessionalProfile y búsqueda → Completo
+Bloque 11 - Expiración automática de proyectos → Completo
+Bloque 12 - Paginación y ordenamiento básico → Completo
+Bloque 13 - Pruebas automatizadas mínimas de API → Completo
+Bloque 14 - Invitaciones directas a contratistas → Completo
+Bloque 15 - Refresh tokens para experiencia móvil → Completo
+Bloque 15.3 - Correcciones diagnóstico post-refresh tokens → Completo
+Bloque 16 - Seguridad V1 / Hardening básico → Completo
+Bloque 17 - Revisión de preparación para frontend → Completo
+Bloque 18 - Web responsiva mínima → Completo
+Bloque 19 - Frontend: flujo cliente mínimo → Completo
+Bloque 20 - Frontend: flujo contratista mínimo → Completo
+Bloque 21 - Frontend: cliente revisa propuestas recibidas → Completo
+Bloque 21.1 - Limpieza técnica pre-contratos → Completo
+Bloque 22 - Frontend: contratos mínimos → Completo
+Bloque 23 - Frontend: evidencias mínimas por contrato → Completo
+Bloque 24 - Frontend: calificaciones mínimas post-contrato → Completo
+Bloque 24.1 - Refresh token automático en Angular → Completo
+
+# =====================================
+
+## Evaluación de velocidad
+
+Ritmo: Muy bueno.
+
+El Bloque 24 cerró el ciclo natural posterior al contrato: una vez finalizado el trabajo, cliente y contratista pueden calificar. Esto fortalece la reputación bidireccional del marketplace.
+
+El Bloque 24.1 fue especialmente importante porque corrigió una deuda de sesión que venía desde el inicio del frontend. Ahora la autenticación no depende únicamente de que el access token siga vigente; Angular puede renovar sesión durante navegación y consumo de API.
+
+# =====================================
+
+## Pendiente inmediato
+
+* Pegar documentación en `OFIPRO_MASTER.md`.
+* Pegar documentación en `SESSION_LOG.md`.
+* Revisar `git status`.
+* Hacer commit de Bloques 24 y 24.1.
+* Subir cambios al repositorio.
+
+# =====================================
+
+## Próximo bloque recomendado
+
+Bloque 25 - Frontend: perfiles públicos y reputación básica.
+
+Razón:
+Después de conectar calificaciones, tiene sentido exponer reputación de usuario en una vista útil:
+
+* Perfil de contratista.
+* Reputación promedio.
+* Total de calificaciones.
+* Últimas calificaciones.
+* Información profesional básica.
+
+Este bloque prepara mejor la confianza del marketplace antes de entrar a UI/UX general.
+
+# =====================================

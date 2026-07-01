@@ -13,4 +13,8 @@ export interface AuthResponse {
   refreshTokenExpiresAt: string;
 }
 
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
 export type UserRole = 'Cliente' | 'Contratista' | 'Administrador';

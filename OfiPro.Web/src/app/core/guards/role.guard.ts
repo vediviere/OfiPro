@@ -1,40 +1,57 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { catchError, map, of } from 'rxjs';
+
 import { UserRole } from '../models/auth.models';
+import { AuthService } from '../services/auth.service';
 
 export const roleGuard: CanActivateFn = (route) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
   const allowedRoles = route.data['roles'] as UserRole[] | undefined;
-  const currentRole = authService.getUserRole();
 
   if (!allowedRoles || allowedRoles.length === 0) {
     return true;
   }
+
+  if (authService.isAuthenticated()) {
+    return validateRole(authService, router, allowedRoles);
+  }
+
+  if (!authService.getRefreshToken()) {
+    authService.logout();
+    return router.createUrlTree(['/login']);
+  }
+
+  return authService.refreshToken().pipe(
+    map(() => validateRole(authService, router, allowedRoles)),
+    catchError(() => {
+      authService.logout();
+      return of(router.createUrlTree(['/login']));
+    }),
+  );
+};
+
+function validateRole(authService: AuthService, router: Router, allowedRoles: UserRole[]) {
+  const currentRole = authService.getUserRole();
 
   if (currentRole && allowedRoles.includes(currentRole)) {
     return true;
   }
 
   if (currentRole === 'Cliente') {
-    router.navigate(['/cliente/dashboard']);
-    return false;
+    return router.createUrlTree(['/cliente/dashboard']);
   }
 
   if (currentRole === 'Contratista') {
-    router.navigate(['/contratista/dashboard']);
-    return false;
+    return router.createUrlTree(['/contratista/dashboard']);
   }
 
   if (currentRole === 'Administrador') {
-    router.navigate(['/admin/dashboard']);
-    return false;
+    return router.createUrlTree(['/admin/dashboard']);
   }
 
   authService.logout();
-  router.navigate(['/login']);
-
-  return false;
-};
+  return router.createUrlTree(['/login']);
+}
